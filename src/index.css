@@ -82,27 +82,86 @@
 
 /* Thermal & Standard Print Styles */
 @media print {
-  body * {
-    visibility: hidden;
-  }
-  
-  #printable-receipt, #printable-receipt * {
-    visibility: visible;
-  }
-  
-  #printable-receipt {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    background: white !important;
-    color: black !important;
+  /* Hide typical interactive/navigation elements on print */
+  .no-print,
+  nav,
+  aside,
+  header,
+  footer,
+  button,
+  .sidebar-container {
+    display: none !important;
   }
 
-  .no-print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* When printing the receipt modal directly via browser print (Ctrl+P / Cmd+P) */
+  body.receipt-modal-active,
+  body:has(#printable-receipt) {
+    background: #ffffff !important;
+    overflow: visible !important;
+  }
+
+  body.receipt-modal-active #root > div > *:not(.receipt-modal-wrapper),
+  body:has(#printable-receipt) #root > div > *:not(:has(#printable-receipt)) {
     display: none !important;
+  }
+
+  body.receipt-modal-active .receipt-modal-wrapper,
+  body:has(#printable-receipt) .fixed {
+    position: static !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    display: block !important;
+  }
+
+  body.receipt-modal-active .receipt-modal-wrapper > div,
+  body:has(#printable-receipt) .max-h-\[90vh\] {
+    max-height: none !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  body.receipt-modal-active .overflow-y-auto,
+  body:has(#printable-receipt) .overflow-y-auto {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  #printable-receipt {
+    position: static !important;
+    margin: 0 auto !important;
+    padding: 8px !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  @page {
+    size: auto;
+    margin: 4mm;
   }
 }
 

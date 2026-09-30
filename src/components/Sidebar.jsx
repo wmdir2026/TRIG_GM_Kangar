@@ -1,5 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
+import giatmaraLogo from '../assets/logo.png';
 import {
   LayoutDashboard,
   UtensilsCrossed,
@@ -180,9 +181,10 @@ export const Sidebar = ({ isOpen, onClose }) => {
           <div className="flex items-center justify-between">
             <div className="bg-white p-2.5 rounded-2xl shadow-md inline-flex items-center justify-center">
               <img
-                src="/logo.png"
+                src={giatmaraLogo}
                 alt="GIATMARA Logo"
                 className="h-12 sm:h-14 w-auto object-contain"
+                onError={(e) => { e.currentTarget.src = './logo.png'; }}
               />
             </div>
             <button
@@ -193,19 +195,20 @@ export const Sidebar = ({ isOpen, onClose }) => {
             </button>
           </div>
           <div className="mt-3">
-            <h1 className="text-white font-black text-sm tracking-tight leading-none">
-              {activeSystemMode === 'MASAKAN' && 'CAFÉ & MASAKAN'}
-              {activeSystemMode === 'REPAIR' && 'BAIKE SMARTPHONE'}
-              {activeSystemMode === 'MANAGEMENT' && 'TRIG GIATMARA KANGAR'}
+            <h1 className="text-amber-400 font-black text-sm tracking-tight leading-tight">
+              TECHBYTE & PASTA CAFE
             </h1>
-            <span className={`text-[10px] font-extrabold tracking-wider uppercase mt-1 block ${
-              activeSystemMode === 'MASAKAN' ? 'text-amber-400' :
-              activeSystemMode === 'REPAIR' ? 'text-cyan-400' :
-              'text-indigo-400'
+            <p className="text-white font-extrabold text-xs tracking-tight leading-tight mt-0.5">
+              TRIG GIATMARA KANGAR
+            </p>
+            <span className={`text-[10px] font-extrabold tracking-wider uppercase mt-1.5 block ${
+              activeSystemMode === 'MASAKAN' ? 'text-amber-300' :
+              activeSystemMode === 'REPAIR' ? 'text-cyan-300' :
+              'text-indigo-300'
             }`}>
-              {activeSystemMode === 'MASAKAN' && 'TastyBites Gourmet System'}
-              {activeSystemMode === 'REPAIR' && 'Planet Service Tech System'}
-              {activeSystemMode === 'MANAGEMENT' && 'Central Management Hub'}
+              {activeSystemMode === 'MASAKAN' && '• Sistem Operasi Café & Masakan'}
+              {activeSystemMode === 'REPAIR' && '• Sistem Baiki Smartphone & Servis'}
+              {activeSystemMode === 'MANAGEMENT' && '• Pusat Pengurusan, Stok & Laporan'}
             </span>
           </div>
         </div>

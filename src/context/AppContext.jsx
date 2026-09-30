@@ -64,8 +64,25 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const loadSettingsStorage = () => {
+    try {
+      const saved = localStorage.getItem('trig_settings');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (!parsed.businessName || parsed.businessName === "TRIG GIATMARA KANGAR") {
+          parsed.businessName = "TECHBYTE & PASTA CAFE";
+          parsed.subName = "TRIG GIATMARA KANGAR";
+        }
+        return parsed;
+      }
+      return INITIAL_SETTINGS;
+    } catch (e) {
+      return INITIAL_SETTINGS;
+    }
+  };
+
   // State initialization
-  const [settings, setSettings] = useState(() => loadStorage('settings', INITIAL_SETTINGS));
+  const [settings, setSettings] = useState(() => loadSettingsStorage());
   const [users, setUsers] = useState(() => loadUsersStorage());
   const [currentUser, setCurrentUser] = useState(() => loadCurrentUserStorage()); // Default Super Admin (Wan Muhadir)
   const [categories, setCategories] = useState(() => loadStorage('categories', INITIAL_MENU_CATEGORIES));
@@ -85,18 +102,37 @@ export const AppProvider = ({ children }) => {
   const [auditLogs, setAuditLogs] = useState(() => loadStorage('audit_logs', INITIAL_AUDIT_LOGS));
 
   // UI state
-  const [currentTab, setCurrentTabState] = useState('portal');
-  const [activeSystemMode, setActiveSystemMode] = useState('PORTAL'); // 'PORTAL', 'MASAKAN', 'REPAIR', 'MANAGEMENT'
+  const [currentTab, setCurrentTabState] = useState('main');
+  const [activeSystemMode, setActiveSystemMode] = useState('MAIN'); // 'MAIN', 'PORTAL', 'MASAKAN', 'REPAIR', 'MANAGEMENT'
   const [selectedTableForCustomer, setSelectedTableForCustomer] = useState(null);
   const [toast, setToast] = useState(null);
   const [receiptData, setReceiptData] = useState(null);
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false);
+  const [isStaffLoggedIn, setIsStaffLoggedIn] = useState(() => {
+    try {
+      return localStorage.getItem('trig_is_staff_logged_in') === 'true';
+    } catch (e) {
+      return false;
+    }
+  });
+
+  const logoutStaff = () => {
+    setIsStaffLoggedIn(false);
+    localStorage.setItem('trig_is_staff_logged_in', 'false');
+    const customerUser = users.find(u => u.role === 'CUSTOMER') || INITIAL_USERS[7];
+    setCurrentUser(customerUser);
+    localStorage.setItem('trig_currentUser', JSON.stringify(customerUser));
+    switchSystemMode('MAIN');
+    showToast('Log keluar berjaya. Anda kini berada di Menu Pelanggan Awam.', 'info');
+  };
 
   // Tab switcher that automatically updates the system mode
   const setCurrentTab = (tab) => {
     setCurrentTabState(tab);
-    if (tab === 'portal') {
+    if (tab === 'main') {
+      setActiveSystemMode('MAIN');
+    } else if (tab === 'portal') {
       setActiveSystemMode('PORTAL');
     } else if (['cafe-dashboard', 'menu', 'tables', 'qr-tables', 'food-ordering', 'kitchen', 'food-orders', 'customer-order'].includes(tab)) {
       setActiveSystemMode('MASAKAN');
@@ -109,7 +145,9 @@ export const AppProvider = ({ children }) => {
 
   const switchSystemMode = (mode) => {
     setActiveSystemMode(mode);
-    if (mode === 'PORTAL') {
+    if (mode === 'MAIN') {
+      setCurrentTabState('main');
+    } else if (mode === 'PORTAL') {
       setCurrentTabState('portal');
     } else if (mode === 'MASAKAN') {
       setCurrentTabState('cafe-dashboard');
@@ -139,6 +177,7 @@ export const AppProvider = ({ children }) => {
   useEffect(() => { localStorage.setItem('trig_sales', JSON.stringify(sales)); }, [sales]);
   useEffect(() => { localStorage.setItem('trig_notifications', JSON.stringify(notifications)); }, [notifications]);
   useEffect(() => { localStorage.setItem('trig_audit_logs', JSON.stringify(auditLogs)); }, [auditLogs]);
+  useEffect(() => { localStorage.setItem('trig_is_staff_logged_in', String(isStaffLoggedIn)); }, [isStaffLoggedIn]);
 
   // Toast helper
   const showToast = (message, type = 'success') => {
@@ -372,6 +411,41 @@ export const AppProvider = ({ children }) => {
 
     logAudit(`Pesanan ${orderId} ditukar status kepada: ${newStatus}`, 'CAFÉ');
     showToast(`Status pesanan ${orderId} kini: ${newStatus}`);
+  };
+
+  const cancelFoodOrder = (orderId, reason = 'Permintaan Pelanggan') => {
+    const order = foodOrders.find(o => o.id === orderId);
+    if (!order) {
+      showToast('Pesanan tidak ditemui.', 'error');
+      return false;
+    }
+
+    // Peraturan: Setelah dibayar dan pihak dapur mula memasak, pesanan tidak boleh dibatalkan atau ditukar
+    if (order.orderStatus === 'PREPARING' || order.orderStatus === 'READY' || order.orderStatus === 'COMPLETED') {
+      showToast('Pihak dapur telah mula memasak hidangan anda. Pesanan ini TIDAK BOLEH dibatalkan atau ditukar lagi!', 'error');
+      return false;
+    }
+
+    setFoodOrders(prev => prev.map(ord => {
+      if (ord.id === orderId) {
+        return {
+          ...ord,
+          orderStatus: 'CANCELLED',
+          cancelReason: reason,
+          cancelledAt: new Date().toISOString()
+        };
+      }
+      return ord;
+    }));
+
+    // Kosongkan meja jika dine-in
+    if (order.tableId) {
+      setTables(prev => prev.map(t => t.id === order.tableId ? { ...t, status: 'AVAILABLE', activeOrderId: null } : t));
+    }
+
+    logAudit(`Pesanan makanan ${orderId} dibatalkan sebelum mula masak (${reason})`, 'CAFÉ');
+    showToast(`Pesanan ${orderId} telah berjaya dibatalkan.`, 'info');
+    return true;
   };
 
   // ================= SMARTPHONE REPAIR MODULE ACTIONS ================= //
@@ -954,6 +1028,7 @@ export const AppProvider = ({ children }) => {
     settings,
     users,
     currentUser,
+    setCurrentUser,
     switchUser,
     categories,
     menu,
@@ -984,6 +1059,9 @@ export const AppProvider = ({ children }) => {
     openReceipt,
     isGlobalSearchOpen,
     setIsGlobalSearchOpen,
+    isStaffLoggedIn,
+    setIsStaffLoggedIn,
+    logoutStaff,
     // Operations
     addMenuItem,
     updateMenuItem,
@@ -993,6 +1071,7 @@ export const AppProvider = ({ children }) => {
     deleteTable,
     createFoodOrder,
     updateFoodOrderStatus,
+    cancelFoodOrder,
     addCustomer,
     updateCustomer,
     createRepairJob,

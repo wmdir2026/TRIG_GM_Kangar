@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import giatmaraLogo from '../assets/logo.png';
 import {
   Printer,
   X,
@@ -18,22 +19,179 @@ export const ReceiptModal = () => {
   const { receiptData, isReceiptModalOpen, setIsReceiptModalOpen, settings, showToast } = useApp();
   const [printFormat, setPrintFormat] = useState('80mm'); // '80mm', '58mm', 'a4'
 
+  const isRepair = receiptData?.type === 'REPAIR';
+  const job = receiptData?.job || {};
+  const isAccessories = receiptData?.type === 'ACCESSORIES';
+
+  const receiptNumber = isRepair ? (job.receiptNo || job.id) : (receiptData?.receiptNo || receiptData?.id);
+  const transactionDate = isRepair ? (job.completedAt || job.dateReceived) : (receiptData?.date || receiptData?.createdAt || new Date().toISOString());
+
+  // Attach body class for print isolation
+  React.useEffect(() => {
+    if (isReceiptModalOpen && receiptData) {
+      document.body.classList.add('receipt-modal-active');
+    } else {
+      document.body.classList.remove('receipt-modal-active');
+    }
+    return () => {
+      document.body.classList.remove('receipt-modal-active');
+    };
+  }, [isReceiptModalOpen, receiptData]);
+
   if (!isReceiptModalOpen || !receiptData) return null;
 
+  // Ultra-reliable isolated print handler
   const handlePrint = () => {
-    window.print();
+    const receiptEl = document.getElementById('printable-receipt');
+    if (!receiptEl) {
+      window.print();
+      return;
+    }
+
+    // Remove any previous print iframe
+    const oldFrame = document.getElementById('receipt-print-iframe');
+    if (oldFrame) {
+      oldFrame.remove();
+    }
+
+    const iframe = document.createElement('iframe');
+    iframe.id = 'receipt-print-iframe';
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0px';
+    iframe.style.height = '0px';
+    iframe.style.border = 'none';
+    iframe.style.visibility = 'hidden';
+    document.body.appendChild(iframe);
+
+    const pri = iframe.contentWindow;
+    const doc = pri.document;
+
+    // Collect all stylesheets from main window
+    const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+      .map(s => s.outerHTML)
+      .join('\n');
+
+    const widthStyle = printFormat === '58mm' ? '58mm' :
+                       printFormat === '80mm' ? '80mm' : '185mm';
+
+    doc.open();
+    doc.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>Resit_${receiptNumber}</title>
+          ${styles}
+          <style>
+            @page {
+              size: ${printFormat === '58mm' ? '58mm auto' : printFormat === '80mm' ? '80mm auto' : 'A4 portrait'};
+              margin: ${printFormat === 'a4' ? '12mm' : '2mm 3mm'};
+            }
+            html, body {
+              margin: 0 !important;
+              padding: 0 !important;
+              background: #ffffff !important;
+              color: #000000 !important;
+              font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            body {
+              display: flex;
+              justify-content: center;
+              align-items: flex-start;
+              min-height: auto !important;
+              padding: ${printFormat === 'a4' ? '10px' : '4px'} !important;
+            }
+            .print-receipt-sheet {
+              width: ${widthStyle} !important;
+              max-width: 100% !important;
+              margin: 0 auto !important;
+              padding: ${printFormat === '58mm' ? '4px' : printFormat === '80mm' ? '8px' : '16px'} !important;
+              background: #ffffff !important;
+              color: #000000 !important;
+              border: none !important;
+              box-shadow: none !important;
+            }
+            img {
+              max-height: 55px !important;
+              width: auto !important;
+              margin: 0 auto 4px auto !important;
+              display: block !important;
+            }
+            svg {
+              display: block !important;
+              margin: 0 auto !important;
+            }
+            * {
+              box-shadow: none !important;
+              text-shadow: none !important;
+              color: #000000 !important;
+            }
+            .text-indigo-900, .text-indigo-700, .text-blue-900 {
+              color: #000000 !important;
+              font-weight: 900 !important;
+            }
+            .text-slate-500, .text-slate-400, .text-slate-600 {
+              color: #444444 !important;
+            }
+            .text-emerald-700, .text-emerald-600 {
+              color: #000000 !important;
+              font-weight: bold !important;
+            }
+            .bg-emerald-50, .bg-blue-50\\/80 {
+              background: #f1f5f9 !important;
+              border: 1px solid #94a3b8 !important;
+            }
+            .border-slate-300, .border-dashed {
+              border-color: #888888 !important;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="print-receipt-sheet">
+            ${receiptEl.innerHTML}
+          </div>
+        </body>
+      </html>
+    `);
+    doc.close();
+
+    const doPrint = () => {
+      try {
+        pri.focus();
+        pri.print();
+      } catch (err) {
+        console.error('Iframe print error, fallback to window.print():', err);
+        window.print();
+      } finally {
+        setTimeout(() => {
+          if (iframe && iframe.parentNode) {
+            iframe.remove();
+          }
+        }, 3000);
+      }
+    };
+
+    if (doc.readyState === 'complete') {
+      setTimeout(doPrint, 200);
+    } else {
+      pri.onload = () => setTimeout(doPrint, 200);
+    }
   };
 
   const handleCopyText = () => {
-    let text = `==============================\n${settings.businessName}\n${settings.institution}\n==============================\n`;
+    let text = `==============================\nTECHBYTE & PASTA CAFE\nTRIG GIATMARA KANGAR\n${settings.institution}\n==============================\n`;
     if (receiptData.type === 'REPAIR') {
-      const job = receiptData.job;
-      text += `RESIT SERVIS BAIKI TELEFON\nNo. Resit: ${job.receiptNo || job.id}\nTarikh: ${new Date(job.completedAt || job.dateReceived).toLocaleString()}\nPelanggan: ${job.customerName} (${job.customerPhone})\nPeranti: ${job.deviceBrand} ${job.deviceModel}\nKerosakan: ${job.damageType}\n------------------------------\n`;
-      (job.partsUsed || []).forEach(p => {
+      const jb = receiptData.job;
+      text += `RESIT SERVIS BAIKI TELEFON\nNo. Resit: ${jb.receiptNo || jb.id}\nTarikh: ${new Date(jb.completedAt || jb.dateReceived).toLocaleString()}\nPelanggan: ${jb.customerName} (${jb.customerPhone})\nPeranti: ${jb.deviceBrand} ${jb.deviceModel}\nKerosakan: ${jb.damageType}\n------------------------------\n`;
+      (jb.partsUsed || []).forEach(p => {
         text += `${p.name} (x${p.quantity || 1}): RM ${((p.sellingPrice || 0) * (p.quantity || 1)).toFixed(2)}\n`;
       });
-      text += `Upah Buruh/Servis: RM ${Number(job.labourCost || 0).toFixed(2)}\n`;
-      text += `JUMLAH BESAR: RM ${Number(job.sellingPrice).toFixed(2)}\nKaedah Bayaran: ${job.paymentMethod || 'TUNAI'} (LULUS/PAID)\nWaranti: ${job.warrantyPeriod}\n==============================\n${settings.repairReceiptFooter}`;
+      text += `Upah Buruh/Servis: RM ${Number(jb.labourCost || 0).toFixed(2)}\n`;
+      text += `JUMLAH BESAR: RM ${Number(jb.sellingPrice).toFixed(2)}\nKaedah Bayaran: ${jb.paymentMethod || 'TUNAI'} (LULUS/PAID)\nWaranti: ${jb.warrantyPeriod}\n==============================\n${settings.repairReceiptFooter}`;
     } else {
       // Café or Accessories
       const isCafe = receiptData.type !== 'ACCESSORIES';
@@ -50,15 +208,8 @@ export const ReceiptModal = () => {
     showToast('Teks resit berjaya disalin ke papan keratan.');
   };
 
-  const isRepair = receiptData.type === 'REPAIR';
-  const job = receiptData.job || {};
-  const isAccessories = receiptData.type === 'ACCESSORIES';
-
-  const receiptNumber = isRepair ? (job.receiptNo || job.id) : (receiptData.receiptNo || receiptData.id);
-  const transactionDate = isRepair ? (job.completedAt || job.dateReceived) : (receiptData.date || receiptData.createdAt || new Date().toISOString());
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs overflow-y-auto">
+    <div className="receipt-modal-wrapper fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs overflow-y-auto">
       <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh] animate-fade-in">
         
         {/* Modal Header */}
@@ -128,15 +279,19 @@ export const ReceiptModal = () => {
             <div className="text-center pb-4 border-b-2 border-dashed border-slate-300">
               <div className="mx-auto mb-2 flex items-center justify-center">
                 <img
-                  src="/logo.png"
+                  src={giatmaraLogo}
                   alt="GIATMARA Logo"
                   className="h-14 w-auto object-contain mx-auto"
+                  onError={(e) => { e.currentTarget.src = './logo.png'; }}
                 />
               </div>
-              <h2 className="font-black text-sm sm:text-base uppercase tracking-tight text-slate-950 mt-1">
-                {settings.businessName}
+              <h2 className="font-black text-base sm:text-lg uppercase tracking-tight text-slate-950 mt-1">
+                TECHBYTE & PASTA CAFE
               </h2>
-              <p className="text-[11px] font-bold text-slate-600">
+              <p className="text-[11px] font-black uppercase tracking-wider text-slate-700">
+                TRIG GIATMARA KANGAR
+              </p>
+              <p className="text-[11px] font-bold text-slate-600 mt-0.5">
                 {isRepair ? 'PERKHIDMATAN MEMBAIKI SMARTPHONE' : 'CAFÉ & FOOD SERVICES'}
               </p>
               <p className="text-[10px] text-slate-500 mt-1 leading-snug">

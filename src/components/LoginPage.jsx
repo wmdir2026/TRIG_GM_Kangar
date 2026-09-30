@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import giatmaraLogo from '../assets/logo.png';
 import {
   Lock,
   User,
@@ -57,18 +58,22 @@ export const LoginPage = ({ onLoginSuccess }) => {
           <div className="relative z-10 space-y-4">
             <div className="bg-white p-3 rounded-2xl inline-block shadow-lg">
               <img
-                src="/logo.png"
+                src={giatmaraLogo}
                 alt="GIATMARA Malaysia"
                 className="h-16 sm:h-20 w-auto object-contain"
+                onError={(e) => { e.currentTarget.src = './logo.png'; }}
               />
             </div>
             <div>
-              <span className="px-2.5 py-1 rounded-full bg-white/10 text-amber-300 text-[10px] font-extrabold uppercase tracking-wider">
+              <span className="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-extrabold uppercase tracking-wider border border-amber-500/30">
                 Program Keusahawanan TRIG
               </span>
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight mt-2">
-                TRIG GIATMARA KANGAR
+              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-amber-400 font-['Cabinet_Grotesk',sans-serif] mt-2">
+                TECHBYTE & PASTA CAFE
               </h1>
+              <p className="text-sm font-extrabold text-white tracking-wide">
+                TRIG GIATMARA KANGAR
+              </p>
               <p className="text-indigo-200 text-xs mt-1">
                 Digital Business Management System
               </p>
