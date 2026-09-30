@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buku Manual Pengguna - Sistem POS TRIG GIATMARA Kangar</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Cabinet+Grotesk:wght@700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      scroll-behavior: smooth;
+      color: #0f172a;
+    }
+    h1, h2, h3, h4 {
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .page-break {
+        page-break-before: always !important;
+        break-before: page !important;
+      }
+      .chapter-card {
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: none !important;
+        page-break-inside: avoid !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 antialiased selection:bg-red-600 selection:text-white">
+
+  <!-- Top Sticky Navigation Bar (Hidden when printing) -->
+  <header class="no-print sticky top-0 z-50 bg-slate-950/95 backdrop-blur-md border-b border-slate-800 text-white shadow-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="bg-white p-1 rounded-xl shadow-xs inline-flex items-center justify-center">
+          <img src="./logo.png" alt="GIATMARA Malaysia" class="h-8 w-auto object-contain">
+        </div>
+        <div class="border-l border-slate-700 pl-3">
+          <span class="font-black text-xs sm:text-sm tracking-tight block">BUKU MANUAL PENGGUNA SISTEM POS</span>
+          <span class="text-[10px] text-amber-400 font-extrabold tracking-wider uppercase">TRIG GIATMARA KANGAR • VERSI 2.6 PRO</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button onclick="window.print()" class="px-4 py-2 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 font-bold text-xs rounded-xl shadow-md transition flex items-center gap-1.5 cursor-pointer">
+          <span>🖨️ Cetak Buku Manual (PDF)</span>
+        </button>
+        <a href="./index.html" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-xl transition">
+          ← Buka Sistem
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+    <!-- ======================================================== -->
+    <!-- COVER / MUKA DEPAN MANUAL -->
+    <!-- ======================================================== -->
+    <section class="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-8 sm:p-14 shadow-2xl border-2 border-slate-800 relative overflow-hidden text-center chapter-card">
+      <div class="absolute -top-32 -left-32 w-80 h-80 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-32 -right-32 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 space-y-6">
+        <!-- Logo Rasmi Original GIATMARA -->
+        <div class="inline-block bg-white p-4 rounded-3xl shadow-2xl">
+          <img src="./logo.png" alt="GIATMARA Malaysia Original Logo" class="h-20 sm:h-24 w-auto object-contain mx-auto">
+        </div>
+
+        <div class="space-y-2">
+          <span class="px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40 text-xs font-black uppercase tracking-widest inline-block">
+            PROGRAM KEUSAHAWANAN TRIG • GIATMARA KANGAR, PERLIS
+          </span>
+          <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-white mt-2">
+            BUKU PANDUAN & MANUAL OPERASI SISTEM POS
+          </h1>
+          <p class="text-sm sm:text-lg text-slate-300 max-w-2xl mx-auto font-normal">
+            Panduan Lengkap Pengendalian Sistem Pengurusan Perniagaan Digital Bersepadu Bagi Kursus Seni Masakan (Café) & Kursus Baiki Smartphone
+          </p>
+        </div>
+
+        <div class="pt-6 border-t border-white/10 grid grid-cols-2 sm:grid-cols-4 gap-4 text-left max-w-3xl mx-auto text-xs">
+          <div class="bg-white/5 p-3 rounded-2xl border border-white/10">
+            <span class="text-slate-400 block text-[10px] font-bold uppercase">Nama Sistem</span>
+            <strong class="text-white">TRIG GM Kangar POS</strong>
+          </div>
+          <div class="bg-white/5 p-3 rounded-2xl border border-white/10">
+            <span class="text-slate-400 block text-[10px] font-bold uppercase">Versi Aplikasi</span>
+            <strong class="text-amber-400">Versi 2.6 Pro (Build 2026)</strong>
+          </div>
+          <div class="bg-white/5 p-3 rounded-2xl border border-white/10">
+            <span class="text-slate-400 block text-[10px] font-bold uppercase">Penerbit</span>
+            <strong class="text-white">GIATMARA Kangar</strong>
+          </div>
+          <div class="bg-white/5 p-3 rounded-2xl border border-white/10">
+            <span class="text-slate-400 block text-[10px] font-bold uppercase">Platform Live</span>
+            <strong class="text-cyan-400">GitHub Pages / Web SPA</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- ISI KANDUNGAN (TABLE OF CONTENTS) -->
+    <!-- ======================================================== -->
+    <section class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 chapter-card">
+      <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
+        <span class="p-2.5 bg-blue-50 text-blue-600 rounded-xl text-lg font-black">📑</span>
+        <div>
+          <h2 class="text-xl font-black text-slate-900">Senarai Kandungan Manual</h2>
+          <p class="text-xs text-slate-500">Susunan bab dan pecahan topik mengikut peranan modul sistem</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+        <a href="#bab1" class="p-3.5 rounded-2xl bg-slate-50 hover:bg-indigo-50/60 border border-slate-200 transition flex items-start gap-3 group">
+          <span class="w-7 h-7 rounded-xl bg-indigo-600 text-white font-black flex items-center justify-center shrink-0">1</span>
+          <div>
+            <strong class="text-slate-900 group-hover:text-indigo-600 text-sm block">Bab 1: Pengenalan & Gambaran Keseluruhan</strong>
+            <span class="text-slate-500 text-[11px]">Objektif sistem, struktur modul latihan keusahawanan dan pangkalan data setempat.</span>
+          </div>
+        </a>
+
+        <a href="#bab2" class="p-3.5 rounded-2xl bg-slate-50 hover:bg-indigo-50/60 border border-slate-200 transition flex items-start gap-3 group">
+          <span class="w-7 h-7 rounded-xl bg-indigo-600 text-white font-black flex items-center justify-center shrink-0">2</span>
+          <div>
+            <strong class="text-slate-900 group-hover:text-indigo-600 text-sm block">Bab 2: Panduan Akses & 8 Peranan Pengguna (RBAC)</strong>
+            <span class="text-slate-500 text-[11px]">Senarai staf rasmi, kata laluan lalai, dan skop akses pentadbir, staf & pelanggan.</span>
+          </div>
+        </a>
+
+        <a href="#bab3" class="p-3.5 rounded-2xl bg-slate-50 hover:bg-indigo-50/60 border border-slate-200 transition flex items-start gap-3 group">
+          <span class="w-7 h-7 rounded-xl bg-amber-600 text-white font-black flex items-center justify-center shrink-0">3</span>
+          <div>
+            <strong class="text-slate-900 group-hover:text-amber-600 text-sm block">Bab 3: Modul Kursus Seni Masakan & Café POS</strong>
+            <span class="text-slate-500 text-[11px]">Pesanan QR di meja, terminal POS juruwang, paparan dapur (KDS) & resit.</span>
+          </div>
+        </a>
+
+        <a href="#bab4" class="p-3.5 rounded-2xl bg-slate-50 hover:bg-indigo-50/60 border border-slate-200 transition flex items-start gap-3 group">
+          <span class="w-7 h-7 rounded-xl bg-cyan-600 text-white font-black flex items-center justify-center shrink-0">4</span>
+          <div>
+            <strong class="text-slate-900 group-hover:text-cyan-600 text-sm block">Bab 4: Modul Kursus Baiki Smartphone</strong>
+            <span class="text-slate-500 text-[11px]">Pendaftaran job REP, checklist fizikal, diagnosis teknikal, alat ganti & POS aksesori.</span>
+          </div>
+        </a>
+
+        <a href="#bab5" class="p-3.5 rounded-2xl bg-slate-50 hover:bg-indigo-50/60 border border-slate-200 transition flex items-start gap-3 group">
+          <span class="w-7 h-7 rounded-xl bg-emerald-600 text-white font-black flex items-center justify-center shrink-0">5</span>
+          <div>
+            <strong class="text-slate-900 group-hover:text-emerald-600 text-sm block">Bab 5: Pengurusan Inventori & Perolehan (PR/PO)</strong>
+            <span class="text-slate-500 text-[11px]">Kawalan 5 kategori stok pusat, pelarasan stok audit dan pesanan belian pembekal.</span>
+          </div>
+        </a>
+
+        <a href="#bab6" class="p-3.5 rounded-2xl bg-slate-50 hover:bg-indigo-50/60 border border-slate-200 transition flex items-start gap-3 group">
+          <span class="w-7 h-7 rounded-xl bg-teal-600 text-white font-black flex items-center justify-center shrink-0">6</span>
+          <div>
+            <strong class="text-slate-900 group-hover:text-teal-600 text-sm block">Bab 6: Laporan Kewangan, Untung Rugi & Audit</strong>
+            <span class="text-slate-500 text-[11px]">Pusat laporan 20+ metrik, penyata Untung & Rugi (P&L), eksport CSV dan log jejak audit.</span>
+          </div>
+        </a>
+
+        <a href="#bab7" class="p-3.5 rounded-2xl bg-slate-50 hover:bg-indigo-50/60 border border-slate-200 transition flex items-start gap-3 group">
+          <span class="w-7 h-7 rounded-xl bg-rose-600 text-white font-black flex items-center justify-center shrink-0">7</span>
+          <div>
+            <strong class="text-slate-900 group-hover:text-rose-600 text-sm block">Bab 7: Format Resit Rasmi & Cetakan Thermal</strong>
+            <span class="text-slate-500 text-[11px]">Panduan format 80mm/58mm thermal printer, cetakan A4 dan kod QR pengesahan.</span>
+          </div>
+        </a>
+
+        <a href="#bab8" class="p-3.5 rounded-2xl bg-slate-50 hover:bg-indigo-50/60 border border-slate-200 transition flex items-start gap-3 group">
+          <span class="w-7 h-7 rounded-xl bg-slate-700 text-white font-black flex items-center justify-center shrink-0">8</span>
+          <div>
+            <strong class="text-slate-900 group-hover:text-slate-900 text-sm block">Bab 8: Soalan Lazim (FAQ) & Penyelesaian Masalah</strong>
+            <span class="text-slate-500 text-[11px]">Penyelesaian ralat paparan, reset data storan, sandaran dan panduan sokongan teknikal.</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- BAB 1: PENGENALAN -->
+    <!-- ======================================================== -->
+    <section id="bab1" class="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-200 space-y-6 chapter-card page-break">
+      <div class="border-b border-slate-100 pb-4">
+        <span class="text-xs font-black text-indigo-600 uppercase tracking-widest block">BAB 1</span>
+        <h2 class="text-2xl font-black text-slate-900">Pengenalan & Gambaran Keseluruhan Sistem</h2>
+      </div>
+
+      <div class="prose max-w-none text-slate-700 text-sm leading-relaxed space-y-4">
+        <p>
+          <strong>Sistem Pengurusan Perniagaan Digital & POS TRIG GIATMARA Kangar</strong> (Versi 2.6 Pro) merupakan sebuah platform aplikasi web bersepadu yang dibangunkan khusus untuk menyokong program latihan keusahawanan teknikal (TRIG) di Kompleks GIATMARA Kangar, Perlis.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-4">
+          <div class="p-4 bg-amber-50 rounded-2xl border border-amber-200">
+            <h4 class="font-black text-amber-900 text-xs uppercase mb-1">1. Latihan Amali Berasaskan Perniagaan</h4>
+            <p class="text-xs text-amber-950/80">Memberi pengalaman sebenar kepada pelatih mengendalikan sistem POS komersial, pesanan meja digital, dan perkhidmatan bengkel teknikal.</p>
+          </div>
+          <div class="p-4 bg-blue-50 rounded-2xl border border-blue-200">
+            <h4 class="font-black text-blue-900 text-xs uppercase mb-1">2. Ketelusan Rekod & Pengauditan</h4>
+            <p class="text-xs text-blue-950/80">Merekod setiap transaksi jualan tunai/QR, kos alat ganti, pergerakan stok, dan pengeluaran resit secara telus dengan nombor siri audit unik.</p>
+          </div>
+          <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-200">
+            <h4 class="font-black text-emerald-900 text-xs uppercase mb-1">3. Tanpa Kebergantungan Server Luar</h4>
+            <p class="text-xs text-emerald-950/80">Sistem berfungsi sebagai Single-Page Application (SPA) yang menyimpan data secara selamat pada peranti setempat (LocalStorage) dan boleh diakses secara langsung.</p>
+          </div>
+        </div>
+
+        <h3 class="text-base font-black text-slate-900 pt-2">Struktur 3 Portal Utama Sistem:</h3>
+        <ul class="list-disc pl-5 space-y-1.5 text-xs text-slate-600">
+          <li><strong>Portal Utama (Platform Landing):</strong> Hab pendaratan pilihan sistem dengan ringkasan status operasi, penunjuk jualan harian, dan pertukaran pantas modul.</li>
+          <li><strong>Sistem Kursus Seni Masakan (Café POS):</strong> Merangkumi terminal pesanan juruwang, paparan pesanan dapur masa nyata (Kitchen Display Screen), pengurusan meja & QR table ordering.</li>
+          <li><strong>Sistem Kursus Baiki Smartphone (Repair Workshop):</strong> Merangkumi pendaftaran job kerosakan (REP-), senarai semak fizikal penerimaan, sebut harga alat ganti, diagnosis teknikal, dan penjejak status pembaikan secara live.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- BAB 2: PERANAN PENGGUNA (RBAC) -->
+    <!-- ======================================================== -->
+    <section id="bab2" class="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-200 space-y-6 chapter-card page-break">
+      <div class="border-b border-slate-100 pb-4">
+        <span class="text-xs font-black text-indigo-600 uppercase tracking-widest block">BAB 2</span>
+        <h2 class="text-2xl font-black text-slate-900">Panduan Akses & 8 Peranan Pengguna Rasmi (RBAC)</h2>
+      </div>
+
+      <div class="text-slate-700 text-sm leading-relaxed space-y-4">
+        <p>
+          Sistem ini dilengkapi kawalan akses berasaskan peranan (*Role-Based Access Control* - RBAC) yang membahagikan kebenaran mengikut tugasan sebenar pengajar, pelatih, pengurus operasi dan pelanggan.
+        </p>
+
+        <div class="overflow-x-auto border border-slate-200 rounded-2xl">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-900 text-white">
+              <tr>
+                <th class="p-3 font-bold">Nama Staf / Pengguna</th>
+                <th class="p-3 font-bold">Username</th>
+                <th class="p-3 font-bold">Peranan (Role)</th>
+                <th class="p-3 font-bold">Capaian Kuasa Sistem</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+              <tr class="bg-indigo-50/50">
+                <td class="p-3 font-bold text-indigo-950">Wan Muhadir</td>
+                <td class="p-3 font-mono font-bold text-slate-800">admin</td>
+                <td class="p-3"><span class="px-2 py-0.5 rounded-full bg-red-100 text-red-800 font-extrabold text-[10px]">SUPER ADMIN</span></td>
+                <td class="p-3 text-slate-600">Akses Penuh Semua Modul, Pengurusan Pengguna, Tetapan Sistem, & Laporan Kewangan.</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-bold text-slate-900">Muhammad Aizat</td>
+                <td class="p-3 font-mono font-bold text-slate-800">manager_cafe</td>
+                <td class="p-3"><span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-extrabold text-[10px]">MANAGER CAFE</span></td>
+                <td class="p-3 text-slate-600">Pengurusan Menu Kafe, Tetapan Meja, Permintaan Belian Bahan (PR), & Laporan Jualan Kafe.</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-bold text-slate-900">Chef Nur Atiqah, Chef Aizat & Pelatih Masakan</td>
+                <td class="p-3 font-mono font-bold text-slate-800">cafe_staff</td>
+                <td class="p-3"><span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 font-extrabold text-[10px]">CAFE STAFF</span></td>
+                <td class="p-3 text-slate-600">Paparan Skrin Dapur (KDS), Pengurusan Status Penyediaan Hidangan (Preparing / Ready).</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-bold text-slate-900">NUR Atiqah</td>
+                <td class="p-3 font-mono font-bold text-slate-800">cafe</td>
+                <td class="p-3"><span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-extrabold text-[10px]">CAFE CASHIER</span></td>
+                <td class="p-3 text-slate-600">Terminal POS Kafe, Terima Bayaran (Tunai/QR), Cetakan Resit, & Senarai Pesanan Meja.</td>
+              </tr>
+              <tr class="bg-cyan-50/50">
+                <td class="p-3 font-bold text-cyan-950">En. Mohd Rizwan</td>
+                <td class="p-3 font-mono font-bold text-slate-800">manager_repair</td>
+                <td class="p-3"><span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-900 font-extrabold text-[10px]">MANAGER REPAIR</span></td>
+                <td class="p-3 text-slate-600">Kelulusan Sebut Harga Pembaikan, Pengurusan Alatan Bengkel, Pesanan Spare Parts, & Laporan Pembaikan.</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-bold text-slate-900">Muhammad Faiz</td>
+                <td class="p-3 font-mono font-bold text-slate-800">repair_staff</td>
+                <td class="p-3"><span class="px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-900 font-extrabold text-[10px]">REPAIR STAFF</span></td>
+                <td class="p-3 text-slate-600">Diagnosis Kerosakan Peranti, Penggunaan Spare Parts dari Inventori, Kemas Kini Status Pembaikan.</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-bold text-slate-900">Mohd Nabil</td>
+                <td class="p-3 font-mono font-bold text-slate-800">repair</td>
+                <td class="p-3"><span class="px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-800 font-extrabold text-[10px]">SMARTPHONE CASHIER</span></td>
+                <td class="p-3 text-slate-600">Daftar Job Baharu, Terima Pembayaran Servis & Jualan POS Aksesori Telefon, Cetak Resit Rasmi.</td>
+              </tr>
+              <tr class="bg-slate-50">
+                <td class="p-3 font-bold text-slate-700">ROSYITA</td>
+                <td class="p-3 font-mono font-bold text-slate-800">pelanggan</td>
+                <td class="p-3"><span class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-800 font-extrabold text-[10px]">CUSTOMER</span></td>
+                <td class="p-3 text-slate-600">Portal Pesanan Meja (QR Table Order) & Portal Penjejakan Status Job Pembaikan (Live Tracker).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="p-3 bg-slate-100 rounded-xl text-xs text-slate-600 border border-slate-200">
+          💡 <strong>Nota Kata Laluan Lalai:</strong> Kata laluan bagi semua akaun staf untuk sesi latihan/demonstrasi ialah <code>admin123</code> (atau klik butang pintas log masuk pantas pada halaman Log Masuk).
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- BAB 3: MODUL SENI MASAKAN & CAFE -->
+    <!-- ======================================================== -->
+    <section id="bab3" class="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-200 space-y-6 chapter-card page-break">
+      <div class="border-b border-slate-100 pb-4">
+        <span class="text-xs font-black text-amber-600 uppercase tracking-widest block">BAB 3</span>
+        <h2 class="text-2xl font-black text-slate-900">Modul Kursus Seni Masakan & Café TRIG POS</h2>
+      </div>
+
+      <div class="text-slate-700 text-sm leading-relaxed space-y-6">
+        
+        <!-- 3.1 -->
+        <div class="space-y-2">
+          <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center font-black text-xs">3.1</span>
+            Aliran Kerja Pesanan Meja Menggunakan Kod QR (Customer QR Ordering)
+          </h3>
+          <p class="text-xs text-slate-600">
+            Pelanggan boleh memesan makanan tanpa perlu beratur di kaunter. Setiap meja makan dilengkapi pelekat Kod QR khusus.
+          </p>
+          <div class="p-4 bg-amber-50/60 rounded-2xl border border-amber-200 text-xs space-y-2">
+            <ol class="list-decimal pl-5 space-y-1.5 font-medium text-slate-800">
+              <li>Pelanggan mengimbas Kod QR di atas meja (cth: Meja M01).</li>
+              <li>Sistem memaparkan e-Menu Café lengkap mengikut kategori (Makanan Panas, Minuman, Bakeri).</li>
+              <li>Pelanggan menekan <strong>+ Tambah</strong> pada menu pilihan dan boleh memasukkan nota khas (cth: <em>Kurang manis, tanpa taugeh</em>).</li>
+              <li>Pelanggan memilih jenis pesanan (Makan Di Sini / Bungkus / Bawa Pulang) dan menekan <strong>Hantar Pesanan (Jana Tiket)</strong>.</li>
+              <li>Pesanan terus dihantar ke Skrin Dapur (KDS) dan Kaunter Juruwang secara serentak.</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- 3.2 -->
+        <div class="space-y-2">
+          <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center font-black text-xs">3.2</span>
+            Terminal Juruwang POS Café (Point of Sale)
+          </h3>
+          <p class="text-xs text-slate-600">
+            Juruwang (NUR Atiqah) menguruskan pesanan terus walk-in dan pengesahan bayaran pesanan QR meja:
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <strong class="text-slate-900 block mb-1">Carian Menu Pantas</strong>
+              <p class="text-slate-600">Pilih menu mengikut tab kategori atau gunakan bar carian untuk menu yang kerap dipesan.</p>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <strong class="text-slate-900 block mb-1">Pelarasan Bakul & Diskaun</strong>
+              <p class="text-slate-600">Gunakan butang <strong>- 1 +</strong> untuk mengubah kuantiti atau butang tong sampah untuk membuang item.</p>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <strong class="text-slate-900 block mb-1">Kaedah Bayaran</strong>
+              <p class="text-slate-600">Sokongan Tunai (dengan pengiraan baki automatik), DuitNow QR, atau Kad Debit/Kredit.</p>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <strong class="text-slate-900 block mb-1">Cetakan Resit Segera</strong>
+              <p class="text-slate-600">Menghasilkan resit bercetak thermal 80mm/58mm rasmi berserta kod pengesahan pesanan.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3.3 -->
+        <div class="space-y-2">
+          <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center font-black text-xs">3.3</span>
+            Sistem Paparan Dapur (Kitchen Display System - KDS)
+          </h3>
+          <p class="text-xs text-slate-600">
+            Skrin di dapur dikendalikan oleh pelatih masakan dan chef untuk menguruskan kitaran penyediaan makanan:
+          </p>
+          <div class="grid grid-cols-4 gap-2 text-center text-xs">
+            <div class="p-2.5 rounded-xl bg-amber-100 text-amber-900 font-bold border border-amber-300">
+              1. PENDING
+              <span class="block text-[10px] font-normal text-amber-800 mt-1">Pesanan baru diterima</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-blue-100 text-blue-900 font-bold border border-blue-300">
+              2. PREPARING
+              <span class="block text-[10px] font-normal text-blue-800 mt-1">Sedang dimasak oleh pelatih</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-emerald-100 text-emerald-900 font-bold border border-emerald-300">
+              3. READY
+              <span class="block text-[10px] font-normal text-emerald-800 mt-1">Siap untuk dihidang</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-200 text-slate-800 font-bold border border-slate-300">
+              4. COMPLETED
+              <span class="block text-[10px] font-normal text-slate-700 mt-1">Pesanan selesai & ditutup</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- BAB 4: MODUL BAIKI SMARTPHONE -->
+    <!-- ======================================================== -->
+    <section id="bab4" class="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-200 space-y-6 chapter-card page-break">
+      <div class="border-b border-slate-100 pb-4">
+        <span class="text-xs font-black text-cyan-600 uppercase tracking-widest block">BAB 4</span>
+        <h2 class="text-2xl font-black text-slate-900">Modul Kursus Baiki Smartphone & Elektronik</h2>
+      </div>
+
+      <div class="text-slate-700 text-sm leading-relaxed space-y-6">
+
+        <!-- 4.1 -->
+        <div class="space-y-2">
+          <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-cyan-600 text-white flex items-center justify-center font-black text-xs">4.1</span>
+            Pendaftaran Job Pembaikan Baharu (Registration REP-2026-xxxxx)
+          </h3>
+          <p class="text-xs text-slate-600">
+            Setiap telefon yang dihantar oleh pelanggan mesti didaftarkan ke dalam sistem untuk menjana Nombor Job rasmi.
+          </p>
+          <div class="p-4 bg-cyan-50/60 rounded-2xl border border-cyan-200 text-xs space-y-2">
+            <ul class="list-disc pl-5 space-y-1 text-slate-800">
+              <li><strong>Pilih / Daftar Pelanggan:</strong> Pilih pelanggan sedia ada atau daftar nama & no. telefon baharu.</li>
+              <li><strong>Spesifikasi Peranti:</strong> Jenama (Samsung, Apple, Oppo, Vivo dll), Model telefon, Warna & No. IMEI / Siri.</li>
+              <li><strong>Aduan Masalah:</strong> Huraian simptom kerosakan yang dilaporkan pelanggan (cth: skrin blank, bateri kembung).</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 4.2 -->
+        <div class="space-y-2">
+          <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-cyan-600 text-white flex items-center justify-center font-black text-xs">4.2</span>
+            Checklist 8 Pemeriksaan Fizikal Semasa Terima
+          </h3>
+          <p class="text-xs text-slate-600">
+            Bagi mengelakkan pertikaian kerosakan sedia ada, juruteknik pelatih wajib memeriksa 8 bahagian fizikal ini di hadapan pelanggan:
+          </p>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <strong class="text-slate-800 block text-[11px]">1. Skrin (LCD)</strong>
+              <span class="text-slate-500 text-[10px]">Good / Fair / Damaged</span>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <strong class="text-slate-800 block text-[11px]">2. Badan (Body)</strong>
+              <span class="text-slate-500 text-[10px]">Good / Calar / Kemek</span>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <strong class="text-slate-800 block text-[11px]">3. Kamera</strong>
+              <span class="text-slate-500 text-[10px]">Jelas / Kabur / Kaca Pecah</span>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <strong class="text-slate-800 block text-[11px]">4. Port Pengecasan</strong>
+              <span class="text-slate-500 text-[10px]">Ketat / Kotor / Longgar</span>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <strong class="text-slate-800 block text-[11px]">5. Butang Suara/Kuasa</strong>
+              <span class="text-slate-500 text-[10px]">Klik Berfungsi / Mati</span>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <strong class="text-slate-800 block text-[11px]">6. Speaker Audio</strong>
+              <span class="text-slate-500 text-[10px]">Jelas / Pecah / Senyap</span>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-rose-200 bg-rose-50/50">
+              <strong class="text-rose-900 block text-[11px]">7. Indikator Air</strong>
+              <span class="text-rose-700 text-[10px]">NO / YES (Merah)</span>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+              <strong class="text-slate-800 block text-[11px]">8. Kerosakan Lain</strong>
+              <span class="text-slate-500 text-[10px]">Catatan khas peranti</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4.3 -->
+        <div class="space-y-2">
+          <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-cyan-600 text-white flex items-center justify-center font-black text-xs">4.3</span>
+            Diagnosis Teknikal, Sebut Harga & Pemotongan Inventori Automatik
+          </h3>
+          <p class="text-xs text-slate-600">
+            Apabila juruteknik (Muhammad Faiz) membuat diagnosis:
+          </p>
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs space-y-2">
+            <ul class="list-disc pl-5 space-y-1.5 text-slate-800">
+              <li>Juruteknik merekod hasil diagnosis mikroskop stereo / multimeter.</li>
+              <li>Pilih alat ganti yang diperlukan (cth: LCD A55). Harga kos dan harga jualan dikira secara automatik.</li>
+              <li>Sistem memotong stok alat ganti tersebut dari <strong>Inventori Pusat</strong> secara automatik untuk mengelakkan ketirisan stok.</li>
+              <li>Masukkan kadar upah buruh (Labour Cost) dan tetapkan tempoh jaminan waranti (cth: <em>30 Hari Waranti Servis</em>).</li>
+              <li>Pelanggan meluluskan sebut harga sebelum kerja pembaikan dimulakan.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 4.4 -->
+        <div class="space-y-2">
+          <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-cyan-600 text-white flex items-center justify-center font-black text-xs">4.4</span>
+            Penjejak Status Pembaikan Secara Live (Customer Repair Tracker)
+          </h3>
+          <p class="text-xs text-slate-600">
+            Pelanggan boleh menyemak status telefon mereka secara langsung di laman web hanya dengan memasukkan No. Job (cth: <code>REP-2026-00001</code>) atau No. Telefon tanpa perlu menelefon bengkel berkali-kali.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- BAB 5: INVENTORI & PEROLEHAN -->
+    <!-- ======================================================== -->
+    <section id="bab5" class="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-200 space-y-6 chapter-card page-break">
+      <div class="border-b border-slate-100 pb-4">
+        <span class="text-xs font-black text-emerald-600 uppercase tracking-widest block">BAB 5</span>
+        <h2 class="text-2xl font-black text-slate-900">Pengurusan Inventori Pusat & Perolehan (PR / PO)</h2>
+      </div>
+
+      <div class="text-slate-700 text-sm leading-relaxed space-y-4">
+        <p>
+          Sistem POS TRIG menyatukan stok daripada kedua-dua bengkel di bawah satu pengkalan data inventori pusat yang terbahagi kepada 5 kategori utama:
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+            <strong class="text-slate-900 block mb-1">1. Café Raw Materials</strong>
+            <p class="text-slate-500">Beras, ayam, daging, rempah, kopi, susu, sirap & bahan mentah dapur.</p>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+            <strong class="text-slate-900 block mb-1">2. Food Packaging</strong>
+            <p class="text-slate-500">Kotak pembungkus makanan, cawan minuman panas/sejuk, beg kertas mesra alam.</p>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+            <strong class="text-slate-900 block mb-1">3. Smartphone Spare Parts</strong>
+            <p class="text-slate-500">Panel skrin LCD/OLED, bateri peranti, charging flex, pembesar suara, kamera.</p>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+            <strong class="text-slate-900 block mb-1">4. Smartphone Accessories</strong>
+            <p class="text-slate-500">Pelindung skrin (Tempered Glass), sarung telefon (Casing), kabel USB-C & pengecas.</p>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 sm:col-span-2">
+            <strong class="text-slate-900 block mb-1">5. Repair Tools & Machines</strong>
+            <p class="text-slate-500">Stesen pemateri, hot air rework station, multimeter digital, mikroskop stereo & alatan amali bengkel.</p>
+          </div>
+        </div>
+
+        <h3 class="text-base font-black text-slate-900 pt-2">Kitaran Pesanan Belian (Procurement Workflow):</h3>
+        <div class="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-200 text-xs">
+          <p class="font-bold text-emerald-950 mb-2">Langkah Perolehan Pembekal:</p>
+          <ol class="list-decimal pl-5 space-y-1.5 text-slate-800">
+            <li><strong>Permintaan Belian (Purchase Request - PR):</strong> Pengurus Kafe atau Pengurus Pembaikan membuat permohonan stok baru apabila paras stok di bawah paras minimum (*Low Stock Alert*).</li>
+            <li><strong>Kelulusan Pentadbir (Super Admin Approval):</strong> Wan Muhadir meluluskan PR berdasarkan keperluan baki belanjawan.</li>
+            <li><strong>Pesanan Belian (Purchase Order - PO):</strong> PO rasmi dijana berserta maklumat pembekal (cth: Mega Parts Supplier KL) dan dihantar kepada wakil jualan.</li>
+            <li><strong>Penerimaan Barang (Goods Receipt / Stock In):</strong> Apabila stok fizikal sampai, juruteknik merekod penerimaan dan kuantiti inventori pusat bertambah secara automatik.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- BAB 6: LAPORAN KEWANGAN -->
+    <!-- ======================================================== -->
+    <section id="bab6" class="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-200 space-y-6 chapter-card page-break">
+      <div class="border-b border-slate-100 pb-4">
+        <span class="text-xs font-black text-teal-600 uppercase tracking-widest block">BAB 6</span>
+        <h2 class="text-2xl font-black text-slate-900">Laporan Kewangan, Untung Rugi & Audit Trail</h2>
+      </div>
+
+      <div class="text-slate-700 text-sm leading-relaxed space-y-4">
+        <p>
+          Sistem menyediakan laporan analisis kewangan secara langsung (*Live Analytics*) untuk menilai prestasi keusahawanan setiap bidang kursus:
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+            <strong class="text-slate-900 block text-sm">Penyata Untung & Rugi Kasar (P&L)</strong>
+            <p class="text-slate-600 leading-relaxed">
+              Memaparkan Jumlah Jualan Kasar, Kos Barangan Dijual (COGS - kos bahan mentah masakan & kos alat ganti telefon), dan Untung Kasar Bersih bagi setiap kursus.
+            </p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+            <strong class="text-slate-900 block text-sm">Pusat Laporan Eksekutif (Reports Center)</strong>
+            <p class="text-slate-600 leading-relaxed">
+              Mengandungi 20+ metrik laporan terperinci termasuk: Item Paling Laris, Trend Jualan Jam Puncak, Pecahan Kaedah Bayaran (Tunai vs QR), dan Laporan Kerosakan Telefon Terbanyak.
+            </p>
+          </div>
+        </div>
+
+        <div class="p-4 bg-slate-900 text-white rounded-2xl space-y-2 text-xs">
+          <div class="flex items-center gap-2 text-amber-400 font-bold">
+            <span>🛡️</span>
+            <span>Jejak Audit Sistem (Audit Trail)</span>
+          </div>
+          <p class="text-slate-300 text-[11px] leading-relaxed">
+            Setiap tindakan seperti log masuk, cipta pesanan makanan, daftar job pembaikan, pengubahsuaian kuantiti stok inventori, dan pemadaman rekod akan direkodkan ke dalam <strong>Audit Trail</strong> secara kekal berserta Nama Pengguna, Alamat IP simulasi, Modul, dan Cap Masa (Timestamp) yang tepat.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- BAB 7: FORMAT RESIT RASMI -->
+    <!-- ======================================================== -->
+    <section id="bab7" class="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-200 space-y-6 chapter-card page-break">
+      <div class="border-b border-slate-100 pb-4">
+        <span class="text-xs font-black text-rose-600 uppercase tracking-widest block">BAB 7</span>
+        <h2 class="text-2xl font-black text-slate-900">Format Resit Rasmi & Cetakan Thermal</h2>
+      </div>
+
+      <div class="text-slate-700 text-sm leading-relaxed space-y-4">
+        <p>
+          Sistem POS TRIG menyokong cetakan resit fizikal melalui mesin pencetak terma (*Thermal Receipt Printer*) serta cetakan format dokumen A4 standard:
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center space-y-1">
+            <span class="text-2xl">🧾</span>
+            <strong class="text-slate-900 block">Thermal 80mm</strong>
+            <p class="text-slate-500 text-[11px]">Format standard industri bagi kafe dan kaunter servis moden.</p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center space-y-1">
+            <span class="text-2xl">📄</span>
+            <strong class="text-slate-900 block">Thermal 58mm</strong>
+            <p class="text-slate-500 text-[11px]">Format kompak untuk pencetak mudah alih (Bluetooth / Mini POS).</p>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center space-y-1">
+            <span class="text-2xl">📑</span>
+            <strong class="text-slate-900 block">Invois Standard A4</strong>
+            <p class="text-slate-500 text-[11px]">Format dokumen rasmi institusi untuk tuntutan perakaunan rasmi.</p>
+          </div>
+        </div>
+
+        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs space-y-2">
+          <strong class="text-slate-900 block">Komponen Wajib Pada Setiap Resit:</strong>
+          <ul class="list-disc pl-5 space-y-1 text-slate-600">
+            <li>Logo rasmi original GIATMARA Malaysia di bahagian atas resit.</li>
+            <li>Nama institusi: <em>TRIG GIATMARA KANGAR, PERLIS</em>.</li>
+            <li>Nombor resit unik (cth: <code>CAF-2026-00042</code> atau <code>REP-2026-00012</code>).</li>
+            <li>Perincian item pesanan, kuantiti, harga seunit, upah buruh servis & jumlah besar.</li>
+            <li>Kaedah pembayaran (Tunai, DuitNow QR, Kad).</li>
+            <li>Klausa waranti pembaikan (30 Hari) bagi pembaikan smartphone.</li>
+            <li>Kod QR digital yang membolehkan pelanggan mengimbas semula maklumat resit di telefon.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- BAB 8: FAQ & TROUBLESHOOTING -->
+    <!-- ======================================================== -->
+    <section id="bab8" class="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-200 space-y-6 chapter-card">
+      <div class="border-b border-slate-100 pb-4">
+        <span class="text-xs font-black text-slate-600 uppercase tracking-widest block">BAB 8</span>
+        <h2 class="text-2xl font-black text-slate-900">Soalan Lazim (FAQ) & Penyelesaian Masalah</h2>
+      </div>
+
+      <div class="text-slate-700 text-sm leading-relaxed space-y-4">
+        <div class="space-y-3 text-xs">
+          <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
+            <strong class="text-slate-900 block text-sm mb-1">Q1: Di manakah data transaksi, menu dan job pembaikan disimpan?</strong>
+            <p class="text-slate-600">Data disimpan secara setempat di dalam <strong>LocalStorage</strong> pelayar web komputer anda. Ini memastikan sistem berfungsi dengan pantas walaupun tiada sambungan internet luar.</p>
+          </div>
+
+          <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
+            <strong class="text-slate-900 block text-sm mb-1">Q2: Bagaimana cara menetapkan semula (Reset) data kepada data asal kilang?</strong>
+            <p class="text-slate-600">Log masuk sebagai Super Admin (Wan Muhadir), pergi ke menu <strong>Sistem & Tetapan ➡️ Tetapan Sistem</strong>, dan klik butang <strong>"Set Semula Data Contoh Asal (Factory Reset)"</strong>.</p>
+          </div>
+
+          <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
+            <strong class="text-slate-900 block text-sm mb-1">Q3: Bagaimana jika teks input kelihatan kabur semasa Dark Mode diaktifkan?</strong>
+            <p class="text-slate-600">Sistem telah dilengkapi kod pelindung kontras automatik (Light Color Scheme Meta) yang memaksa semua kotak teks, dropdown dan placeholder kekal berwarna hitam pekat (#0f172a) berlatar putih bersih.</p>
+          </div>
+
+          <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
+            <strong class="text-slate-900 block text-sm mb-1">Q4: Bolehkah resit dicetak tanpa dialog pencetak berulang kali?</strong>
+            <p class="text-slate-600">Ya, bagi pencetak terma komersial, tetapkan pelayar Chrome kepada mod <em>"Kiosk Printing"</em> dengan parameter <code>--kiosk-printing</code> pada shortcut pelayar.</p>
+          </div>
+        </div>
+
+        <div class="border-t border-slate-200 pt-6 text-center text-xs text-slate-500 space-y-1">
+          <p><strong>Kompleks GIATMARA Kangar</strong> • Jalan Kangar-Alor Setar, 01000 Kangar, Perlis</p>
+          <p>Talian Hotline: 04-976 1234 • E-mel Rasmi: trig.kangar@giatmara.edu.my</p>
+          <p class="text-[10px] text-slate-400 mt-2">Hak Cipta Terpelihara © 2026 GIATMARA Malaysia. Dokumen ini adalah panduan rasmi kegunaan latihan keusahawanan.</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+</body>
+</html>
