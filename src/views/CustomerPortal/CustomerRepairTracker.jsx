@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import giatmaraLogo from '../../assets/logo.png';
 import {
   Smartphone,
   Search,
@@ -8,11 +9,12 @@ import {
   Wrench,
   ShieldCheck,
   Receipt,
-  Phone
+  Phone,
+  ArrowLeft
 } from 'lucide-react';
 
 export const CustomerRepairTracker = () => {
-  const { repairJobs, openReceipt, settings } = useApp();
+  const { repairJobs, openReceipt, settings, switchSystemMode } = useApp();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchedJob, setSearchedJob] = useState(null);
@@ -49,16 +51,50 @@ export const CustomerRepairTracker = () => {
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in pb-12">
       
       {/* Header */}
-      <div className="bg-linear-to-r from-blue-900 via-indigo-900 to-slate-900 text-white p-6 rounded-3xl shadow-xl text-center space-y-2">
-        <div className="w-12 h-12 rounded-2xl bg-white/10 mx-auto flex items-center justify-center text-blue-300">
-          <Smartphone className="w-6 h-6" />
+      <div className="bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 border border-cyan-500/30 text-white p-6 rounded-3xl shadow-xl text-center space-y-4">
+        
+        {/* Top Back & Brand Bar */}
+        <div className="flex items-center justify-between pb-3 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="bg-white p-2 rounded-xl shadow-md shrink-0">
+              <img
+                src={giatmaraLogo}
+                alt="GIATMARA Logo"
+                className="h-9 w-auto object-contain"
+                onError={(e) => { e.currentTarget.src = './logo.png'; }}
+              />
+            </div>
+            <div className="text-left">
+              <span className="text-sm sm:text-base font-black text-amber-400 font-['Cabinet_Grotesk',sans-serif] tracking-wider uppercase block leading-tight">
+                TECHBYTE & PASTA CAFE
+              </span>
+              <span className="text-[11px] font-extrabold text-white tracking-tight uppercase leading-tight block">
+                TRIG GIATMARA KANGAR
+              </span>
+            </div>
+          </div>
+
+          <button
+            onClick={() => switchSystemMode('MAIN')}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-black transition cursor-pointer shadow-md"
+            title="Kembali ke Menu Paling Utama"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Menu Utama</span>
+          </button>
         </div>
-        <h1 className="text-xl sm:text-2xl font-black">
-          SEMAKAN STATUS PEMBAIKAN TELEFON AWAM
-        </h1>
-        <p className="text-xs text-blue-200 max-w-lg mx-auto">
-          {settings.businessName} • Masukkan No. Job Baiki (cth: REP-2026-00001) atau No. Telefon untuk semakan masa nyata.
-        </p>
+
+        <div className="space-y-1">
+          <div className="w-11 h-11 rounded-2xl bg-cyan-500/20 border border-cyan-400/40 mx-auto flex items-center justify-center text-cyan-300">
+            <Smartphone className="w-6 h-6" />
+          </div>
+          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+            SEMAKAN STATUS PEMBAIKAN TELEFON PINTAR
+          </h1>
+          <p className="text-xs text-cyan-200/90 max-w-lg mx-auto">
+            Masukkan No. Job Baiki (cth: <strong>REP-2026-00001</strong>) atau No. Telefon untuk semakan diagnosis dan status siap secara masa nyata.
+          </p>
+        </div>
       </div>
 
       {/* Search Bar Form */}

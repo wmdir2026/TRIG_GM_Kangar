@@ -1,5 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
+import giatmaraLogo from '../../assets/logo.png';
 import {
   Smartphone,
   Wrench,
@@ -61,7 +62,12 @@ export const RepairDashboard = () => {
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <div className="bg-white px-3 py-2 rounded-2xl shadow-md shrink-0">
-                <img src="/logo.png" alt="GIATMARA Logo" className="h-12 sm:h-14 w-auto object-contain" />
+                <img
+                  src={giatmaraLogo}
+                  alt="GIATMARA Logo"
+                  className="h-12 sm:h-14 w-auto object-contain"
+                  onError={(e) => { e.currentTarget.src = './logo.png'; }}
+                />
               </div>
               <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-black uppercase tracking-wider border border-blue-400/30">
                 KURSUS BAIKI SMARTPHONE & ELEKTRONIK

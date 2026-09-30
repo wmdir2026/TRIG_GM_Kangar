@@ -3,17 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="./logo.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#f59e0b" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="color-scheme" content="light" />
     <title>TECHBYTE & PASTA CAFE • TRIG GIATMARA KANGAR</title>
     <meta name="description" content="TECHBYTE & PASTA CAFE • Sistem Pengurusan Perniagaan Digital Program TRIG GIATMARA Kangar: Kursus Masakan & Kursus Baiki Smartphone" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="./assets/index-MjEyko57.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-4NTz1H9d.css">
+    <script type="module" crossorigin src="./assets/index-WSOnVyw8.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-DEfiV4Iw.css">
   </head>
   <body class="bg-slate-100 text-slate-900 selection:bg-indigo-500 selection:text-white">
     <div id="root"></div>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW reg error:', err));
+        });
+      }
+    </script>
   </body>
 </html>

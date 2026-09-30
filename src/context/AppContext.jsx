@@ -18,6 +18,7 @@ import {
   INITIAL_NOTIFICATIONS,
   INITIAL_AUDIT_LOGS
 } from '../data/initialData';
+import { realtimeSync } from '../services/realtimeSync';
 
 const AppContext = createContext();
 
@@ -134,7 +135,7 @@ export const AppProvider = ({ children }) => {
       setActiveSystemMode('MAIN');
     } else if (tab === 'portal') {
       setActiveSystemMode('PORTAL');
-    } else if (['cafe-dashboard', 'menu', 'tables', 'qr-tables', 'food-ordering', 'kitchen', 'food-orders', 'customer-order'].includes(tab)) {
+    } else if (['cafe-dashboard', 'menu', 'tables', 'qr-tables', 'food-ordering', 'kitchen', 'food-orders', 'customer-order', 'customer-phone-app', 'waiter-tablet-app'].includes(tab)) {
       setActiveSystemMode('MASAKAN');
     } else if (['repair-dashboard', 'customers', 'repair-jobs', 'repair-tools', 'accessories-pos', 'customer-repair-tracker'].includes(tab)) {
       setActiveSystemMode('REPAIR');
@@ -157,6 +158,92 @@ export const AppProvider = ({ children }) => {
       setCurrentTabState('dashboard');
     }
   };
+
+  // Real-time Cloud Synchronization State (MQTT & BroadcastChannel)
+  const [syncStatus, setSyncStatus] = useState('connecting');
+
+  // Realtime Sync Subscription for Cross-Device Synchronization (Android Phone <-> Android Tab)
+  useEffect(() => {
+    const unsubStatus = realtimeSync.onStatusChange(setSyncStatus);
+
+    const unsubEvents = realtimeSync.subscribe((event) => {
+      if (!event || !event.type) return;
+
+      if (event.type === 'ORDER_CREATED') {
+        const incomingOrder = event.payload?.order;
+        if (!incomingOrder) return;
+
+        setFoodOrders(prev => {
+          if (prev.some(o => o.id === incomingOrder.id)) return prev;
+          return [incomingOrder, ...prev];
+        });
+
+        if (incomingOrder.orderType === 'DINE_IN' && incomingOrder.tableId) {
+          setTables(prev => prev.map(t => t.id === incomingOrder.tableId ? { ...t, status: 'OCCUPIED', activeOrderId: incomingOrder.id } : t));
+        }
+
+        if (event.payload?.sale) {
+          setSales(prev => {
+            if (prev.some(s => s.id === event.payload.sale.id)) return prev;
+            return [event.payload.sale, ...prev];
+          });
+        }
+
+        realtimeSync.playChime('new_order');
+        showToast(`🔔 Pesanan Baru (${incomingOrder.orderType === 'DINE_IN' ? `Meja ${incomingOrder.tableId}` : 'Takeaway'}): ${incomingOrder.id}`, 'info');
+      }
+
+      else if (event.type === 'ORDER_STATUS_UPDATED') {
+        const { orderId, newStatus } = event.payload || {};
+        if (!orderId || !newStatus) return;
+
+        const now = new Date().toISOString();
+        setFoodOrders(prev => prev.map(o => {
+          if (o.id === orderId) {
+            return {
+              ...o,
+              orderStatus: newStatus,
+              confirmedAt: newStatus === 'CONFIRMED' && !o.confirmedAt ? now : o.confirmedAt,
+              preparedAt: (newStatus === 'READY' || newStatus === 'COMPLETED') && !o.preparedAt ? now : o.preparedAt,
+              completedAt: newStatus === 'COMPLETED' ? now : o.completedAt
+            };
+          }
+          return o;
+        }));
+
+        if (newStatus === 'COMPLETED' || newStatus === 'CANCELLED') {
+          setTables(prev => prev.map(t => t.activeOrderId === orderId ? { ...t, status: 'AVAILABLE', activeOrderId: null } : t));
+        }
+
+        if (newStatus === 'READY') {
+          realtimeSync.playChime('ready');
+          showToast(`✅ Pesanan ${orderId} siap dimasak! Sedia dihidang.`, 'success');
+        } else if (newStatus === 'PREPARING') {
+          showToast(`🔥 Pesanan ${orderId} sedang dimasak di dapur.`, 'info');
+        }
+      }
+
+      else if (event.type === 'ORDER_CANCELLED') {
+        const { orderId, reason } = event.payload || {};
+        if (!orderId) return;
+
+        setFoodOrders(prev => prev.map(o => o.id === orderId ? { ...o, orderStatus: 'CANCELLED', cancelReason: reason } : o));
+        setTables(prev => prev.map(t => t.activeOrderId === orderId ? { ...t, status: 'AVAILABLE', activeOrderId: null } : t));
+        showToast(`Pesanan ${orderId} dibatalkan.`, 'info');
+      }
+
+      else if (event.type === 'TABLE_UPDATED') {
+        const { id, updated } = event.payload || {};
+        if (!id) return;
+        setTables(prev => prev.map(t => t.id === id ? { ...t, ...updated } : t));
+      }
+    });
+
+    return () => {
+      unsubStatus();
+      unsubEvents();
+    };
+  }, []);
 
   // Sync to LocalStorage
   useEffect(() => { localStorage.setItem('trig_settings', JSON.stringify(settings)); }, [settings]);
@@ -295,6 +382,7 @@ export const AppProvider = ({ children }) => {
 
   const updateTable = (id, updated) => {
     setTables(prev => prev.map(t => t.id === id ? { ...t, ...updated } : t));
+    realtimeSync.broadcast('TABLE_UPDATED', { id, updated });
     showToast(`Meja ${id} dikemaskini.`);
   };
 
@@ -369,6 +457,9 @@ export const AppProvider = ({ children }) => {
     };
     setSales(prev => [newSale, ...prev]);
 
+    // Broadcast across devices (Android Phone <-> Android Tab <-> PC)
+    realtimeSync.broadcast('ORDER_CREATED', { order: newOrder, sale: newSale });
+
     // Add Kitchen notification
     addNotification({
       title: 'Pesanan Dapur Baru!',
@@ -409,6 +500,9 @@ export const AppProvider = ({ children }) => {
       }
     }
 
+    // Broadcast status change across devices (Android Phone <-> Android Tab)
+    realtimeSync.broadcast('ORDER_STATUS_UPDATED', { orderId, newStatus });
+
     logAudit(`Pesanan ${orderId} ditukar status kepada: ${newStatus}`, 'CAFÉ');
     showToast(`Status pesanan ${orderId} kini: ${newStatus}`);
   };
@@ -442,6 +536,9 @@ export const AppProvider = ({ children }) => {
     if (order.tableId) {
       setTables(prev => prev.map(t => t.id === order.tableId ? { ...t, status: 'AVAILABLE', activeOrderId: null } : t));
     }
+
+    // Broadcast cancellation across devices
+    realtimeSync.broadcast('ORDER_CANCELLED', { orderId, reason });
 
     logAudit(`Pesanan makanan ${orderId} dibatalkan sebelum mula masak (${reason})`, 'CAFÉ');
     showToast(`Pesanan ${orderId} telah berjaya dibatalkan.`, 'info');
@@ -1062,6 +1159,9 @@ export const AppProvider = ({ children }) => {
     isStaffLoggedIn,
     setIsStaffLoggedIn,
     logoutStaff,
+    // Realtime Sync
+    syncStatus,
+    realtimeSync,
     // Operations
     addMenuItem,
     updateMenuItem,

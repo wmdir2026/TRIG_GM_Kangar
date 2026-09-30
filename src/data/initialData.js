@@ -1,7 +1,10 @@
+import giatmaraLogo from '../assets/logo.png';
+
 // Initial Seed Data for TRIG GIATMARA KANGAR Digital Business Management System
 
 export const INITIAL_SETTINGS = {
-  businessName: "TRIG GIATMARA KANGAR",
+  businessName: "TECHBYTE & PASTA CAFE",
+  subName: "TRIG GIATMARA KANGAR",
   tagline: "Digital Business Management System",
   institution: "GIATMARA Kangar, Perlis",
   businessType: "Training & Entrepreneurship Business",
@@ -15,7 +18,7 @@ export const INITIAL_SETTINGS = {
   serviceChargeRate: 0,
   cafeReceiptFooter: "TERIMA KASIH KERANA BERKUNJUNG KE CAFÉ GIATMARA KANGAR!\nSemoga menjamu selera dengan gembira. Sila datang lagi.",
   repairReceiptFooter: "TERIMA KASIH KERANA MENGGUNAKAN PERKHIDMATAN BAIKI SMARTPHONE GIATMARA KANGAR.\nJaminan servis 30 hari untuk alat ganti yang ditukar. Sila simpan resit ini.",
-  logoUrl: "/logo.png"
+  logoUrl: giatmaraLogo
 };
 
 export const INITIAL_USERS = [

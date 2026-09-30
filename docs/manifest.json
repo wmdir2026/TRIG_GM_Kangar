@@ -1,0 +1,48 @@
+{
+  "name": "TECHBYTE & PASTA CAFE • TRIG GIATMARA KANGAR",
+  "short_name": "TRIG POS Cafe",
+  "description": "Sistem Pengurusan Makanan & Aplikasi Pelanggan / Pelayan TRIG GIATMARA Kangar",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#f59e0b",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Aplikasi Pelanggan (Phone)",
+      "short_name": "Apps Pelanggan",
+      "description": "Buka Aplikasi Pesanan Makanan Pelanggan",
+      "url": "./?app=customer",
+      "icons": [{ "src": "./logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Aplikasi Pelayan (Tablet)",
+      "short_name": "Apps Pelayan",
+      "description": "Buka Aplikasi Tablet Pengambilan Pesanan Pelayan",
+      "url": "./?app=waiter",
+      "icons": [{ "src": "./logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Paparan Dapur (KDS)",
+      "short_name": "Dapur Cafe",
+      "description": "Buka Paparan Masakan Dapur Masa Nyata",
+      "url": "./?app=kitchen",
+      "icons": [{ "src": "./logo.png", "sizes": "192x192" }]
+    }
+  ]
+}
