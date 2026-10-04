@@ -1,4 +1,4 @@
-// Service Worker for TECHBYTE & PASTA CAFE PWA
+// Service Worker for TECHBYTE & FELÌCE CAFFÉ PWA
 const CACHE_NAME = 'trig-cafe-pwa-v1';
 
 self.addEventListener('install', (event) => {
