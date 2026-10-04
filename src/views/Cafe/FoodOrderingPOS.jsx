@@ -16,7 +16,9 @@ import {
   Clock,
   Printer,
   Sparkles,
-  X
+  X,
+  Calendar,
+  AlertCircle
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -28,8 +30,12 @@ export const FoodOrderingPOS = () => {
     createFoodOrder,
     openReceipt,
     settings,
-    showToast
+    showToast,
+    isMenuItemAvailableToday,
+    getCurrentDayMalay
   } = useApp();
+
+  const todayMalay = getCurrentDayMalay ? getCurrentDayMalay() : 'Hari Ini';
 
   const [orderType, setOrderType] = useState('DINE_IN'); // 'DINE_IN' or 'TAKEAWAY'
   const [selectedTable, setSelectedTable] = useState('M01');
@@ -51,6 +57,11 @@ export const FoodOrderingPOS = () => {
 
   // Add to cart
   const handleAddToCart = (item) => {
+    if (isMenuItemAvailableToday && !isMenuItemAvailableToday(item)) {
+      showToast(`Item "${item.name}" tidak dimasak/dijual pada hari ${todayMalay}.`, 'warning');
+      return;
+    }
+
     if (item.status === 'OUT OF STOCK') {
       showToast('Item ini telah kehabisan stok.', 'warning');
       return;
@@ -228,15 +239,21 @@ export const FoodOrderingPOS = () => {
 
         {/* Search & Category Filter */}
         <div className="bg-white p-3.5 rounded-2xl border border-stone-200 shadow-xs flex flex-col sm:flex-row gap-3 items-center justify-between">
-          <div className="relative w-full sm:w-64">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-            <input
-              type="text"
-              placeholder="Cari menu makanan/minuman..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 text-xs bg-stone-50 border border-stone-200 rounded-xl outline-none font-medium"
-            />
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="relative w-full sm:w-64">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+              <input
+                type="text"
+                placeholder="Cari menu makanan/minuman..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 text-xs bg-stone-50 border border-stone-200 rounded-xl outline-none font-medium"
+              />
+            </div>
+            <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-700 text-xs font-black shrink-0">
+              <Calendar className="w-3.5 h-3.5" />
+              <span>Hari Ini: {todayMalay}</span>
+            </div>
           </div>
 
           <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
@@ -264,58 +281,91 @@ export const FoodOrderingPOS = () => {
 
         {/* Menu Cards Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5 max-h-[68vh] overflow-y-auto pr-1">
-          {filteredMenu.map(item => (
-            <div
-              key={item.id}
-              onClick={() => handleAddToCart(item)}
-              className={`bg-white rounded-2xl border border-stone-200 shadow-xs overflow-hidden cursor-pointer hover:shadow-lg hover:border-amber-400 transition-all flex flex-col justify-between group ${
-                item.status === 'OUT OF STOCK' ? 'opacity-50 pointer-events-none' : ''
-              }`}
-            >
-              <div>
-                <div className="relative h-28 w-full bg-stone-100 overflow-hidden">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                    onError={(e) => {
-                      e.target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=80";
-                    }}
-                  />
-                  <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[9px] font-black bg-neutral-950/80 text-amber-400 border border-amber-500/30">
-                    {item.category}
-                  </span>
-                  {item.status === 'OUT OF STOCK' && (
-                    <span className="absolute inset-0 bg-black/60 flex items-center justify-center text-xs font-black text-white">
-                      HABIS STOK
+          {filteredMenu.map(item => {
+            const availableToday = isMenuItemAvailableToday ? isMenuItemAvailableToday(item) : true;
+            const isOutOfStock = item.status === 'OUT OF STOCK';
+            const isInactive = item.status === 'INACTIVE';
+            const canOrder = availableToday && !isOutOfStock && !isInactive;
+
+            return (
+              <div
+                key={item.id}
+                onClick={() => canOrder && handleAddToCart(item)}
+                className={`bg-white rounded-2xl border transition-all flex flex-col justify-between group ${
+                  canOrder
+                    ? 'border-stone-200 shadow-xs cursor-pointer hover:shadow-lg hover:border-amber-400'
+                    : 'border-stone-200/70 bg-stone-50/80 shadow-none cursor-not-allowed opacity-75'
+                }`}
+              >
+                <div>
+                  <div className="relative h-28 w-full bg-stone-100 overflow-hidden">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className={`w-full h-full object-cover transition duration-300 ${canOrder ? 'group-hover:scale-105' : 'grayscale-[35%]'}`}
+                      onError={(e) => {
+                        e.target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=80";
+                      }}
+                    />
+                    <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[9px] font-black bg-neutral-950/80 text-amber-400 border border-amber-500/30">
+                      {item.category}
                     </span>
-                  )}
+
+                    {!availableToday ? (
+                      <div className="absolute inset-0 bg-stone-950/80 backdrop-blur-[2px] flex flex-col items-center justify-center p-2 text-center z-10">
+                        <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider">
+                          Tidak Dimasak Hari Ini
+                        </span>
+                        <span className="text-[9px] font-bold text-stone-200 mt-0.5">
+                          (Hari {todayMalay})
+                        </span>
+                        {item.availableDays && item.availableDays.length > 0 && (
+                          <span className="text-[8px] text-stone-300 mt-1 line-clamp-1 px-1.5 py-0.5 bg-black/40 rounded">
+                            Dijual: {item.availableDays.join(', ')}
+                          </span>
+                        )}
+                      </div>
+                    ) : isOutOfStock ? (
+                      <span className="absolute inset-0 bg-black/60 flex items-center justify-center text-xs font-black text-white z-10">
+                        HABIS STOK
+                      </span>
+                    ) : isInactive ? (
+                      <span className="absolute inset-0 bg-stone-900/70 flex items-center justify-center text-xs font-black text-stone-300 z-10">
+                        TIDAK AKTIF
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <div className="p-3">
+                    <h4 className="font-bold text-xs text-stone-900 line-clamp-1 leading-snug">
+                      {item.name}
+                    </h4>
+                    <p className="text-[10px] text-stone-400 line-clamp-1 mt-0.5">
+                      {item.description}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="p-3">
-                  <h4 className="font-bold text-xs text-stone-900 line-clamp-1 leading-snug">
-                    {item.name}
-                  </h4>
-                  <p className="text-[10px] text-stone-400 line-clamp-1 mt-0.5">
-                    {item.description}
-                  </p>
+                <div className="p-3 pt-0 flex items-center justify-between">
+                  <span className="text-xs font-black text-amber-700">
+                    RM {item.sellingPrice.toFixed(2)}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={!canOrder}
+                    className={`p-1.5 rounded-lg transition font-black ${
+                      canOrder
+                        ? 'bg-amber-50 text-amber-800 group-hover:bg-amber-500 group-hover:text-neutral-950'
+                        : 'bg-stone-200 text-stone-400 cursor-not-allowed'
+                    }`}
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-              </div>
 
-              <div className="p-3 pt-0 flex items-center justify-between">
-                <span className="text-xs font-black text-amber-700">
-                  RM {item.sellingPrice.toFixed(2)}
-                </span>
-                <button
-                  type="button"
-                  className="p-1.5 rounded-lg bg-amber-50 text-amber-800 group-hover:bg-amber-500 group-hover:text-neutral-950 transition font-black"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
               </div>
-
-            </div>
-          ))}
+            );
+          })}
         </div>
 
       </div>

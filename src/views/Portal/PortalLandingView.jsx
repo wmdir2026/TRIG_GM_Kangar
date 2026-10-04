@@ -98,7 +98,7 @@ export const PortalLandingView = () => {
 
         <div className="relative z-10 max-w-3xl mx-auto space-y-4">
           
-          {/* Logo & Sub-tag with TechByte & Pasta Cafe Above TRIG GIATMARA Kangar */}
+          {/* Logo & Sub-tag with TechByte & Felìce Caffé Above TRIG GIATMARA Kangar */}
           <div className="flex flex-col items-center gap-3">
             <div className="bg-white p-3 sm:p-4 rounded-3xl shadow-xl inline-flex items-center justify-center">
               <img
@@ -110,7 +110,7 @@ export const PortalLandingView = () => {
             </div>
             <div className="text-center space-y-1">
               <h2 className="text-xl sm:text-2xl font-black text-amber-400 font-['Cabinet_Grotesk',sans-serif] tracking-wider uppercase">
-                TECHBYTE & PASTA CAFE
+                TECHBYTE & FELÌCE CAFFÉ
               </h2>
               <p className="text-xs sm:text-sm font-extrabold text-white tracking-widest uppercase">
                 TRIG GIATMARA KANGAR
@@ -131,7 +131,7 @@ export const PortalLandingView = () => {
             <button
               onClick={() => switchSystemMode('MAIN')}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-stone-950 font-black text-xs uppercase tracking-wider shadow-lg transition-transform hover:scale-105 cursor-pointer"
-              title="Buka Menu Paling Utama TechByte & Pasta Cafe"
+              title="Buka Menu Paling Utama TechByte & Felìce Caffé"
             >
               <span>🍽️📱</span>
               <span>Menu Paling Utama (Pelanggan)</span>

@@ -57,7 +57,7 @@ export const TechByteLandingView = () => {
       setCurrentUser(customerUser);
     }
     setCurrentTab('customer-order');
-    showToast('Selamat datang ke Menu Tempahan Makanan Café TechByte & Pasta!', 'info');
+    showToast('Selamat datang ke Menu Tempahan Makanan Café TechByte & Felìce Caffé!', 'info');
   };
 
   // Handle direct navigation to Customer Smartphone Repair Tracker (PELANGGAN)
@@ -147,7 +147,7 @@ export const TechByteLandingView = () => {
             <div className="relative group transform hover:scale-[1.02] transition-transform duration-300">
               <img
                 src={woodSignImg}
-                alt="TECHBYTE & PASTA CAFE"
+                alt="TECHBYTE & FELÌCE CAFFÉ"
                 className="w-full max-w-[480px] sm:max-w-[540px] h-auto object-contain rounded-2xl shadow-2xl drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]"
               />
             </div>

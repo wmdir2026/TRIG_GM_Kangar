@@ -27,7 +27,8 @@ import {
   Smartphone,
   ChevronRight,
   ArrowLeft,
-  Sparkles
+  Sparkles,
+  Calendar
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -45,8 +46,12 @@ export const CustomerPhoneApp = () => {
     showToast,
     switchSystemMode,
     setCurrentTab,
-    syncStatus
+    syncStatus,
+    isMenuItemAvailableToday,
+    getCurrentDayMalay
   } = useApp();
+
+  const todayMalay = getCurrentDayMalay ? getCurrentDayMalay() : 'Hari Ini';
 
   const [tableId, setTableId] = useState(selectedTableForCustomer || 'M05');
   const [orderType, setOrderType] = useState('DINE_IN');
@@ -79,6 +84,11 @@ export const CustomerPhoneApp = () => {
   const grandTotal = subtotal;
 
   const handleAddToCart = (item) => {
+    if (isMenuItemAvailableToday && !isMenuItemAvailableToday(item)) {
+      showToast(`Maaf, hidangan "${item.name}" tidak dimasak/dijual pada hari ${todayMalay}.`, 'warning');
+      return;
+    }
+
     if (item.status === 'OUT OF STOCK') {
       showToast('Maaf, item ini telah habis stok.', 'warning');
       return;
@@ -195,7 +205,7 @@ export const CustomerPhoneApp = () => {
 
           <div>
             <span className="text-xs font-black text-amber-400 block leading-tight tracking-wide uppercase">
-              TECHBYTE & PASTA CAFE
+              TECHBYTE & FELÌCE CAFFÉ
             </span>
             <span className="text-[10px] font-bold text-slate-400 block leading-none">
               Aplikasi Pelanggan (Android Phone)
@@ -268,6 +278,11 @@ export const CustomerPhoneApp = () => {
 
           {/* Category Chips (Horizontal Scroll) */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black whitespace-nowrap bg-amber-500/15 border border-amber-500/40 text-amber-300 shrink-0">
+              <Calendar className="w-3.5 h-3.5 text-amber-400" />
+              <span>Hari Ini: {todayMalay}</span>
+            </div>
+
             <button
               onClick={() => setSelectedCategory('ALL')}
               className={`px-3.5 py-1.5 rounded-full text-xs font-black whitespace-nowrap transition ${
@@ -297,25 +312,47 @@ export const CustomerPhoneApp = () => {
           <div className="space-y-3">
             {filteredMenu.map(item => {
               const qtyInCart = getItemCartQty(item.id);
+              const availableToday = isMenuItemAvailableToday ? isMenuItemAvailableToday(item) : true;
               const isOutOfStock = item.status === 'OUT OF STOCK';
+              const isInactive = item.status === 'INACTIVE';
+              const canOrder = availableToday && !isOutOfStock && !isInactive;
 
               return (
                 <div
                   key={item.id}
-                  onClick={() => !isOutOfStock && handleAddToCart(item)}
+                  onClick={() => canOrder && handleAddToCart(item)}
                   className={`bg-slate-900 rounded-2xl p-3 border transition flex items-center justify-between gap-3 shadow-md ${
-                    qtyInCart > 0 ? 'border-amber-500 bg-slate-900/90' : 'border-slate-800 hover:border-slate-700'
-                  } ${isOutOfStock ? 'opacity-50' : 'active:scale-[0.98]'}`}
+                    qtyInCart > 0
+                      ? 'border-amber-500 bg-slate-900/90'
+                      : canOrder
+                      ? 'border-slate-800 hover:border-slate-700'
+                      : 'border-slate-800/60 bg-slate-950/70 opacity-60 cursor-not-allowed'
+                  } ${canOrder ? 'active:scale-[0.98] cursor-pointer' : ''}`}
                 >
                   <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-slate-950 shrink-0">
                     <img
                       src={item.image}
                       alt={item.name}
-                      className="w-full h-full object-cover"
+                      className={`w-full h-full object-cover transition ${canOrder ? '' : 'grayscale-[40%]'}`}
                       onError={(e) => {
                         e.currentTarget.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=80";
                       }}
                     />
+                    {!availableToday ? (
+                      <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-[1px] flex flex-col items-center justify-center p-1 text-center">
+                        <span className="text-[8px] font-black text-amber-400 uppercase tracking-wider">
+                          Tidak Dijual
+                        </span>
+                        <span className="text-[7px] font-bold text-slate-300">
+                          Hari {todayMalay}
+                        </span>
+                      </div>
+                    ) : isOutOfStock ? (
+                      <div className="absolute inset-0 bg-black/75 flex items-center justify-center text-[9px] font-black text-rose-300">
+                        HABIS STOK
+                      </div>
+                    ) : null}
+
                     {qtyInCart > 0 && (
                       <span className="absolute bottom-1 right-1 bg-emerald-500 text-slate-950 text-[10px] font-black px-1.5 py-0.2 rounded-md shadow-md">
                         {qtyInCart}x
@@ -324,9 +361,16 @@ export const CustomerPhoneApp = () => {
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider block">
-                      {item.category}
-                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider">
+                        {item.category}
+                      </span>
+                      {!availableToday && (
+                        <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                          Tidak Dimasak Hari {todayMalay}
+                        </span>
+                      )}
+                    </div>
                     <h4 className="font-black text-xs text-white truncate mt-0.5">
                       {item.name}
                     </h4>
@@ -354,20 +398,24 @@ export const CustomerPhoneApp = () => {
                         <button
                           type="button"
                           onClick={() => handleAddToCart(item)}
-                          className="w-6 h-6 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center font-black"
+                          disabled={!canOrder}
+                          className="w-6 h-6 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center font-black disabled:opacity-40"
                         >
                           <Plus className="w-3 h-3" />
                         </button>
                       </div>
-                    ) : (
+                    ) : canOrder ? (
                       <button
                         type="button"
                         onClick={() => handleAddToCart(item)}
-                        disabled={isOutOfStock}
                         className="w-9 h-9 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black flex items-center justify-center shadow-md transition"
                       >
                         <Plus className="w-4 h-4" />
                       </button>
+                    ) : (
+                      <div className="px-2 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-[9px] font-bold text-slate-500 text-center">
+                        {!availableToday ? 'Off Hari Ini' : 'Habis'}
+                      </div>
                     )}
                   </div>
                 </div>

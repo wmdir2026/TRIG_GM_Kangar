@@ -24,7 +24,8 @@ import {
   Info,
   CheckCircle2,
   RefreshCw,
-  Sparkles
+  Sparkles,
+  Calendar
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -40,8 +41,12 @@ export const CustomerTableOrder = () => {
     selectedTableForCustomer,
     openReceipt,
     showToast,
-    switchSystemMode
+    switchSystemMode,
+    isMenuItemAvailableToday,
+    getCurrentDayMalay
   } = useApp();
+
+  const todayMalay = getCurrentDayMalay ? getCurrentDayMalay() : 'Hari Ini';
 
   const [tableId, setTableId] = useState(selectedTableForCustomer || 'M05');
   const [orderType, setOrderType] = useState('DINE_IN');
@@ -72,6 +77,11 @@ export const CustomerTableOrder = () => {
 
   // Add to cart or increment quantity
   const handleAddToCart = (item) => {
+    if (isMenuItemAvailableToday && !isMenuItemAvailableToday(item)) {
+      showToast(`Maaf, hidangan "${item.name}" tidak dimasak/dijual pada hari ${todayMalay}.`, 'warning');
+      return;
+    }
+
     if (item.status === 'OUT OF STOCK') {
       showToast('Maaf, item ini telah habis stok.', 'warning');
       return;
@@ -202,7 +212,7 @@ export const CustomerTableOrder = () => {
           <div>
             <div className="flex flex-col">
               <span className="text-base sm:text-lg font-black text-amber-400 font-['Cabinet_Grotesk',sans-serif] tracking-wide uppercase">
-                TECHBYTE & PASTA CAFE
+                TECHBYTE & FELÌCE CAFFÉ
               </span>
               <div className="flex items-center gap-2">
                 <span className="text-xs sm:text-sm font-extrabold text-white tracking-tight">
@@ -350,6 +360,11 @@ export const CustomerTableOrder = () => {
             </div>
 
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+              <div className="flex items-center gap-1.5 px-3 py-2 rounded-2xl text-xs font-black whitespace-nowrap bg-amber-500/15 border border-amber-500/40 text-amber-300 shrink-0">
+                <Calendar className="w-3.5 h-3.5 text-amber-400" />
+                <span>Hari Ini: {todayMalay}</span>
+              </div>
+
               <button
                 onClick={() => setSelectedCategory('ALL')}
                 className={`px-4 py-2 rounded-2xl text-xs font-black transition whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
@@ -392,12 +407,21 @@ export const CustomerTableOrder = () => {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
                 {bestsellers.map(item => {
                   const qtyInCart = getItemCartQty(item.id);
+                  const availableToday = isMenuItemAvailableToday ? isMenuItemAvailableToday(item) : true;
+                  const isOutOfStock = item.status === 'OUT OF STOCK';
+                  const isInactive = item.status === 'INACTIVE';
+                  const canOrder = availableToday && !isOutOfStock && !isInactive;
+
                   return (
                     <div
                       key={item.id}
-                      onClick={() => handleAddToCart(item)}
-                      className={`bg-slate-900 rounded-3xl border p-3 flex flex-col justify-between transition-all hover:scale-[1.02] cursor-pointer group shadow-lg relative overflow-hidden ${
-                        qtyInCart > 0 ? 'border-amber-500 shadow-amber-500/10' : 'border-slate-800 hover:border-amber-500/60'
+                      onClick={() => canOrder && handleAddToCart(item)}
+                      className={`bg-slate-900 rounded-3xl border p-3 flex flex-col justify-between transition-all group shadow-lg relative overflow-hidden ${
+                        qtyInCart > 0
+                          ? 'border-amber-500 shadow-amber-500/10'
+                          : canOrder
+                          ? 'border-slate-800 hover:border-amber-500/60 hover:scale-[1.02] cursor-pointer'
+                          : 'border-slate-800/60 bg-slate-950/70 opacity-60 cursor-not-allowed'
                       }`}
                     >
                       <div className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-500 text-slate-950 shadow-sm">
@@ -416,11 +440,25 @@ export const CustomerTableOrder = () => {
                           <img
                             src={item.image}
                             alt={item.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                            className={`w-full h-full object-cover transition duration-300 ${canOrder ? 'group-hover:scale-105' : 'grayscale-[35%]'}`}
                             onError={(e) => {
                               e.currentTarget.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=80";
                             }}
                           />
+                          {!availableToday ? (
+                            <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-[1px] flex flex-col items-center justify-center p-1.5 text-center">
+                              <span className="text-[8px] font-black text-amber-400 uppercase tracking-wider">
+                                Tidak Dijual
+                              </span>
+                              <span className="text-[7px] font-bold text-slate-300 mt-0.5">
+                                Hari {todayMalay}
+                              </span>
+                            </div>
+                          ) : isOutOfStock ? (
+                            <div className="absolute inset-0 bg-black/75 flex items-center justify-center text-[9px] font-black text-rose-300">
+                              HABIS STOK
+                            </div>
+                          ) : null}
                         </div>
 
                         <h3 className="font-black text-xs text-white line-clamp-1 group-hover:text-amber-400 transition">
@@ -437,8 +475,13 @@ export const CustomerTableOrder = () => {
                         </span>
                         <button
                           type="button"
-                          className="w-6 h-6 rounded-xl bg-amber-500 group-hover:bg-amber-400 text-slate-950 font-black flex items-center justify-center transition shadow-xs"
-                          title="Tambah ke Pesanan"
+                          disabled={!canOrder}
+                          className={`w-6 h-6 rounded-xl font-black flex items-center justify-center transition shadow-xs ${
+                            canOrder
+                              ? 'bg-amber-500 group-hover:bg-amber-400 text-slate-950 cursor-pointer'
+                              : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                          }`}
+                          title={canOrder ? "Tambah ke Pesanan" : "Tidak dijual hari ini"}
                         >
                           <Plus className="w-3.5 h-3.5" />
                         </button>
@@ -465,24 +508,29 @@ export const CustomerTableOrder = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {filteredMenu.map(item => {
                 const qtyInCart = getItemCartQty(item.id);
+                const availableToday = isMenuItemAvailableToday ? isMenuItemAvailableToday(item) : true;
                 const isOutOfStock = item.status === 'OUT OF STOCK';
+                const isInactive = item.status === 'INACTIVE';
+                const canOrder = availableToday && !isOutOfStock && !isInactive;
 
                 return (
                   <div
                     key={item.id}
-                    onClick={() => !isOutOfStock && handleAddToCart(item)}
-                    className={`bg-slate-900 rounded-3xl border overflow-hidden flex flex-col justify-between transition-all shadow-md group cursor-pointer ${
+                    onClick={() => canOrder && handleAddToCart(item)}
+                    className={`bg-slate-900 rounded-3xl border overflow-hidden flex flex-col justify-between transition-all shadow-md group ${
                       qtyInCart > 0
                         ? 'border-amber-500 ring-1 ring-amber-500/50'
-                        : 'border-slate-800 hover:border-amber-500/50'
-                    } ${isOutOfStock ? 'opacity-60 cursor-not-allowed' : 'hover:scale-[1.01]'}`}
+                        : canOrder
+                        ? 'border-slate-800 hover:border-amber-500/50 hover:scale-[1.01] cursor-pointer'
+                        : 'border-slate-800/60 bg-slate-950/70 opacity-65 cursor-not-allowed'
+                    }`}
                   >
                     <div>
                       <div className="relative h-36 w-full bg-slate-950 overflow-hidden">
                         <img
                           src={item.image}
                           alt={item.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                          className={`w-full h-full object-cover transition duration-300 ${canOrder ? 'group-hover:scale-105' : 'grayscale-[35%]'}`}
                           onError={(e) => {
                             e.currentTarget.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=80";
                           }}
@@ -494,6 +542,26 @@ export const CustomerTableOrder = () => {
                           RM {item.sellingPrice.toFixed(2)}
                         </span>
 
+                        {!availableToday ? (
+                          <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-[1px] flex flex-col items-center justify-center p-2 text-center z-10">
+                            <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider">
+                              Tidak Dimasak Hari Ini
+                            </span>
+                            <span className="text-[8px] font-bold text-slate-300 mt-0.5">
+                              (Hari {todayMalay})
+                            </span>
+                            {item.availableDays && item.availableDays.length > 0 && (
+                              <span className="text-[8px] text-slate-400 mt-1 line-clamp-1 px-1.5 py-0.5 bg-black/40 rounded">
+                                Dijual: {item.availableDays.join(', ')}
+                              </span>
+                            )}
+                          </div>
+                        ) : isOutOfStock ? (
+                          <div className="absolute inset-0 bg-black/75 flex items-center justify-center text-xs font-black text-rose-300 z-10">
+                            HABIS STOK
+                          </div>
+                        ) : null}
+
                         {qtyInCart > 0 && (
                           <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded-xl text-[10px] font-black bg-emerald-500 text-slate-950 shadow-lg flex items-center gap-1 animate-pulse">
                             <CheckCircle2 className="w-3 h-3" />
@@ -503,9 +571,16 @@ export const CustomerTableOrder = () => {
                       </div>
 
                       <div className="p-4">
-                        <h3 className="font-black text-sm text-white leading-snug group-hover:text-amber-400 transition">
-                          {item.name}
-                        </h3>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-black text-sm text-white leading-snug group-hover:text-amber-400 transition">
+                            {item.name}
+                          </h3>
+                          {!availableToday && (
+                            <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                              Off Hari {todayMalay}
+                            </span>
+                          )}
+                        </div>
                         <p className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">
                           {item.description}
                         </p>
@@ -532,7 +607,8 @@ export const CustomerTableOrder = () => {
                           <button
                             type="button"
                             onClick={() => handleAddToCart(item)}
-                            className="w-8 h-8 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center justify-center font-black transition cursor-pointer"
+                            disabled={!canOrder}
+                            className="w-8 h-8 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center justify-center font-black transition cursor-pointer disabled:opacity-40"
                             title="Tambah 1 Lagi"
                           >
                             <Plus className="w-3.5 h-3.5" />
@@ -542,15 +618,21 @@ export const CustomerTableOrder = () => {
                         <button
                           type="button"
                           onClick={() => handleAddToCart(item)}
-                          disabled={isOutOfStock}
-                          className={`w-full py-2.5 rounded-2xl text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                            isOutOfStock
-                              ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                              : 'bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 shadow-md shadow-amber-500/20'
+                          disabled={!canOrder}
+                          className={`w-full py-2.5 rounded-2xl text-xs font-black transition flex items-center justify-center gap-1.5 ${
+                            canOrder
+                              ? 'bg-linear-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 shadow-md shadow-amber-500/20 cursor-pointer'
+                              : 'bg-slate-800 text-slate-500 cursor-not-allowed'
                           }`}
                         >
                           <Plus className="w-4 h-4" />
-                          <span>{isOutOfStock ? 'Habis Stok' : 'TAMBAH KE PESANAN'}</span>
+                          <span>
+                            {!availableToday
+                              ? `TIDAK DIJUAL HARI INI (${todayMalay})`
+                              : isOutOfStock
+                              ? 'HABIS STOK'
+                              : 'TAMBAH KE PESANAN'}
+                          </span>
                         </button>
                       )}
                     </div>

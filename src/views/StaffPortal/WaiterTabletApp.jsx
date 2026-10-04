@@ -30,7 +30,8 @@ import {
   ArrowLeft,
   Users,
   BellRing,
-  LogOut
+  LogOut,
+  Calendar
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -50,8 +51,12 @@ export const WaiterTabletApp = () => {
     currentUser,
     syncStatus,
     realtimeSync,
-    logoutStaff
+    logoutStaff,
+    isMenuItemAvailableToday,
+    getCurrentDayMalay
   } = useApp();
+
+  const todayMalay = getCurrentDayMalay ? getCurrentDayMalay() : 'Hari Ini';
 
   const [activeTableId, setActiveTableId] = useState(selectedTableForCustomer || 'M01');
   const [orderType, setOrderType] = useState('DINE_IN');
@@ -86,6 +91,11 @@ export const WaiterTabletApp = () => {
 
   // Add item to active table's ticket
   const handleAddToTicket = (item) => {
+    if (isMenuItemAvailableToday && !isMenuItemAvailableToday(item)) {
+      showToast(`Item "${item.name}" tidak dimasak/dijual pada hari ${todayMalay}.`, 'warning');
+      return;
+    }
+
     if (item.status === 'OUT OF STOCK') {
       showToast('Item ini habis stok.', 'warning');
       return;
@@ -201,7 +211,7 @@ export const WaiterTabletApp = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-black text-amber-400 uppercase tracking-wide">
-                TECHBYTE & PASTA CAFE
+                TECHBYTE & FELÌCE CAFFÉ
               </span>
               <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-black flex items-center gap-1">
                 <Tablet className="w-3 h-3" />
@@ -403,6 +413,11 @@ export const WaiterTabletApp = () => {
 
           {/* Quick Category Chips */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none shrink-0">
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-black whitespace-nowrap bg-amber-500/15 border border-amber-500/40 text-amber-300 shrink-0">
+              <Calendar className="w-3 h-3 text-amber-400" />
+              <span>Hari Ini: {todayMalay}</span>
+            </div>
+
             <button
               onClick={() => setSelectedCategory('ALL')}
               className={`px-3 py-1 rounded-xl text-xs font-black whitespace-nowrap transition ${
@@ -433,37 +448,63 @@ export const WaiterTabletApp = () => {
             {filteredMenu.map(item => {
               const inTicket = ticketCart.find(i => i.id === item.id);
               const qty = inTicket ? inTicket.quantity : 0;
+              const availableToday = isMenuItemAvailableToday ? isMenuItemAvailableToday(item) : true;
               const isOutOfStock = item.status === 'OUT OF STOCK';
+              const isInactive = item.status === 'INACTIVE';
+              const canOrder = availableToday && !isOutOfStock && !isInactive;
 
               return (
                 <div
                   key={item.id}
-                  onClick={() => !isOutOfStock && handleAddToTicket(item)}
-                  className={`bg-slate-950 rounded-2xl p-2.5 border transition cursor-pointer flex flex-col justify-between active:scale-[0.98] ${
+                  onClick={() => canOrder && handleAddToTicket(item)}
+                  className={`bg-slate-950 rounded-2xl p-2.5 border transition flex flex-col justify-between ${
                     qty > 0
                       ? 'border-amber-400 bg-amber-500/10'
-                      : 'border-slate-800 hover:border-slate-700'
-                  } ${isOutOfStock ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      : canOrder
+                      ? 'border-slate-800 hover:border-slate-700 cursor-pointer active:scale-[0.98]'
+                      : 'border-slate-800/60 bg-slate-950/60 opacity-60 cursor-not-allowed'
+                  }`}
                 >
                   <div className="flex items-start gap-2">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-14 h-14 rounded-xl object-cover shrink-0 bg-slate-900"
-                      onError={(e) => {
-                        e.currentTarget.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=80";
-                      }}
-                    />
+                    <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-slate-900">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className={`w-full h-full object-cover ${canOrder ? '' : 'grayscale-[40%]'}`}
+                        onError={(e) => {
+                          e.currentTarget.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=80";
+                        }}
+                      />
+                      {!availableToday && (
+                        <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-[1px] flex flex-col items-center justify-center p-0.5 text-center">
+                          <span className="text-[7px] font-black text-amber-400 uppercase leading-none">
+                            Off
+                          </span>
+                          <span className="text-[6px] font-bold text-slate-300 leading-none mt-0.5">
+                            {todayMalay}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
                     <div className="flex-1 min-w-0">
-                      <span className="text-[9px] font-black text-amber-400 uppercase tracking-wider block">
-                        {item.category}
-                      </span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[9px] font-black text-amber-400 uppercase tracking-wider block truncate">
+                          {item.category}
+                        </span>
+                      </div>
                       <h4 className="font-black text-xs text-white truncate leading-tight mt-0.5">
                         {item.name}
                       </h4>
-                      <span className="font-black text-xs text-amber-400 block mt-1">
-                        RM {item.sellingPrice.toFixed(2)}
-                      </span>
+                      {!availableToday ? (
+                        <span className="text-[8px] font-bold text-amber-300/80 block mt-0.5">
+                          Tidak Dijual Hari Ini
+                        </span>
+                      ) : (
+                        <span className="font-black text-xs text-amber-400 block mt-1">
+                          RM {item.sellingPrice.toFixed(2)}
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -474,13 +515,23 @@ export const WaiterTabletApp = () => {
                         <Check className="w-3 h-3" />
                         <span>{qty} dlm tiket</span>
                       </span>
-                    ) : (
+                    ) : canOrder ? (
                       <span className="text-[10px] text-slate-500 font-bold">Tekan untuk tambah</span>
+                    ) : (
+                      <span className="text-[9px] text-slate-500 font-bold">
+                        {!availableToday ? `Off Hari ${todayMalay}` : isOutOfStock ? 'Habis Stok' : 'Tidak Aktif'}
+                      </span>
                     )}
 
-                    <div className="w-6 h-6 rounded-lg bg-amber-500 text-slate-950 font-black flex items-center justify-center text-xs shadow-xs">
-                      <Plus className="w-3.5 h-3.5" />
-                    </div>
+                    {canOrder ? (
+                      <div className="w-6 h-6 rounded-lg bg-amber-500 text-slate-950 font-black flex items-center justify-center text-xs shadow-xs">
+                        <Plus className="w-3.5 h-3.5" />
+                      </div>
+                    ) : (
+                      <div className="px-1.5 py-0.5 rounded bg-slate-900 text-slate-600 text-[8px] font-bold">
+                        Off
+                      </div>
+                    )}
                   </div>
                 </div>
               );

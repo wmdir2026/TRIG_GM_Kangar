@@ -69,7 +69,7 @@ export const LoginPage = ({ onLoginSuccess }) => {
                 Program Keusahawanan TRIG
               </span>
               <h1 className="text-xl sm:text-2xl font-black tracking-tight text-amber-400 font-['Cabinet_Grotesk',sans-serif] mt-2">
-                TECHBYTE & PASTA CAFE
+                TECHBYTE & FELÌCE CAFFÉ
               </h1>
               <p className="text-sm font-extrabold text-white tracking-wide">
                 TRIG GIATMARA KANGAR

@@ -70,8 +70,8 @@ export const AppProvider = ({ children }) => {
       const saved = localStorage.getItem('trig_settings');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (!parsed.businessName || parsed.businessName === "TRIG GIATMARA KANGAR") {
-          parsed.businessName = "TECHBYTE & PASTA CAFE";
+        if (!parsed.businessName || parsed.businessName === "TRIG GIATMARA KANGAR" || parsed.businessName.includes("PASTA CAFE") || parsed.businessName.includes("PASTA CAFÉ")) {
+          parsed.businessName = "TECHBYTE & FELÌCE CAFFÉ";
           parsed.subName = "TRIG GIATMARA KANGAR";
         }
         return parsed;
@@ -416,28 +416,133 @@ export const AppProvider = ({ children }) => {
   };
 
   // ================= CAFÉ MODULE ACTIONS ================= //
+  // Constants and Helpers for Menu Scheduling
+  const DAYS_OF_WEEK = ['Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu', 'Ahad'];
+
+  const getCurrentDayMalay = () => {
+    // 0 = Ahad, 1 = Isnin, 2 = Selasa, 3 = Rabu, 4 = Khamis, 5 = Jumaat, 6 = Sabtu
+    const map = ['Ahad', 'Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu'];
+    return map[new Date().getDay()];
+  };
+
+  const isMenuItemAvailableToday = (item) => {
+    if (!item) return false;
+    if (item.status === 'INACTIVE') return false;
+    if (item.status === 'OUT OF STOCK') return false;
+    const today = getCurrentDayMalay();
+    // Default: jika tiada availableDays atau kosong, ia dijual setiap hari
+    if (!item.availableDays || !Array.isArray(item.availableDays) || item.availableDays.length === 0) {
+      return true;
+    }
+    return item.availableDays.includes(today);
+  };
+
+  // Only Super Admin and Manager Cafe can add menu items
   const addMenuItem = (item) => {
+    const isSuperAdmin = currentUser?.role === 'SUPER ADMIN';
+    const isCafeManager =
+      currentUser?.role === 'MANAGER CAFE' ||
+      currentUser?.role === 'MANAGER' ||
+      (currentUser?.role && currentUser.role.includes('CAFE') && currentUser.role.includes('MANAGER'));
+
+    if (!isSuperAdmin && !isCafeManager) {
+      showToast('Akses Ditolak: Hanya Super Admin dan Manager Café dibenarkan menambah item menu makanan/minuman.', 'error');
+      return null;
+    }
+
+    const cost = parseFloat(item.costPrice) || 0;
+    const selling = parseFloat(item.sellingPrice) || 0;
+    const profit = Math.max(0, selling - cost);
+
     const newItem = {
       ...item,
-      id: `MENU-${String(menu.length + 1).padStart(3, '0')}`,
-      status: item.status || 'AVAILABLE'
+      id: item.id || `MENU-${String(menu.length + 1).padStart(3, '0')}`,
+      costPrice: cost,
+      sellingPrice: selling,
+      grossProfit: profit,
+      status: item.status || 'AVAILABLE',
+      availableDays: item.availableDays && item.availableDays.length > 0
+        ? item.availableDays
+        : ['Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu', 'Ahad'],
+      createdAt: new Date().toISOString(),
+      createdBy: currentUser ? `${currentUser.name} (${currentUser.role})` : 'Manager Café'
     };
+
     setMenu(prev => [newItem, ...prev]);
-    logAudit(`Menambah item menu baru: ${newItem.name}`, 'CAFÉ');
-    showToast('Menu makanan berjaya ditambah!');
+    logAudit(`Menambah item menu baru: "${newItem.name}" (Kos: RM ${cost.toFixed(2)}, Jual: RM ${selling.toFixed(2)}, Untung: RM ${profit.toFixed(2)}) oleh ${currentUser?.name || 'Admin'}`, 'CAFÉ');
+    showToast(`Menu "${newItem.name}" berjaya ditambah! (Untung: RM ${profit.toFixed(2)})`, 'success');
+    return newItem;
   };
 
+  // Only Super Admin and Manager Cafe can update menu items
   const updateMenuItem = (id, updated) => {
-    setMenu(prev => prev.map(m => m.id === id ? { ...m, ...updated } : m));
-    logAudit(`Mengemas kini menu: ${updated.name || id}`, 'CAFÉ');
-    showToast('Menu berjaya dikemaskini.');
+    const isSuperAdmin = currentUser?.role === 'SUPER ADMIN';
+    const isCafeManager =
+      currentUser?.role === 'MANAGER CAFE' ||
+      currentUser?.role === 'MANAGER' ||
+      (currentUser?.role && currentUser.role.includes('CAFE') && currentUser.role.includes('MANAGER'));
+
+    if (!isSuperAdmin && !isCafeManager) {
+      showToast('Akses Ditolak: Hanya Super Admin dan Manager Café dibenarkan mengemaskini menu makanan.', 'error');
+      return;
+    }
+
+    setMenu(prev => prev.map(m => {
+      if (m.id === id) {
+        const cost = updated.costPrice !== undefined ? parseFloat(updated.costPrice) : m.costPrice;
+        const selling = updated.sellingPrice !== undefined ? parseFloat(updated.sellingPrice) : m.sellingPrice;
+        const profit = Math.max(0, selling - cost);
+        return {
+          ...m,
+          ...updated,
+          costPrice: cost,
+          sellingPrice: selling,
+          grossProfit: profit
+        };
+      }
+      return m;
+    }));
+
+    logAudit(`Mengemas kini menu: ${updated.name || id} oleh ${currentUser?.name || 'Admin'}`, 'CAFÉ');
+    showToast('Menu makanan berjaya dikemaskini.');
   };
 
+  // Only Super Admin and Manager Cafe can delete menu items
   const deleteMenuItem = (id) => {
+    const isSuperAdmin = currentUser?.role === 'SUPER ADMIN';
+    const isCafeManager =
+      currentUser?.role === 'MANAGER CAFE' ||
+      currentUser?.role === 'MANAGER' ||
+      (currentUser?.role && currentUser.role.includes('CAFE') && currentUser.role.includes('MANAGER'));
+
+    if (!isSuperAdmin && !isCafeManager) {
+      showToast('Akses Ditolak: Hanya Super Admin dan Manager Café dibenarkan memadam menu makanan.', 'error');
+      return;
+    }
+
     const item = menu.find(m => m.id === id);
     setMenu(prev => prev.filter(m => m.id !== id));
-    logAudit(`Memadam menu: ${item ? item.name : id}`, 'CAFÉ');
-    showToast('Menu telah dipadam.', 'info');
+    logAudit(`Memadam menu: ${item ? item.name : id} oleh ${currentUser?.name || 'Admin'}`, 'CAFÉ');
+    showToast(`Menu ${item ? `"${item.name}"` : id} telah dipadam.`, 'info');
+  };
+
+  // Manager Cafe specific action: Set which days an item is sold / cooked
+  const updateMenuSchedule = (id, availableDays) => {
+    const isSuperAdmin = currentUser?.role === 'SUPER ADMIN';
+    const isCafeManager =
+      currentUser?.role === 'MANAGER CAFE' ||
+      currentUser?.role === 'MANAGER' ||
+      (currentUser?.role && currentUser.role.includes('CAFE') && currentUser.role.includes('MANAGER'));
+
+    if (!isCafeManager && !isSuperAdmin) {
+      showToast('Akses Ditolak: Hanya Manager Café yang mempunyai kuasa memilih hari jualan menu ini.', 'error');
+      return;
+    }
+
+    const item = menu.find(m => m.id === id);
+    setMenu(prev => prev.map(m => m.id === id ? { ...m, availableDays } : m));
+    logAudit(`Manager Café (${currentUser?.name || 'Manager'}) menetapkan jadual jualan "${item?.name || id}": [${availableDays.join(', ')}]`, 'CAFÉ');
+    showToast(`Jadual jualan "${item?.name || id}" berjaya dikemaskini!`, 'success');
   };
 
   const addTable = (tbl) => {
@@ -1506,6 +1611,10 @@ export const AppProvider = ({ children }) => {
     addMenuItem,
     updateMenuItem,
     deleteMenuItem,
+    updateMenuSchedule,
+    DAYS_OF_WEEK,
+    getCurrentDayMalay,
+    isMenuItemAvailableToday,
     addTable,
     updateTable,
     deleteTable,

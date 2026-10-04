@@ -3,7 +3,7 @@ import giatmaraLogo from '../assets/logo.png';
 // Initial Seed Data for TRIG GIATMARA KANGAR Digital Business Management System
 
 export const INITIAL_SETTINGS = {
-  businessName: "TECHBYTE & PASTA CAFE",
+  businessName: "TECHBYTE & FELÌCE CAFFÉ",
   subName: "TRIG GIATMARA KANGAR",
   tagline: "Digital Business Management System",
   institution: "GIATMARA Kangar, Perlis",

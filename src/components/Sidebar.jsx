@@ -196,7 +196,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
           </div>
           <div className="mt-3">
             <h1 className="text-amber-400 font-black text-sm tracking-tight leading-tight">
-              TECHBYTE & PASTA CAFE
+              TECHBYTE & FELÌCE CAFFÉ
             </h1>
             <p className="text-white font-extrabold text-xs tracking-tight leading-tight mt-0.5">
               TRIG GIATMARA KANGAR

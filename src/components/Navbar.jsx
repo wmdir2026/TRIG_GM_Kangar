@@ -104,7 +104,7 @@ export const Navbar = ({ onToggleSidebar }) => {
                   <span className={`font-black text-xs sm:text-sm tracking-tight leading-tight uppercase ${
                     activeSystemMode !== 'MANAGEMENT' ? 'text-amber-400' : 'text-amber-600'
                   }`}>
-                    TECHBYTE & PASTA CAFE
+                    TECHBYTE & FELÌCE CAFFÉ
                   </span>
                   
                   {/* Active Module Indicator Badge (Staff vs Customer) */}
@@ -153,7 +153,7 @@ export const Navbar = ({ onToggleSidebar }) => {
                     className={`font-extrabold text-[11px] sm:text-xs tracking-tight leading-none text-left hover:underline ${
                       activeSystemMode !== 'MANAGEMENT' ? 'text-white' : 'text-slate-900'
                     }`}
-                    title="Klik untuk ke Menu Paling Utama TechByte & Pasta Cafe"
+                    title="Klik untuk ke Menu Paling Utama TechByte & Felìce Caffé"
                   >
                     TRIG GIATMARA KANGAR
                   </button>
@@ -179,7 +179,7 @@ export const Navbar = ({ onToggleSidebar }) => {
             <button
               onClick={() => switchSystemMode('MAIN')}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition duration-200 hover:scale-[1.02]"
-              title="Ke Menu Paling Utama TechByte & Pasta Cafe"
+              title="Ke Menu Paling Utama TechByte & Felìce Caffé"
             >
               <span>🍽️📱</span>
               <span>Menu Utama</span>

@@ -183,7 +183,7 @@ export const ReceiptModal = () => {
   };
 
   const handleCopyText = () => {
-    let text = `==============================\nTECHBYTE & PASTA CAFE\nTRIG GIATMARA KANGAR\n${settings.institution}\n==============================\n`;
+    let text = `==============================\nTECHBYTE & FELÌCE CAFFÉ\nTRIG GIATMARA KANGAR\n${settings.institution}\n==============================\n`;
     if (receiptData.type === 'REPAIR') {
       const jb = receiptData.job;
       text += `RESIT SERVIS BAIKI TELEFON\nNo. Resit: ${jb.receiptNo || jb.id}\nTarikh: ${new Date(jb.completedAt || jb.dateReceived).toLocaleString()}\nPelanggan: ${jb.customerName} (${jb.customerPhone})\nPeranti: ${jb.deviceBrand} ${jb.deviceModel}\nKerosakan: ${jb.damageType}\n------------------------------\n`;
@@ -286,7 +286,7 @@ export const ReceiptModal = () => {
                 />
               </div>
               <h2 className="font-black text-base sm:text-lg uppercase tracking-tight text-slate-950 mt-1">
-                TECHBYTE & PASTA CAFE
+                TECHBYTE & FELÌCE CAFFÉ
               </h2>
               <p className="text-[11px] font-black uppercase tracking-wider text-slate-700">
                 TRIG GIATMARA KANGAR

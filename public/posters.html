@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Koleksi Poster Iklan A4 - TECHBYTE & FELÌCE CAFFÉ GIATMARA KANGAR</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Cabinet+Grotesk:wght@800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .a4-page {
+      width: 210mm;
+      min-height: 297mm;
+      height: 297mm;
+      margin: 0 auto 24px auto;
+      background: white;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      page-break-after: always;
+    }
+
+    @media print {
+      body {
+        background: transparent !important;
+        padding: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .a4-page {
+        margin: 0 !important;
+        box-shadow: none !important;
+        page-break-after: always !important;
+        page-break-inside: avoid !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-900 py-8 text-slate-900">
+
+  <!-- Floating Control Bar (Hidden when Printing) -->
+  <div class="no-print fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-950/90 backdrop-blur-md border border-slate-700 px-6 py-3 rounded-full shadow-2xl flex items-center gap-4 text-white">
+    <div className="flex items-center gap-2">
+      <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+      <span className="font-extrabold text-sm tracking-wide">KOLEKSI POSTER A4 TECHBYTE & FELÌCE CAFFÉ GIATMARA</span>
+    </div>
+    <div class="h-4 w-[1px] bg-slate-700"></div>
+    <button onclick="window.print()" class="px-5 py-2 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 font-black text-xs uppercase tracking-wider rounded-full shadow-lg transition flex items-center gap-1.5 cursor-pointer">
+      🖨️ Cetak / Simpan PDF (A4)
+    </button>
+    <a href="./index.html" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-full transition">
+      ← Kembali ke Sistem
+    </a>
+  </div>
+
+  <div class="pt-12 flex flex-col items-center">
+
+    <!-- ========================================== -->
+    <!-- POSTER 1: REVOLUSI SISTEM POS DIGITAL (UTAMA) -->
+    <!-- ========================================== -->
+    <div class="a4-page bg-gradient-to-b from-slate-950 via-[#0a1428] to-slate-950 text-white p-10">
+      
+      <!-- Top Decorative Accent -->
+      <div class="absolute top-0 left-0 right-0 h-3 bg-gradient-to-r from-amber-500 via-red-600 to-blue-600"></div>
+
+      <!-- Header Section with Official GIATMARA Logo -->
+      <div class="flex items-center justify-between border-b border-white/10 pb-5">
+        <div class="bg-white px-5 py-3 rounded-2xl shadow-xl flex items-center justify-center">
+          <img src="./logo.png" alt="GIATMARA Malaysia" class="h-14 w-auto object-contain">
+        </div>
+        <div class="text-right">
+          <span class="inline-block px-3 py-1 bg-amber-500/20 border border-amber-400/40 text-amber-300 font-black text-[11px] rounded-full uppercase tracking-wider">
+            PROGRAM KEUSAHAWANAN TECHBYTE & FELÌCE CAFFÉ
+          </span>
+          <h2 class="text-lg font-black tracking-tight text-white mt-1">GIATMARA KANGAR, PERLIS</h2>
+        </div>
+      </div>
+
+      <!-- Hero Title -->
+      <div class="text-center my-auto space-y-3">
+        <span class="px-4 py-1.5 rounded-full bg-red-600/30 border border-red-500/50 text-red-300 text-xs font-black uppercase tracking-widest inline-block">
+          INOVASI DIGITAL PERNIAGAAN LATIHAN
+        </span>
+        <h1 class="text-4xl font-black leading-tight tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-amber-200">
+          TECHBYTE & FELÌCE CAFFÉ
+        </h1>
+        <h2 class="text-base font-extrabold text-amber-300 uppercase tracking-wide">
+          SISTEM POS & PENGURUSAN PERNIAGAAN DIGITAL BERSEPADU
+        </h2>
+        <p class="text-slate-300 text-xs max-w-xl mx-auto leading-relaxed">
+          Platform pintar yang memperkasa operasi jualan, inventori berpusat dan pemantauan perniagaan usahawan pelatih GIATMARA Kangar secara digital dan automatik.
+        </p>
+      </div>
+
+      <!-- Visual Graphic Mockup Showcase -->
+      <div class="relative rounded-2xl overflow-hidden shadow-2xl border-2 border-white/10 my-auto">
+        <img src="./posters/poster_overview.jpg" alt="Sistem POS TECHBYTE & FELÌCE CAFFÉ GIATMARA" class="w-full h-64 object-cover object-center">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
+        <div class="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs">
+          <span class="font-extrabold text-amber-300">⚡ Transaksi Pantas • Rekod Telus • 100% Digital</span>
+          <span class="bg-blue-600/80 px-2.5 py-0.5 rounded-full font-bold">Versi 2.6 Pro</span>
+        </div>
+      </div>
+
+      <!-- Two Core Operational Pillars -->
+      <div class="grid grid-cols-2 gap-4 my-auto">
+        <!-- Pillar 1: Cafe -->
+        <div class="p-4 rounded-2xl bg-gradient-to-br from-amber-950/40 to-slate-900/90 border border-amber-500/30 space-y-2">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">☕</span>
+            <h3 class="font-black text-amber-300 text-sm">1. FELÌCE CAFFÉ</h3>
+          </div>
+          <ul class="text-[11px] text-slate-300 space-y-1">
+            <li>✓ <strong>Imbas QR di Meja</strong> (Pesan dari Telefon Pintar)</li>
+            <li>✓ <strong>Kitchen Display Screen</strong> (Automasi Pesanan)</li>
+            <li>✓ <strong>Resit Thermal & Digital</strong> dengan QR Bayaran</li>
+          </ul>
+        </div>
+
+        <!-- Pillar 2: Repair -->
+        <div class="p-4 rounded-2xl bg-gradient-to-br from-blue-950/40 to-slate-900/90 border border-blue-500/30 space-y-2">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">📱</span>
+            <h3 class="font-black text-cyan-300 text-sm">2. TECHBYTE SMARTPHONE</h3>
+          </div>
+          <ul class="text-[11px] text-slate-300 space-y-1">
+            <li>✓ <strong>Penjejakan Status Job (REP-)</strong> Secara Live</li>
+            <li>✓ <strong>Diagnosis Multimeter & Mikroskop 4K</strong></li>
+            <li>✓ <strong>Pengurusan Spare Parts & Waranti 30 Hari</strong></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Bottom Call To Action & QR Code Section -->
+      <div class="bg-gradient-to-r from-red-950/80 via-slate-900 to-blue-950/80 p-4 rounded-2xl border border-white/10 flex items-center justify-between gap-4 mt-auto">
+        <div class="space-y-1 max-w-sm">
+          <span class="text-[10px] font-black uppercase text-amber-400 tracking-wider">LAYARI SISTEM DALAM TALIAN</span>
+          <p class="text-xs font-bold text-white leading-snug">
+            Imbas kod QR ini untuk mencuba dan melihat demo sistem POS secara langsung di pelayar web anda!
+          </p>
+          <p class="text-[10px] text-slate-400 font-mono">
+            https://wmdir2026.github.io/TRIG_GM_Kangar/
+          </p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="bg-white p-2 rounded-xl shadow-lg" id="qr-poster-1"></div>
+        </div>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="border-t border-white/10 pt-3 flex items-center justify-between text-[10px] text-slate-400">
+        <span>📍 Kompleks GIATMARA Kangar, Jalan Kangar-Alor Setar, 01000 Kangar, Perlis</span>
+        <span>📞 04-976 1234 • 019-456 7890</span>
+      </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- POSTER 2: CAFÉ & SENI MASAKAN (EAT, ENJOY, REPEAT) -->
+    <!-- ========================================== -->
+    <div class="a4-page bg-gradient-to-b from-[#1c1208] via-[#0f0904] to-black text-white p-10">
+      
+      <!-- Top Decorative Accent -->
+      <div class="absolute top-0 left-0 right-0 h-3 bg-gradient-to-r from-amber-400 via-amber-600 to-red-600"></div>
+
+      <!-- Header with Logo -->
+      <div class="flex items-center justify-between border-b border-amber-500/20 pb-5">
+        <div class="bg-white px-5 py-3 rounded-2xl shadow-xl flex items-center justify-center">
+          <img src="./logo.png" alt="GIATMARA Malaysia" class="h-14 w-auto object-contain">
+        </div>
+        <div class="text-right">
+          <span class="px-3 py-1 bg-amber-500/20 text-amber-300 font-black text-[11px] rounded-full uppercase tracking-wider border border-amber-500/30">
+            KURSUS SENI MASAKAN & BAKERI
+          </span>
+          <h2 class="text-base font-black tracking-tight text-white mt-1">FELÌCE CAFFÉ GIATMARA KANGAR</h2>
+        </div>
+      </div>
+
+      <!-- Title & Tagline -->
+      <div class="text-center my-auto space-y-2">
+        <span class="text-xs font-black tracking-widest text-amber-400 uppercase">SAJIAN ENAK • PESAN PANTAS • TANPA BERATUR</span>
+        <h1 class="text-5xl font-black tracking-tight text-white font-['Cabinet_Grotesk',sans-serif]">
+          EAT • ENJOY • REPEAT
+        </h1>
+        <p class="text-xs text-amber-100/80 max-w-lg mx-auto">
+          Nikmati keenakan menu istimewa hasil air tangan pelatih Seni Masakan & Bakeri GIATMARA Kangar dengan kemudahan pesanan digital moden di meja anda.
+        </p>
+      </div>
+
+      <!-- Visual Graphic Mockup -->
+      <div class="relative rounded-2xl overflow-hidden shadow-2xl border-2 border-amber-500/30 my-auto">
+        <img src="./posters/poster_cafe.jpg" alt="FELÌCE CAFFÉ GIATMARA Kangar" class="w-full h-64 object-cover object-center">
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+        <div class="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs">
+          <span class="font-extrabold text-amber-300">🍽️ Pesan Terus dari Meja Menggunakan Telefon Pintar</span>
+          <span class="bg-amber-600 px-3 py-0.5 rounded-full font-bold text-black">Bebas Barisan</span>
+        </div>
+      </div>
+
+      <!-- How it Works (3 Steps) -->
+      <div class="grid grid-cols-3 gap-3 my-auto text-center">
+        <div class="p-3.5 rounded-2xl bg-amber-950/30 border border-amber-500/20 space-y-1">
+          <div class="w-8 h-8 rounded-full bg-amber-500 text-black font-black text-sm flex items-center justify-center mx-auto">1</div>
+          <h4 class="font-extrabold text-amber-300 text-xs">DUDUK DI MEJA</h4>
+          <p class="text-[10px] text-slate-300">Pilih meja santai anda di dalam café yang selesa.</p>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-amber-950/30 border border-amber-500/20 space-y-1">
+          <div class="w-8 h-8 rounded-full bg-amber-500 text-black font-black text-sm flex items-center justify-center mx-auto">2</div>
+          <h4 class="font-extrabold text-amber-300 text-xs">IMBAS KOD QR</h4>
+          <p class="text-[10px] text-slate-300">Imbas QR di atas meja & pilih menu makanan/minuman kegemaran.</p>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-amber-950/30 border border-amber-500/20 space-y-1">
+          <div class="w-8 h-8 rounded-full bg-amber-500 text-black font-black text-sm flex items-center justify-center mx-auto">3</div>
+          <h4 class="font-extrabold text-amber-300 text-xs">HIDANGAN DIHANTAR</h4>
+          <p class="text-[10px] text-slate-300">Pesanan dihantar terus ke dapur & sampai ke meja anda!</p>
+        </div>
+      </div>
+
+      <!-- Signature Menu Highlights -->
+      <div class="bg-amber-950/40 p-4 rounded-2xl border border-amber-500/30 flex items-center justify-between gap-4 mt-auto">
+        <div class="space-y-1">
+          <span class="text-[10px] font-black uppercase text-amber-400 tracking-wider">MENU POPULAR KAMI</span>
+          <p class="text-xs font-bold text-white">Nasi Ayam Istimewa • Kopi Aromatik Karamel • Pastri Croissant Panas • Minuman Segar</p>
+          <p class="text-[10px] text-amber-200/70">Waktu Operasi: Isnin – Jumaat (8.30 Pagi – 4.30 Petang)</p>
+        </div>
+        <div class="bg-white p-2 rounded-xl shadow-lg shrink-0" id="qr-poster-2"></div>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="border-t border-amber-500/20 pt-3 flex items-center justify-between text-[10px] text-amber-200/60">
+        <span>📍 FELÌCE CAFFÉ, Aras Bawah, Kompleks GIATMARA Kangar, Perlis</span>
+        <span>Instagram/FB: @FeliceCaffeGiatmara • Tel: 012-345 6789</span>
+      </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- POSTER 3: KLINIK BAIKI SMARTPHONE (TECH & REPAIR) -->
+    <!-- ========================================== -->
+    <div class="a4-page bg-gradient-to-b from-[#041124] via-[#020b18] to-black text-white p-10">
+      
+      <!-- Top Decorative Accent -->
+      <div class="absolute top-0 left-0 right-0 h-3 bg-gradient-to-r from-cyan-400 via-blue-600 to-indigo-600"></div>
+
+      <!-- Header with Logo -->
+      <div class="flex items-center justify-between border-b border-cyan-500/20 pb-5">
+        <div class="bg-white px-5 py-3 rounded-2xl shadow-xl flex items-center justify-center">
+          <img src="./logo.png" alt="GIATMARA Malaysia" class="h-14 w-auto object-contain">
+        </div>
+        <div class="text-right">
+          <span class="px-3 py-1 bg-cyan-500/20 text-cyan-300 font-black text-[11px] rounded-full uppercase tracking-wider border border-cyan-500/30">
+            KURSUS BAIKI SMARTPHONE & ELEKTRONIK
+          </span>
+          <h2 class="text-base font-black tracking-tight text-white mt-1">TECHBYTE PUSAT SERVIS MEMBAIKI SMARTPHONE</h2>
+        </div>
+      </div>
+
+      <!-- Title & Hook -->
+      <div class="text-center my-auto space-y-2">
+        <span class="text-xs font-black tracking-widest text-cyan-400 uppercase">PANTAS • TELUS • BERKUALITI TINGGI</span>
+        <h1 class="text-4xl font-black tracking-tight text-white">
+          TELEFON ANDA ROSAK ATAU PECAH?
+        </h1>
+        <p class="text-xs text-cyan-100/80 max-w-lg mx-auto">
+          Dapatkan rawatan peranti profesional oleh pelatih juruteknik terlatih GIATMARA Kangar menggunakan peralatan makmal ESD & mikroskop stereo terkini.
+        </p>
+      </div>
+
+      <!-- Visual Graphic Mockup -->
+      <div class="relative rounded-2xl overflow-hidden shadow-2xl border-2 border-cyan-500/30 my-auto">
+        <img src="./posters/poster_repair.jpg" alt="TECHBYTE Pusat Servis Membaiki Smartphone" class="w-full h-64 object-cover object-center">
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+        <div class="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs">
+          <span class="font-extrabold text-cyan-300">🔬 Diagnosis Mikroskop 4K & Multimeter Precision Percuma</span>
+          <span class="bg-cyan-500 px-3 py-0.5 rounded-full font-black text-black">Jaminan 30 Hari</span>
+        </div>
+      </div>
+
+      <!-- 4 Core Service Advantages -->
+      <div class="grid grid-cols-2 gap-3 my-auto">
+        <div class="p-3.5 rounded-2xl bg-cyan-950/30 border border-cyan-500/30 flex items-start gap-3">
+          <span class="text-2xl">🔍</span>
+          <div>
+            <h4 class="font-black text-cyan-300 text-xs uppercase">1. KONSULTASI & DIAGNOSIS PERCUMA</h4>
+            <p class="text-[10px] text-slate-300 leading-snug">Pemeriksaan komponen & punca sebenar kerosakan tanpa sebarang caj tersembunyi.</p>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-cyan-950/30 border border-cyan-500/30 flex items-start gap-3">
+          <span class="text-2xl">📱</span>
+          <div>
+            <h4 class="font-black text-cyan-300 text-xs uppercase">2. TUKAR LCD & BATERI SEGERA</h4>
+            <p class="text-[10px] text-slate-300 leading-snug">Alat ganti berkualiti tinggi untuk Samsung, iPhone, Oppo, Vivo, Redmi dan lain-lain.</p>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-cyan-950/30 border border-cyan-500/30 flex items-start gap-3">
+          <span class="text-2xl">🛡️</span>
+          <div>
+            <h4 class="font-black text-cyan-300 text-xs uppercase">3. WARANTI SERVIS 30 HARI</h4>
+            <p class="text-[10px] text-slate-300 leading-snug">Jaminan servis rasmi GIATMARA berserta resit sistem bercetak dan kod QR pengesahan.</p>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-cyan-950/30 border border-cyan-500/30 flex items-start gap-3">
+          <span class="text-2xl">📲</span>
+          <div>
+            <h4 class="font-black text-cyan-300 text-xs uppercase">4. PENJEJAK STATUS LIVE (REP-)</h4>
+            <p class="text-[10px] text-slate-300 leading-snug">Semak status pembaikan bila-bila masa dari telefon anda tanpa perlu datang berulang kali.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Repair Tracker Banner with QR -->
+      <div class="bg-gradient-to-r from-blue-950/80 via-slate-900 to-cyan-950/80 p-4 rounded-2xl border border-cyan-500/40 flex items-center justify-between gap-4 mt-auto">
+        <div class="space-y-1">
+          <span class="text-[10px] font-black uppercase text-cyan-400 tracking-wider">SEMAK STATUS PEMBAIKAN PERANTI ANDA</span>
+          <p class="text-xs font-bold text-white">Imbas kod QR ini dan masukkan No. Job (cth: REP-2026-00001) atau No. Telefon untuk semakan live!</p>
+          <p class="text-[10px] text-cyan-200/70">Waktu Operasi Bengkel: Isnin – Jumaat (9.00 Pagi – 5.00 Petang)</p>
+        </div>
+        <div class="bg-white p-2 rounded-xl shadow-lg shrink-0" id="qr-poster-3"></div>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="border-t border-cyan-500/20 pt-3 flex items-center justify-between text-[10px] text-cyan-200/60">
+        <span>📍 TECHBYTE Pusat Servis Membaiki Smartphone, Tingkat 1, Wisma GIATMARA Kangar, Perlis</span>
+        <span>Hotline Teknikal: 04-976 1234 • WhatsApp: 019-456 7890</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Generate Dynamic QR Codes into Posters -->
+  <script>
+    const qrUrl = "https://wmdir2026.github.io/TRIG_GM_Kangar/";
+
+    new QRCode(document.getElementById("qr-poster-1"), {
+      text: qrUrl,
+      width: 75,
+      height: 75,
+      colorDark: "#0f172a",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.M
+    });
+
+    new QRCode(document.getElementById("qr-poster-2"), {
+      text: qrUrl,
+      width: 75,
+      height: 75,
+      colorDark: "#0f172a",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.M
+    });
+
+    new QRCode(document.getElementById("qr-poster-3"), {
+      text: qrUrl,
+      width: 75,
+      height: 75,
+      colorDark: "#0f172a",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  </script>
+
+</body>
+</html>

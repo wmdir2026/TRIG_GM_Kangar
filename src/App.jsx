@@ -116,7 +116,7 @@ const MainLayout = () => {
       return <CustomerRepairTracker />;
     }
 
-    // Menu Paling Utama (TechByte & Pasta Cafe Landing View)
+    // Menu Paling Utama (TechByte & Felìce Caffé Landing View)
     if (activeSystemMode === 'MAIN' || currentTab === 'main') {
       return <TechByteLandingView />;
     }
@@ -257,7 +257,7 @@ const MainLayout = () => {
               onError={(e) => { e.currentTarget.src = './logo.png'; }}
             />
             <p>
-              <strong className="text-amber-400">TECHBYTE & PASTA CAFE</strong> • <strong>TRIG GIATMARA KANGAR</strong> — {activeSystemMode === 'MAIN' ? 'Menu Paling Utama Digital Business' : activeSystemMode === 'PORTAL' ? 'Platform Pengurusan Staf & Operasi' : activeSystemMode === 'MASAKAN' ? 'Sistem Kursus Masakan & Café' : activeSystemMode === 'REPAIR' ? 'Sistem Kursus Baiki Smartphone' : 'Digital Business Management System'}
+              <strong className="text-amber-400">TECHBYTE & FELÌCE CAFFÉ</strong> • <strong>TRIG GIATMARA KANGAR</strong> — {activeSystemMode === 'MAIN' ? 'Menu Paling Utama Digital Business' : activeSystemMode === 'PORTAL' ? 'Platform Pengurusan Staf & Operasi' : activeSystemMode === 'MASAKAN' ? 'Sistem Kursus Masakan & Café' : activeSystemMode === 'REPAIR' ? 'Sistem Kursus Baiki Smartphone' : 'Digital Business Management System'}
             </p>
           </div>
           <p className="text-[11px] opacity-75">

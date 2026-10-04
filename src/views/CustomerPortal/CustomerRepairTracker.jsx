@@ -279,7 +279,7 @@ export const CustomerRepairTracker = () => {
             </div>
             <div className="text-left">
               <span className="text-sm sm:text-base font-black text-amber-400 font-['Cabinet_Grotesk',sans-serif] tracking-wider uppercase block leading-tight">
-                TECHBYTE & PASTA CAFE
+                TECHBYTE & FELÌCE CAFFÉ
               </span>
               <span className="text-[11px] font-extrabold text-white tracking-tight uppercase leading-tight block">
                 TRIG GIATMARA KANGAR
