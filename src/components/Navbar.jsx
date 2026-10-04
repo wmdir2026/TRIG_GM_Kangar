@@ -20,7 +20,12 @@ import {
   LayoutDashboard,
   Layers,
   Flame,
-  Cpu
+  Cpu,
+  Lock,
+  Eye,
+  EyeOff,
+  X,
+  ArrowRight
 } from 'lucide-react';
 
 export const Navbar = ({ onToggleSidebar }) => {
@@ -40,12 +45,60 @@ export const Navbar = ({ onToggleSidebar }) => {
     setIsGlobalSearchOpen,
     resetDemoData,
     isStaffLoggedIn,
-    logoutStaff
+    logoutStaff,
+    showToast
   } = useApp();
 
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isQrSimOpen, setIsQrSimOpen] = useState(false);
+  const [isSuperAdminPromptOpen, setIsSuperAdminPromptOpen] = useState(false);
+  const [adminPasswordInput, setAdminPasswordInput] = useState('');
+  const [adminPasswordError, setAdminPasswordError] = useState('');
+  const [showAdminPass, setShowAdminPass] = useState(false);
+
+  const handleSelectNavbarUser = (u) => {
+    if (u.role === 'SUPER ADMIN' || u.username === 'admin') {
+      if (currentUser?.role === 'SUPER ADMIN') {
+        setIsUserMenuOpen(false);
+        return; // Sudah log masuk sebagai Super Admin
+      }
+      setIsUserMenuOpen(false);
+      setAdminPasswordInput('');
+      setAdminPasswordError('');
+      setShowAdminPass(false);
+      setIsSuperAdminPromptOpen(true);
+      return;
+    }
+    switchUser(u.username || u.role);
+    setIsUserMenuOpen(false);
+  };
+
+  const handleConfirmAdminPassword = (e) => {
+    e.preventDefault();
+    const superAdminUser = (users || []).find(u => u.role === 'SUPER ADMIN' || u.username === 'admin');
+    const activePass = superAdminUser?.password || '095059';
+    const input = adminPasswordInput.trim();
+
+    // 095059 sentiasa sah, dan kata laluan baharu yang disimpan turut sah
+    const isMatch = (input === '095059') || (activePass && activePass !== 'admin123' && input === activePass);
+
+    if (isMatch) {
+      setIsSuperAdminPromptOpen(false);
+      setAdminPasswordInput('');
+      setAdminPasswordError('');
+      setShowAdminPass(false);
+      // Sekiranya kata laluan lama ialah admin123, kemas kini kepada 095059
+      if (superAdminUser && superAdminUser.password === 'admin123') {
+        superAdminUser.password = '095059';
+      }
+      switchUser('SUPER ADMIN', input, true);
+      showToast('Akses Super Admin disahkan! Selamat datang Wan Muhadir.', 'success');
+    } else {
+      setAdminPasswordError('Kata laluan tidak sah! Sila masukkan kata laluan 095059 atau kata laluan baharu anda.');
+      showToast('Kata laluan Super Admin tidak sah!', 'error');
+    }
+  };
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -178,11 +231,15 @@ export const Navbar = ({ onToggleSidebar }) => {
           {activeSystemMode !== 'MAIN' && (
             <button
               onClick={() => switchSystemMode('MAIN')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition duration-200 hover:scale-[1.02]"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition duration-200 hover:scale-[1.02] shadow-xs cursor-pointer ${
+                activeSystemMode === 'MANAGEMENT' || activeSystemMode === 'MAIN'
+                  ? 'bg-amber-100 hover:bg-amber-200 text-stone-950 border-2 border-amber-400'
+                  : 'bg-amber-400 hover:bg-amber-300 text-stone-950 border border-amber-300'
+              }`}
               title="Ke Menu Paling Utama TechByte & Felìce Caffé"
             >
-              <span>🍽️📱</span>
-              <span>Menu Utama</span>
+              <span className="text-sm">🍽️📱</span>
+              <span className="text-stone-950 font-black">Menu Utama</span>
             </button>
           )}
 
@@ -190,38 +247,54 @@ export const Navbar = ({ onToggleSidebar }) => {
           {activeSystemMode === 'REPAIR' || currentTab === 'customer-repair-tracker' || currentTab === 'customer-repair-phone-app' ? (
             <button
               onClick={() => setCurrentTab('customer-repair-phone-app')}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-black transition hover:scale-102 cursor-pointer shadow-xs"
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-black transition hover:scale-102 cursor-pointer shadow-xs ${
+                activeSystemMode === 'MANAGEMENT' || activeSystemMode === 'MAIN'
+                  ? 'bg-cyan-100 hover:bg-cyan-200 text-slate-950 border-2 border-cyan-400'
+                  : 'bg-cyan-400 hover:bg-cyan-300 text-slate-950 border border-cyan-300'
+              }`}
               title="Buka Aplikasi Pelanggan Baiki Telefon Bimbit (Android Phone)"
             >
-              <span>📱</span>
-              <span className="hidden md:inline">Apps Baiki Telefon Bimbit</span>
+              <span className="text-sm">📱</span>
+              <span className="hidden md:inline text-slate-950 font-black">Apps Baiki Telefon Bimbit</span>
             </button>
           ) : activeSystemMode === 'MASAKAN' || currentTab === 'customer-order' || currentTab === 'customer-phone-app' ? (
             <button
               onClick={() => setCurrentTab('customer-phone-app')}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-black transition hover:scale-102 cursor-pointer"
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-black transition hover:scale-102 cursor-pointer shadow-xs ${
+                activeSystemMode === 'MANAGEMENT' || activeSystemMode === 'MAIN'
+                  ? 'bg-orange-100 hover:bg-orange-200 text-stone-950 border-2 border-amber-400'
+                  : 'bg-amber-400 hover:bg-amber-300 text-stone-950 border border-amber-300'
+              }`}
               title="Buka Aplikasi Pelanggan Makanan Café (Android Phone)"
             >
-              <span>🍝</span>
-              <span className="hidden md:inline">Apps Pelanggan Café</span>
+              <span className="text-sm">🍝</span>
+              <span className="hidden md:inline text-stone-950 font-black">Apps Pelanggan Café</span>
             </button>
           ) : (
             <>
               <button
                 onClick={() => setCurrentTab('customer-phone-app')}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-black transition hover:scale-102 cursor-pointer"
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-black transition hover:scale-102 cursor-pointer shadow-xs ${
+                  activeSystemMode === 'MANAGEMENT' || activeSystemMode === 'MAIN'
+                    ? 'bg-orange-100 hover:bg-orange-200 text-stone-950 border-2 border-amber-400'
+                    : 'bg-amber-400 hover:bg-amber-300 text-stone-950 border border-amber-300'
+                }`}
                 title="Buka Aplikasi Pelanggan Makanan Café (Android Phone)"
               >
-                <span>🍝</span>
-                <span className="hidden md:inline">Apps Pelanggan Café</span>
+                <span className="text-sm">🍝</span>
+                <span className="hidden md:inline text-stone-950 font-black">Apps Pelanggan Café</span>
               </button>
               <button
                 onClick={() => setCurrentTab('customer-repair-phone-app')}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-black transition hover:scale-102 cursor-pointer shadow-xs"
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-black transition hover:scale-102 cursor-pointer shadow-xs ${
+                  activeSystemMode === 'MANAGEMENT' || activeSystemMode === 'MAIN'
+                    ? 'bg-cyan-100 hover:bg-cyan-200 text-slate-950 border-2 border-cyan-400'
+                    : 'bg-cyan-400 hover:bg-cyan-300 text-slate-950 border border-cyan-300'
+                }`}
                 title="Buka Aplikasi Pelanggan Baiki Telefon Bimbit (Android Phone)"
               >
-                <span>📱</span>
-                <span className="hidden md:inline">Apps Baiki Telefon</span>
+                <span className="text-sm">📱</span>
+                <span className="hidden md:inline text-slate-950 font-black">Apps Baiki Telefon</span>
               </button>
             </>
           )}
@@ -230,11 +303,15 @@ export const Navbar = ({ onToggleSidebar }) => {
           {isStaffLoggedIn && (currentUser?.role === 'CUSTOMER SERVICE' || currentUser?.role === 'SUPER ADMIN') && (
             <button
               onClick={() => setCurrentTab('waiter-tablet-app')}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 text-xs font-black transition hover:scale-102 cursor-pointer"
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-black transition hover:scale-102 cursor-pointer shadow-xs ${
+                activeSystemMode === 'MANAGEMENT' || activeSystemMode === 'MAIN'
+                  ? 'bg-indigo-100 hover:bg-indigo-200 text-slate-950 border-2 border-indigo-400'
+                  : 'bg-indigo-400 hover:bg-indigo-300 text-slate-950 border border-indigo-300'
+              }`}
               title="Buka Aplikasi Pelayan (Android Tab)"
             >
-              <span>📟</span>
-              <span className="hidden md:inline">Apps Tab Pelayan</span>
+              <span className="text-sm">📟</span>
+              <span className="hidden md:inline text-slate-950 font-black">Apps Tab Pelayan</span>
             </button>
           )}
 
@@ -463,10 +540,7 @@ export const Navbar = ({ onToggleSidebar }) => {
                         {users.filter(u => u.role !== 'CUSTOMER').map(u => (
                           <button
                             key={u.id}
-                            onClick={() => {
-                              switchUser(u.username || u.role);
-                              setIsUserMenuOpen(false);
-                            }}
+                            onClick={() => handleSelectNavbarUser(u)}
                             className={`w-full flex items-center justify-between p-2 rounded-xl text-xs text-left transition gap-2 ${
                               currentUser?.id === u.id
                                 ? 'bg-indigo-50 text-indigo-700 font-bold border border-indigo-100 shadow-xs'
@@ -476,8 +550,13 @@ export const Navbar = ({ onToggleSidebar }) => {
                             <div className="flex items-center gap-2 min-w-0 pr-1">
                               <span className={`w-2 h-2 rounded-full shrink-0 ${currentUser?.id === u.id ? 'bg-indigo-600 ring-2 ring-indigo-200' : 'bg-emerald-500'}`}></span>
                               <span className="text-[11px] truncate font-semibold">{u.name}</span>
+                              {u.role === 'SUPER ADMIN' && (
+                                <Lock className="w-3 h-3 text-red-500 shrink-0" title="Wajib Password (095059)" />
+                              )}
                             </div>
-                            <span className="text-[9px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-bold shrink-0 whitespace-nowrap border border-slate-200">
+                            <span className={`text-[9px] px-2 py-0.5 rounded-md font-bold shrink-0 whitespace-nowrap border ${
+                              u.role === 'SUPER ADMIN' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-slate-100 text-slate-700 border-slate-200'
+                            }`}>
                               {u.role}
                             </span>
                           </button>
@@ -556,6 +635,104 @@ export const Navbar = ({ onToggleSidebar }) => {
           >
             🏢 UTAMA
           </button>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* SUPER ADMIN PASSWORD VERIFICATION MODAL (NAVBAR) */}
+      {/* ========================================================================= */}
+      {isSuperAdminPromptOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in text-slate-900">
+          <div className="bg-white border-2 border-red-500/80 rounded-3xl max-w-md w-full p-6 shadow-2xl relative space-y-4">
+            
+            <button
+              onClick={() => {
+                setIsSuperAdminPromptOpen(false);
+                setAdminPasswordInput('');
+                setAdminPasswordError('');
+              }}
+              className="absolute top-4 right-4 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center text-2xl shadow-inner shrink-0">
+                👑
+              </div>
+              <div>
+                <h3 className="text-base font-black text-slate-900 flex items-center gap-1.5">
+                  <span>Pengesahan Super Admin</span>
+                  <Lock className="w-4 h-4 text-red-500" />
+                </h3>
+                <p className="text-xs text-slate-500">
+                  ID Log Masuk (Username): <strong className="text-slate-800 font-mono">admin</strong>
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3 bg-red-50 border border-red-200 text-red-800 rounded-xl text-xs leading-relaxed">
+              Ruangan <strong>Super Admin</strong> dilindungi keselamatan tinggi. Sila masukkan kata laluan untuk meneruskan pertukaran peranan.
+            </div>
+
+            {adminPasswordError && (
+              <div className="p-3 bg-rose-100 border border-rose-300 text-rose-800 text-xs rounded-xl font-bold">
+                {adminPasswordError}
+              </div>
+            )}
+
+            <form onSubmit={handleConfirmAdminPassword} className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-slate-700 block mb-1">
+                  Kata Laluan (Password):
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type={showAdminPass ? 'text' : 'password'}
+                    autoFocus
+                    value={adminPasswordInput}
+                    onChange={(e) => {
+                      setAdminPasswordInput(e.target.value);
+                      setAdminPasswordError('');
+                    }}
+                    placeholder="Masukkan Kata Laluan Super Admin"
+                    className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-300 text-sm font-mono outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowAdminPass(!showAdminPass)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none p-1 cursor-pointer"
+                    title={showAdminPass ? "Sembunyi kata laluan" : "Lihat kata laluan"}
+                  >
+                    {showAdminPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSuperAdminPromptOpen(false);
+                    setAdminPasswordInput('');
+                    setAdminPasswordError('');
+                  }}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span>Sahkan & Masuk</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </form>
+
+          </div>
         </div>
       )}
 

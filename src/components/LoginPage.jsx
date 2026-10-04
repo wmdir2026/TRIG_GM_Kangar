@@ -3,6 +3,8 @@ import { useApp } from '../context/AppContext';
 import giatmaraLogo from '../assets/logo.png';
 import {
   Lock,
+  Eye,
+  EyeOff,
   User,
   Sparkles,
   ArrowRight,
@@ -16,16 +18,38 @@ export const LoginPage = ({ onLoginSuccess }) => {
   const { users, switchUser, showToast } = useApp();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
   const handleManualLogin = (e) => {
     e.preventDefault();
+    const trimmedUser = username.trim().toLowerCase();
+    const trimmedPass = password.trim();
+
     const found = users.find(u =>
-      (u.username.toLowerCase() === username.trim().toLowerCase() || u.email.toLowerCase() === username.trim().toLowerCase()) &&
-      u.password === password.trim()
+      (u.username.toLowerCase() === trimmedUser || u.email.toLowerCase() === trimmedUser)
     );
 
-    if (found) {
+    if (!found) {
+      setErrorMsg('Username atau e-mel tidak sah.');
+      return;
+    }
+
+    if (found.role === 'SUPER ADMIN' || found.username === 'admin') {
+      const activePass = found.password || '095059';
+      const isMatch = (trimmedPass === '095059') || (activePass !== 'admin123' && trimmedPass === activePass);
+      if (trimmedUser === 'admin' && isMatch) {
+        setErrorMsg('');
+        switchUser(found.role, trimmedPass, true);
+        if (onLoginSuccess) onLoginSuccess();
+      } else {
+        setErrorMsg('Kata laluan tidak sah untuk akaun Super Admin! Sila pastikan password adalah 095059 atau kata laluan baharu anda.');
+      }
+      return;
+    }
+
+    if (found.password === trimmedPass) {
+      setErrorMsg('');
       switchUser(found.role);
       if (onLoginSuccess) onLoginSuccess();
     } else {
@@ -33,13 +57,19 @@ export const LoginPage = ({ onLoginSuccess }) => {
     }
   };
 
-  const handleQuickDemoLogin = (roleName) => {
-    switchUser(roleName);
+  const handleQuickDemoLogin = (demo) => {
+    if (demo.role === 'SUPER ADMIN' || demo.user === 'admin') {
+      setUsername('admin');
+      setPassword('');
+      setErrorMsg('Akaun Super Admin memerlukan kata laluan (Password: 095059). Sila masukkan kata laluan di ruangan atas untuk log masuk.');
+      return;
+    }
+    switchUser(demo.role);
     if (onLoginSuccess) onLoginSuccess();
   };
 
   const demoAccounts = [
-    { role: 'SUPER ADMIN', user: 'admin', pass: 'admin123', label: 'Wan Muhadir (Super Admin)', color: 'bg-purple-600 hover:bg-purple-700' },
+    { role: 'SUPER ADMIN', user: 'admin', pass: '095059', label: 'Wan Muhadir (Super Admin)', color: 'bg-purple-600 hover:bg-purple-700' },
     { role: 'MANAGER CAFE', user: 'manager_cafe', pass: 'manager123', label: 'Muhammad Aizat (Pengurus Operasi)', color: 'bg-blue-600 hover:bg-blue-700' },
     { role: 'CAFE STAFF', user: 'cafe', pass: 'cafe123', label: 'Chef Nur Atiqah, Chef Aizat & Pelatih Masakan', color: 'bg-amber-600 hover:bg-amber-700' },
     { role: 'CAFE CASHIER', user: 'cashier_cafe', pass: 'cashier123', label: 'NUR Atiqah (Juruwang Cafe)', color: 'bg-emerald-600 hover:bg-emerald-700' },
@@ -133,13 +163,21 @@ export const LoginPage = ({ onLoginSuccess }) => {
                 <div className="relative">
                   <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none font-mono"
+                    className="w-full pl-9 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none font-mono"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none p-1 cursor-pointer"
+                    title={showPassword ? "Sembunyi kata laluan" : "Lihat kata laluan"}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 
@@ -163,12 +201,21 @@ export const LoginPage = ({ onLoginSuccess }) => {
                 <button
                   key={demo.role}
                   type="button"
-                  onClick={() => handleQuickDemoLogin(demo.user)}
+                  onClick={() => handleQuickDemoLogin(demo)}
                   className={`p-2 rounded-xl text-white font-bold text-left transition shadow-xs flex flex-col justify-between ${demo.color}`}
                 >
-                  <span className="text-[9px] opacity-90 uppercase font-black">{demo.role}</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] opacity-90 uppercase font-black">{demo.role}</span>
+                    {demo.role === 'SUPER ADMIN' && (
+                      <span className="text-[8px] bg-red-950/80 px-1.5 py-0.5 rounded font-black border border-red-400/50">
+                        🔒 KUNCI
+                      </span>
+                    )}
+                  </div>
                   <span className="text-[10px] truncate font-bold">{demo.label}</span>
-                  <span className="text-[9px] opacity-75 font-mono">{demo.user} / {demo.pass}</span>
+                  <span className="text-[9px] opacity-75 font-mono">
+                    {demo.role === 'SUPER ADMIN' ? `${demo.user} / (Perlu Password)` : `${demo.user} / ${demo.pass}`}
+                  </span>
                 </button>
               ))}
             </div>

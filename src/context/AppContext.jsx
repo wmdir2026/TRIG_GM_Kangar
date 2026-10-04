@@ -24,7 +24,7 @@ const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
   // Helper to load or fallback to initial
-  const USERS_STORAGE_VERSION = 'v2.3_customer_service_waiter';
+  const USERS_STORAGE_VERSION = 'v2.7_super_admin_pass_095059_verified';
 
   const loadStorage = (key, fallback) => {
     try {
@@ -39,14 +39,46 @@ export const AppProvider = ({ children }) => {
   const loadUsersStorage = () => {
     try {
       const v = localStorage.getItem('trig_users_storage_version');
+      const saved = localStorage.getItem('trig_users');
+
+      // Jika versi storan berubah atau pengguna belum dikemas kini
       if (v !== USERS_STORAGE_VERSION) {
         localStorage.setItem('trig_users_storage_version', USERS_STORAGE_VERSION);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            const upgraded = parsed.map(u => {
+              if (u.username === 'admin' || u.role === 'SUPER ADMIN') {
+                // Naik taraf admin123 atau kata laluan kosong kepada 095059
+                if (!u.password || u.password === 'admin123') {
+                  return { ...u, password: '095059' };
+                }
+              }
+              return u;
+            });
+            localStorage.setItem('trig_users', JSON.stringify(upgraded));
+            return upgraded;
+          } catch (err) {
+            localStorage.setItem('trig_users', JSON.stringify(INITIAL_USERS));
+            return INITIAL_USERS;
+          }
+        }
         localStorage.setItem('trig_users', JSON.stringify(INITIAL_USERS));
-        localStorage.setItem('trig_currentUser', JSON.stringify(INITIAL_USERS[0]));
         return INITIAL_USERS;
       }
-      const saved = localStorage.getItem('trig_users');
-      return saved ? JSON.parse(saved) : INITIAL_USERS;
+
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.map(u => {
+          if (u.username === 'admin' || u.role === 'SUPER ADMIN') {
+            if (!u.password || u.password === 'admin123') {
+              return { ...u, password: '095059' };
+            }
+          }
+          return u;
+        });
+      }
+      return INITIAL_USERS;
     } catch (e) {
       return INITIAL_USERS;
     }
@@ -54,14 +86,20 @@ export const AppProvider = ({ children }) => {
 
   const loadCurrentUserStorage = () => {
     try {
-      const v = localStorage.getItem('trig_users_storage_version');
-      if (v !== USERS_STORAGE_VERSION) {
-        return INITIAL_USERS[0];
-      }
+      const isStaff = localStorage.getItem('trig_is_staff_logged_in') === 'true';
       const saved = localStorage.getItem('trig_currentUser');
-      return saved ? JSON.parse(saved) : INITIAL_USERS[0];
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Jika belum log masuk staf atau pengguna ialah pelanggan
+        if (!isStaff && (parsed.role === 'SUPER ADMIN' || parsed.username === 'admin')) {
+          const customerUser = INITIAL_USERS.find(u => u.role === 'CUSTOMER') || INITIAL_USERS[7];
+          return customerUser;
+        }
+        return parsed;
+      }
+      return INITIAL_USERS.find(u => u.role === 'CUSTOMER') || INITIAL_USERS[7];
     } catch (e) {
-      return INITIAL_USERS[0];
+      return INITIAL_USERS.find(u => u.role === 'CUSTOMER') || INITIAL_USERS[7];
     }
   };
 
@@ -371,7 +409,7 @@ export const AppProvider = ({ children }) => {
   };
 
   // User Auth & Switcher
-  const switchUser = (roleOrUsernameOrId) => {
+  const switchUser = (roleOrUsernameOrId, password = null, force = false) => {
     if (!roleOrUsernameOrId) return false;
     const target = String(roleOrUsernameOrId).toLowerCase().trim();
     const found = users.find(u => 
@@ -381,8 +419,22 @@ export const AppProvider = ({ children }) => {
       u.name?.toLowerCase() === target
     );
     if (found) {
+      // Kawalan Keselamatan: Hanya login betul (095059 atau Kata laluan aktif Super Admin) sahaja boleh masuk ke Super Admin
+      if (found.role === 'SUPER ADMIN' && !force) {
+        const activePass = found.password || '095059';
+        const isMatch = (password === '095059') || (activePass !== 'admin123' && password === activePass);
+        if (!isMatch) {
+          showToast('Akses Ditolak: Kata laluan Super Admin tidak sah!', 'error');
+          return false;
+        }
+      }
+
       setCurrentUser(found);
-      setIsStaffLoggedIn(found.role !== 'CUSTOMER');
+      const isStaff = found.role !== 'CUSTOMER';
+      setIsStaffLoggedIn(isStaff);
+      localStorage.setItem('trig_is_staff_logged_in', String(isStaff));
+      localStorage.setItem('trig_currentUser', JSON.stringify(found));
+
       showToast(`Log masuk sebagai: ${found.name} (${found.role})`, 'info');
       logAudit(`Log masuk pengguna sebagai ${found.role}`, 'AUTH');
       if (found.role === 'CUSTOMER') {
@@ -1485,8 +1537,26 @@ export const AppProvider = ({ children }) => {
   };
 
   const updateUser = (id, updated) => {
-    setUsers(prev => prev.map(u => u.id === id ? { ...u, ...updated } : u));
-    showToast('Maklumat pengguna dikemaskini.');
+    setUsers(prev => {
+      const nextUsers = prev.map(u => u.id === id ? { ...u, ...updated } : u);
+      localStorage.setItem('trig_users', JSON.stringify(nextUsers));
+      return nextUsers;
+    });
+
+    if (currentUser?.id === id) {
+      setCurrentUser(prev => {
+        const nextCurrent = { ...prev, ...updated };
+        localStorage.setItem('trig_currentUser', JSON.stringify(nextCurrent));
+        return nextCurrent;
+      });
+    }
+
+    if (updated.role === 'SUPER ADMIN' || updated.username === 'admin') {
+      showToast('Kata laluan & data Super Admin berjaya dikemaskini. Password baru kini aktif!', 'success');
+      logAudit('Super Admin mengemaskini kata laluan / profil akaun', 'AUTH');
+    } else {
+      showToast('Maklumat pengguna dikemaskini.', 'success');
+    }
   };
 
   const deleteUser = (id) => {

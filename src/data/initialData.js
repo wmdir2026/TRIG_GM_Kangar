@@ -25,7 +25,7 @@ export const INITIAL_USERS = [
   {
     id: "USR-001",
     username: "admin",
-    password: "admin123",
+    password: "095059",
     name: "Wan Muhadir (Super Admin)",
     role: "SUPER ADMIN",
     email: "wanmuhadir@giatmara.edu.my",

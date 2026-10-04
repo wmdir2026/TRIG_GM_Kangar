@@ -11,7 +11,10 @@ import {
   Edit2,
   Trash2,
   Lock,
-  X
+  X,
+  Eye,
+  EyeOff,
+  Save
 } from 'lucide-react';
 
 export const UserManagement = () => {
@@ -20,6 +23,7 @@ export const UserManagement = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     username: '',
@@ -47,6 +51,7 @@ export const UserManagement = () => {
 
   const handleOpenAdd = () => {
     setEditingUser(null);
+    setShowPassword(false);
     setFormData({
       username: '',
       password: '',
@@ -61,6 +66,7 @@ export const UserManagement = () => {
 
   const handleOpenEdit = (u) => {
     setEditingUser(u);
+    setShowPassword(false);
     setFormData({
       username: u.username,
       password: u.password,
@@ -257,17 +263,40 @@ export const UserManagement = () => {
                   />
                 </div>
                 <div>
-                  <label className="font-extrabold text-slate-900 block mb-1 text-xs">Kata Laluan (Password) *</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="font-extrabold text-slate-900 block text-xs">Kata Laluan (Password) *</label>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-[11px] text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      <span>{showPassword ? 'Sembunyi' : 'Lihat'}</span>
+                    </button>
+                  </div>
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     required
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    placeholder="••••••••"
+                    placeholder="Masukkan kata laluan"
                     className="w-full px-3 py-2 bg-white border-2 border-slate-300 rounded-xl font-mono font-bold text-slate-950 placeholder:text-slate-500 outline-none focus:border-indigo-600"
                   />
                 </div>
               </div>
+
+              {/* Nota Khas untuk Super Admin */}
+              {editingUser && (editingUser.role === 'SUPER ADMIN' || editingUser.username === 'admin') && (
+                <div className="p-3 bg-amber-50 border border-amber-300 rounded-2xl text-amber-950 text-xs flex items-start gap-2 shadow-xs">
+                  <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <div className="space-y-0.5">
+                    <p className="font-black text-amber-950">Akaun Super Admin Dilindungi</p>
+                    <p className="text-[11px] text-amber-900 leading-tight">
+                      Selepas anda klik butang <strong>Simpan</strong>, kata laluan baharu ini akan aktif serta-merta untuk semua log masuk sistem Super Admin.
+                    </p>
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="font-extrabold text-slate-900 block mb-1 text-xs">Peranan Akses (Role) *</label>
@@ -320,15 +349,16 @@ export const UserManagement = () => {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+                  className="px-4 py-2 font-semibold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md"
+                  className="px-5 py-2 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md flex items-center gap-1.5 cursor-pointer"
                 >
-                  {editingUser ? 'Simpan' : 'Daftar Pengguna'}
+                  <Save className="w-4 h-4" />
+                  <span>{editingUser ? 'Simpan' : 'Daftar Pengguna'}</span>
                 </button>
               </div>
             </form>

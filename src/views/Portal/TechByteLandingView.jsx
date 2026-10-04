@@ -23,7 +23,9 @@ import {
   X,
   Users,
   LogOut,
-  ExternalLink
+  ExternalLink,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 export const TechByteLandingView = () => {
@@ -43,6 +45,10 @@ export const TechByteLandingView = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [customUsername, setCustomUsername] = useState('');
   const [customPassword, setCustomPassword] = useState('');
+  const [isSuperAdminPromptOpen, setIsSuperAdminPromptOpen] = useState(false);
+  const [adminPasswordInput, setAdminPasswordInput] = useState('');
+  const [adminPasswordError, setAdminPasswordError] = useState('');
+  const [showAdminPassModal, setShowAdminPassModal] = useState(false);
 
   // Handle direct navigation to Customer Cafe Food Ordering (PELANGGAN)
   const handleGoToCustomerCafe = () => {
@@ -77,10 +83,28 @@ export const TechByteLandingView = () => {
   };
 
   // Handle Login select (ADMIN / STAF)
-  const handleSelectUser = (user) => {
+  const handleSelectUser = (user, isAuthVerified = false) => {
+    // Jika Super Admin dipilih tanpa pengesahan kata laluan, buka dialog pengesahan kata laluan
+    if ((user.role === 'SUPER ADMIN' || user.username === 'admin') && !isAuthVerified) {
+      setAdminPasswordInput('');
+      setAdminPasswordError('');
+      setIsSuperAdminPromptOpen(true);
+      return;
+    }
+
+    const activePass = (user.role === 'SUPER ADMIN' || user.username === 'admin') ? (user.password || '095059') : null;
+    const success = switchUser(user.id, activePass, true);
+    if (!success) {
+      showToast('Akses ditolak atau gagal menukar pengguna!', 'error');
+      return;
+    }
+
     setIsStaffLoggedIn(true);
-    switchUser(user.id);
     setIsLoginModalOpen(false);
+    setIsSuperAdminPromptOpen(false);
+    setCustomUsername('');
+    setCustomPassword('');
+
     if (user.role === 'CUSTOMER SERVICE') {
       setCurrentTab('waiter-tablet-app');
       showToast(`Log masuk berjaya! Selamat datang ${user.name} (Apps Tab Pelayan sahaja).`, 'success');
@@ -90,16 +114,74 @@ export const TechByteLandingView = () => {
     showToast(`Log masuk berjaya! Selamat datang ${user.name} (${user.role}).`, 'success');
   };
 
+  // Pengesahan Kata Laluan Khas untuk Super Admin (Menggunakan password aktif dari profil atau 095059)
+  const handleConfirmSuperAdminPassword = (e) => {
+    e.preventDefault();
+    const input = adminPasswordInput.trim();
+    const superAdminUser = (users || []).find(u => u.role === 'SUPER ADMIN' || u.username === 'admin') || {
+      id: "USR-001",
+      username: "admin",
+      password: "095059",
+      name: "Wan Muhadir (Super Admin)",
+      role: "SUPER ADMIN"
+    };
+    const activePass = superAdminUser?.password || '095059';
+
+    // 095059 sentiasa diterima, dan kata laluan baharu yang disimpan turut diterima
+    const isMatch = (input === '095059') || (activePass !== 'admin123' && input === activePass);
+
+    if (isMatch) {
+      setAdminPasswordError('');
+      // Jika kata laluan lama tersimpan sebagai admin123, kemas kini secara automatik
+      if (superAdminUser.password === 'admin123') {
+        superAdminUser.password = '095059';
+      }
+      handleSelectUser(superAdminUser, true);
+    } else {
+      setAdminPasswordError('Kata laluan tidak sah! Sila masukkan kata laluan 095059 atau kata laluan baharu anda.');
+      showToast('Kata laluan tidak sah untuk Super Admin!', 'error');
+    }
+  };
+
   // Handle manual login
   const handleManualLogin = (e) => {
     e.preventDefault();
+    const trimmedUser = customUsername.trim().toLowerCase();
+    const trimmedPass = customPassword.trim();
+
+    if (!trimmedUser || !trimmedPass) {
+      showToast('Sila masukkan Nama Pengguna dan Kata Laluan!', 'warning');
+      return;
+    }
+
     const found = (users || []).find(
-      u => u.username.toLowerCase() === customUsername.trim().toLowerCase() &&
-           u.password === customPassword.trim()
+      u => u.username.toLowerCase() === trimmedUser || u.email?.toLowerCase() === trimmedUser
     );
 
-    if (found) {
-      handleSelectUser(found);
+    if (!found) {
+      showToast('Nama pengguna tidak sah / tidak dijumpai!', 'error');
+      return;
+    }
+
+    // Kawalan khas bagi Super Admin: Semak dengan kata laluan 095059 atau kata laluan aktif pengguna
+    if (found.role === 'SUPER ADMIN' || found.username === 'admin') {
+      const activePass = found.password || '095059';
+      const isMatch = (trimmedPass === '095059') || (activePass !== 'admin123' && trimmedPass === activePass);
+
+      if (trimmedUser === found.username.toLowerCase() && isMatch) {
+        if (found.password === 'admin123') {
+          found.password = '095059';
+        }
+        handleSelectUser(found, true);
+      } else {
+        showToast('Kata laluan tidak sah untuk Super Admin! Sila semak semula kata laluan anda.', 'error');
+      }
+      return;
+    }
+
+    // Bagi akaun staf operasi lain
+    if (found.password === trimmedPass) {
+      handleSelectUser(found, true);
     } else {
       showToast('Nama pengguna atau kata laluan tidak sah!', 'error');
     }
@@ -488,9 +570,9 @@ export const TechByteLandingView = () => {
                       <button
                         key={u.id}
                         onClick={() => handleSelectUser(u)}
-                        className={`p-3 rounded-2xl border text-left transition-all flex items-center gap-3 hover:scale-[1.02] cursor-pointer ${
+                        className={`p-3 rounded-2xl border text-left transition-all flex items-center gap-3 hover:scale-[1.02] cursor-pointer relative ${
                           isSuperAdmin
-                            ? 'bg-gradient-to-r from-red-950/60 to-slate-900 border-red-500/50 hover:border-red-400'
+                            ? 'bg-gradient-to-r from-red-950/80 via-slate-900 to-red-950/40 border-red-500/60 hover:border-red-400 shadow-lg shadow-red-950/40'
                             : isCustomerService
                             ? 'bg-gradient-to-r from-indigo-950/70 to-slate-900 border-indigo-500/50 hover:border-indigo-400 shadow-indigo-500/10'
                             : isCafe
@@ -500,13 +582,22 @@ export const TechByteLandingView = () => {
                             : 'bg-slate-800 border-slate-700 hover:border-slate-500'
                         }`}
                       >
-                        <div className="w-10 h-10 rounded-full bg-slate-800 border border-white/20 flex items-center justify-center overflow-hidden shrink-0 text-lg">
+                        <div className={`w-10 h-10 rounded-full border flex items-center justify-center overflow-hidden shrink-0 text-lg ${
+                          isSuperAdmin ? 'bg-red-900/60 border-red-400 text-xl' : 'bg-slate-800 border-white/20'
+                        }`}>
                           {isSuperAdmin ? '👑' : isCustomerService ? '📟' : isCafe ? '☕' : '📱'}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h4 className="font-extrabold text-xs text-white truncate">
-                            {u.name}
-                          </h4>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <h4 className="font-extrabold text-xs text-white truncate">
+                              {u.name}
+                            </h4>
+                            {isSuperAdmin && (
+                              <span className="text-[8px] px-1.5 py-0.5 rounded bg-red-500/30 text-red-200 border border-red-500/50 font-bold inline-flex items-center gap-0.5">
+                                <Lock className="w-2.5 h-2.5" /> DIKUNCI
+                              </span>
+                            )}
+                          </div>
                           <span className={`text-[10px] font-black uppercase block ${
                             isSuperAdmin ? 'text-red-400' : isCustomerService ? 'text-indigo-400' : isCafe ? 'text-amber-400' : 'text-cyan-400'
                           }`}>
@@ -514,7 +605,7 @@ export const TechByteLandingView = () => {
                           </span>
                           <span className="text-[9px] text-slate-400 block truncate">
                             {isSuperAdmin
-                              ? 'Akses Semua 3 Modul (Unlimit)'
+                              ? 'ID: admin • Wajib Masukkan Kata Laluan'
                               : isCustomerService
                               ? 'Akses Apps Tab Pelayan Sahaja'
                               : isCafe
@@ -530,25 +621,34 @@ export const TechByteLandingView = () => {
 
             {/* Manual Form Login */}
             <div className="border-t border-slate-800 pt-4">
-              <span className="text-[11px] font-bold text-slate-400 block mb-2">
-                Atau log masuk menggunakan Nama Pengguna:
-              </span>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-bold text-slate-300">
+                  Atau log masuk menggunakan ID Pengguna & Kata Laluan:
+                </span>
+                <span className="text-[10px] text-amber-400 font-semibold">
+                  Super Admin: ID "admin"
+                </span>
+              </div>
               <form onSubmit={handleManualLogin} className="space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <input
-                    type="text"
-                    placeholder="Nama Pengguna (cth: admin, cafe, repair)"
-                    value={customUsername}
-                    onChange={(e) => setCustomUsername(e.target.value)}
-                    className="px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white outline-none focus:border-amber-400"
-                  />
-                  <input
-                    type="password"
-                    placeholder="Kata Laluan"
-                    value={customPassword}
-                    onChange={(e) => setCustomPassword(e.target.value)}
-                    className="px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white outline-none focus:border-amber-400"
-                  />
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="ID Pengguna (cth: admin)"
+                      value={customUsername}
+                      onChange={(e) => setCustomUsername(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white outline-none focus:border-amber-400"
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="password"
+                      placeholder="Kata Laluan (Password)"
+                      value={customPassword}
+                      onChange={(e) => setCustomPassword(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white outline-none focus:border-amber-400"
+                    />
+                  </div>
                 </div>
                 <button
                   type="submit"
@@ -558,6 +658,111 @@ export const TechByteLandingView = () => {
                 </button>
               </form>
             </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* SUPER ADMIN PASSWORD VERIFICATION PROMPT MODAL */}
+      {/* ========================================================================= */}
+      {isSuperAdminPromptOpen && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+          <div className="bg-slate-900 border-2 border-red-500/70 rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl relative text-white space-y-5">
+            
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                setIsSuperAdminPromptOpen(false);
+                setAdminPasswordInput('');
+                setAdminPasswordError('');
+              }}
+              className="absolute top-4 right-4 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Header */}
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-red-950/90 border border-red-500/60 flex items-center justify-center text-2xl shadow-xl shrink-0">
+                👑
+              </div>
+              <div>
+                <h3 className="text-base font-black text-white flex items-center gap-2">
+                  <span>Pengesahan Super Admin</span>
+                  <Lock className="w-4 h-4 text-red-400" />
+                </h3>
+                <p className="text-xs text-slate-300">
+                  ID Log Masuk (Username): <strong className="text-amber-400 font-mono">admin</strong>
+                </p>
+              </div>
+            </div>
+
+            {/* Notice */}
+            <div className="p-3 rounded-xl bg-red-950/40 border border-red-900/60 text-xs text-slate-200 leading-relaxed">
+              Ruangan <strong>Super Admin</strong> dilindungi kata laluan. Hanya log masuk yang betul dibenarkan masuk ke kawalan penuh sistem.
+            </div>
+
+            {/* Error Message */}
+            {adminPasswordError && (
+              <div className="p-3 bg-red-500/20 border border-red-500 text-red-200 text-xs rounded-xl font-bold animate-shake">
+                {adminPasswordError}
+              </div>
+            )}
+
+            {/* Form */}
+            <form onSubmit={handleConfirmSuperAdminPassword} className="space-y-4">
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-bold text-slate-300 block">
+                    Kata Laluan (Password):
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowAdminPassModal(!showAdminPassModal)}
+                    className="text-[11px] text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 cursor-pointer"
+                  >
+                    {showAdminPassModal ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    <span>{showAdminPassModal ? 'Sembunyi' : 'Lihat'}</span>
+                  </button>
+                </div>
+                <div className="relative">
+                  <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type={showAdminPassModal ? "text" : "password"}
+                    autoFocus
+                    value={adminPasswordInput}
+                    onChange={(e) => {
+                      setAdminPasswordInput(e.target.value);
+                      setAdminPasswordError('');
+                    }}
+                    placeholder="Masukkan Kata Laluan (cth: 095059)"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white font-mono outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSuperAdminPromptOpen(false);
+                    setAdminPasswordInput('');
+                    setAdminPasswordError('');
+                  }}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs uppercase tracking-wider shadow-lg transition flex items-center justify-center gap-1.5"
+                >
+                  <span>Sahkan & Masuk</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </form>
 
           </div>
         </div>
