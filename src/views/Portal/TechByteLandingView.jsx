@@ -81,6 +81,11 @@ export const TechByteLandingView = () => {
     setIsStaffLoggedIn(true);
     switchUser(user.id);
     setIsLoginModalOpen(false);
+    if (user.role === 'CUSTOMER SERVICE') {
+      setCurrentTab('waiter-tablet-app');
+      showToast(`Log masuk berjaya! Selamat datang ${user.name} (Apps Tab Pelayan sahaja).`, 'success');
+      return;
+    }
     switchSystemMode('PORTAL');
     showToast(`Log masuk berjaya! Selamat datang ${user.name} (${user.role}).`, 'success');
   };
@@ -193,19 +198,28 @@ export const TechByteLandingView = () => {
             </button>
 
             {/* Current logged-in status hint (Hanya jika admin/staf sedang log masuk) */}
-            {isStaffLoggedIn && currentUser && (
+            {isStaffLoggedIn && currentUser && currentUser.role !== 'CUSTOMER' && (
               <div className="mt-2 text-center md:text-right">
                 <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-300 bg-black/60 px-2.5 py-0.5 rounded-full border border-amber-500/30">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   {currentUser?.name?.split(' ')[0]} ({currentUser?.role})
                 </span>
                 <div className="mt-1 flex items-center gap-2 justify-center md:justify-end">
-                  <button
-                    onClick={() => switchSystemMode('PORTAL')}
-                    className="text-[10px] text-cyan-300 hover:text-cyan-200 underline font-black cursor-pointer"
-                  >
-                    Platform Staf →
-                  </button>
+                  {currentUser?.role === 'CUSTOMER SERVICE' ? (
+                    <button
+                      onClick={() => setCurrentTab('waiter-tablet-app')}
+                      className="text-[10px] text-indigo-300 hover:text-indigo-200 underline font-black cursor-pointer"
+                    >
+                      Buka Tab Pelayan →
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => switchSystemMode('PORTAL')}
+                      className="text-[10px] text-cyan-300 hover:text-cyan-200 underline font-black cursor-pointer"
+                    >
+                      Platform Staf →
+                    </button>
+                  )}
                   <span className="text-white/30">•</span>
                   <button
                     onClick={logoutStaff}
@@ -330,7 +344,7 @@ export const TechByteLandingView = () => {
         </div>
 
         {/* ========================================================================= */}
-        {/* ANDROID APPS SHOWCASE: PHONE (PELANGGAN) & TAB (PEKERJA / PELAYAN) */}
+        {/* ANDROID APPS SHOWCASE: APPS PELANGGAN (CAFE & BAIKI TELEFON) */}
         {/* ========================================================================= */}
         <div className="bg-stone-950/85 backdrop-blur-md rounded-3xl border border-amber-500/30 p-5 sm:p-6 shadow-2xl space-y-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-b border-stone-800 pb-3">
@@ -340,10 +354,10 @@ export const TechByteLandingView = () => {
               </div>
               <div>
                 <h3 className="text-base sm:text-lg font-black text-white uppercase tracking-wide">
-                  Aplikasi Mudah Alih Android (Real-Time Cloud Sync)
+                  Aplikasi Mudah Alih Pelanggan (Android Phone Apps)
                 </h3>
                 <p className="text-xs text-slate-400">
-                  Dua aplikasi diselaraskan secara langsung melalui rangkaian awam GitHub Pages
+                  Dua aplikasi awam diselaraskan secara langsung melalui rangkaian cloud MQTT GitHub Pages
                 </p>
               </div>
             </div>
@@ -358,7 +372,7 @@ export const TechByteLandingView = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             
-            {/* APP 1: ANDROID PHONE UNTUK PELANGGAN */}
+            {/* APP 1: ANDROID PHONE PESANAN MAKANAN CAFE */}
             <div
               onClick={() => setCurrentTab('customer-phone-app')}
               className="bg-slate-900/90 rounded-2xl p-4 border border-amber-500/40 hover:border-amber-400 transition-all hover:scale-[1.01] cursor-pointer group shadow-lg flex flex-col justify-between"
@@ -366,53 +380,53 @@ export const TechByteLandingView = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[10px] font-black uppercase tracking-wider">
-                    ANDROID PHONE • PELANGGAN
+                    ANDROID PHONE • CAFÉ
                   </span>
                   <span className="text-xs text-amber-400 font-mono font-bold">?app=customer</span>
                 </div>
                 <h4 className="text-base font-black text-white group-hover:text-amber-400 transition">
-                  Aplikasi Pelanggan (Android Phone)
+                  Aplikasi Pesanan Makanan Café
                 </h4>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  Pelanggan boleh mengimbas QR kod meja atau memilih nombor meja, memesan makanan & minuman, membuat bayaran DuitNow QR, serta menjejaki status masakan dapur secara langsung dengan kunci pembatalan automatik.
+                  Pelanggan boleh imbas QR meja, memesan makanan & minuman Itali, bayaran DuitNow QR, serta pantau status masakan dapur secara langsung.
                 </p>
               </div>
 
               <div className="pt-4 flex items-center justify-between">
                 <span className="text-xs font-black text-amber-400 flex items-center gap-1">
-                  <span>Buka Apps Pelanggan</span>
+                  <span>Buka Apps Café</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </span>
-                <span className="text-[10px] text-slate-500 font-bold">Responsif Skrin Telefon</span>
+                <span className="text-[10px] text-slate-500 font-bold">Format Skrin Telefon</span>
               </div>
             </div>
 
-            {/* APP 2: ANDROID TAB UNTUK PEKERJA / PELAYAN */}
+            {/* APP 2: ANDROID PHONE BAIKI SMARTPHONE */}
             <div
-              onClick={() => setCurrentTab('waiter-tablet-app')}
-              className="bg-slate-900/90 rounded-2xl p-4 border border-indigo-500/40 hover:border-indigo-400 transition-all hover:scale-[1.01] cursor-pointer group shadow-lg flex flex-col justify-between"
+              onClick={() => setCurrentTab('customer-repair-phone-app')}
+              className="bg-slate-900/90 rounded-2xl p-4 border border-cyan-500/40 hover:border-cyan-400 transition-all hover:scale-[1.01] cursor-pointer group shadow-lg flex flex-col justify-between"
             >
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-0.5 rounded-full bg-indigo-500 text-white text-[10px] font-black uppercase tracking-wider">
-                    ANDROID TAB • PELAYAN
+                  <span className="px-2.5 py-0.5 rounded-full bg-cyan-400 text-slate-950 text-[10px] font-black uppercase tracking-wider">
+                    ANDROID PHONE • BAIKI
                   </span>
-                  <span className="text-xs text-indigo-400 font-mono font-bold">?app=waiter</span>
+                  <span className="text-xs text-cyan-300 font-mono font-bold">?app=repair</span>
                 </div>
-                <h4 className="text-base font-black text-white group-hover:text-indigo-400 transition">
-                  Aplikasi Pelayan / Tablet (Android Tab)
+                <h4 className="text-base font-black text-white group-hover:text-cyan-300 transition">
+                  Apps Baiki Telefon Bimbit
                 </h4>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  Direka khas untuk kru pelayan mengambil pesanan terus di meja pelanggan menggunakan skrin tablet 3-zon: Peta visual meja, papan sentuh menu pantas, penghantaran tiket dapur serta kutipan bayaran tunai / QR.
+                  Semak status live kerja baikpulih telefon pintar (timeline 7-peringkat), pendaftaran permohonan servis baru & katalog aksesori.
                 </p>
               </div>
 
               <div className="pt-4 flex items-center justify-between">
-                <span className="text-xs font-black text-indigo-400 flex items-center gap-1">
-                  <span>Buka Apps Pelayan</span>
+                <span className="text-xs font-black text-cyan-300 flex items-center gap-1">
+                  <span>Buka Apps Baiki Telefon</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </span>
-                <span className="text-[10px] text-slate-500 font-bold">Format Skrin Lebar Tablet</span>
+                <span className="text-[10px] text-slate-500 font-bold">Format Skrin Telefon</span>
               </div>
             </div>
 
@@ -462,48 +476,55 @@ export const TechByteLandingView = () => {
               </span>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {(users || []).map((u) => {
-                  const isSuperAdmin = u.role === 'SUPER ADMIN';
-                  const isCafe = u.role.includes('CAFE');
-                  const isRepair = u.role.includes('REPAIR') || u.role.includes('SMARTPHONE');
+                {(users || [])
+                  .filter(u => u.role !== 'CUSTOMER')
+                  .map((u) => {
+                    const isSuperAdmin = u.role === 'SUPER ADMIN';
+                    const isCustomerService = u.role === 'CUSTOMER SERVICE';
+                    const isCafe = u.role.includes('CAFE');
+                    const isRepair = u.role.includes('REPAIR') || u.role.includes('SMARTPHONE');
 
-                  return (
-                    <button
-                      key={u.id}
-                      onClick={() => handleSelectUser(u)}
-                      className={`p-3 rounded-2xl border text-left transition-all flex items-center gap-3 hover:scale-[1.02] cursor-pointer ${
-                        isSuperAdmin
-                          ? 'bg-gradient-to-r from-red-950/60 to-slate-900 border-red-500/50 hover:border-red-400'
-                          : isCafe
-                          ? 'bg-gradient-to-r from-amber-950/60 to-slate-900 border-amber-500/50 hover:border-amber-400'
-                          : isRepair
-                          ? 'bg-gradient-to-r from-blue-950/60 to-slate-900 border-cyan-500/50 hover:border-cyan-400'
-                          : 'bg-slate-800 border-slate-700 hover:border-slate-500'
-                      }`}
-                    >
-                      <div className="w-10 h-10 rounded-full bg-slate-800 border border-white/20 flex items-center justify-center overflow-hidden shrink-0 text-lg">
-                        {isSuperAdmin ? '👑' : isCafe ? '☕' : '📱'}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h4 className="font-extrabold text-xs text-white truncate">
-                          {u.name}
-                        </h4>
-                        <span className={`text-[10px] font-black uppercase block ${
-                          isSuperAdmin ? 'text-red-400' : isCafe ? 'text-amber-400' : 'text-cyan-400'
-                        }`}>
-                          {u.role}
-                        </span>
-                        <span className="text-[9px] text-slate-400 block truncate">
-                          {isSuperAdmin
-                            ? 'Akses Semua 3 Modul (Unlimit)'
+                    return (
+                      <button
+                        key={u.id}
+                        onClick={() => handleSelectUser(u)}
+                        className={`p-3 rounded-2xl border text-left transition-all flex items-center gap-3 hover:scale-[1.02] cursor-pointer ${
+                          isSuperAdmin
+                            ? 'bg-gradient-to-r from-red-950/60 to-slate-900 border-red-500/50 hover:border-red-400'
+                            : isCustomerService
+                            ? 'bg-gradient-to-r from-indigo-950/70 to-slate-900 border-indigo-500/50 hover:border-indigo-400 shadow-indigo-500/10'
                             : isCafe
-                            ? 'Akses Modul Pengurusan Café'
-                            : 'Akses Modul Baiki Smartphone'}
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })}
+                            ? 'bg-gradient-to-r from-amber-950/60 to-slate-900 border-amber-500/50 hover:border-amber-400'
+                            : isRepair
+                            ? 'bg-gradient-to-r from-blue-950/60 to-slate-900 border-cyan-500/50 hover:border-cyan-400'
+                            : 'bg-slate-800 border-slate-700 hover:border-slate-500'
+                        }`}
+                      >
+                        <div className="w-10 h-10 rounded-full bg-slate-800 border border-white/20 flex items-center justify-center overflow-hidden shrink-0 text-lg">
+                          {isSuperAdmin ? '👑' : isCustomerService ? '📟' : isCafe ? '☕' : '📱'}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-extrabold text-xs text-white truncate">
+                            {u.name}
+                          </h4>
+                          <span className={`text-[10px] font-black uppercase block ${
+                            isSuperAdmin ? 'text-red-400' : isCustomerService ? 'text-indigo-400' : isCafe ? 'text-amber-400' : 'text-cyan-400'
+                          }`}>
+                            {u.role}
+                          </span>
+                          <span className="text-[9px] text-slate-400 block truncate">
+                            {isSuperAdmin
+                              ? 'Akses Semua 3 Modul (Unlimit)'
+                              : isCustomerService
+                              ? 'Akses Apps Tab Pelayan Sahaja'
+                              : isCafe
+                              ? 'Akses Modul Pengurusan Café'
+                              : 'Akses Modul Baiki Smartphone'}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
               </div>
             </div>
 

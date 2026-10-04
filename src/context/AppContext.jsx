@@ -24,7 +24,7 @@ const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
   // Helper to load or fallback to initial
-  const USERS_STORAGE_VERSION = 'v2.2_wan_muhadir';
+  const USERS_STORAGE_VERSION = 'v2.3_customer_service_waiter';
 
   const loadStorage = (key, fallback) => {
     try {
@@ -102,6 +102,19 @@ export const AppProvider = ({ children }) => {
   const [notifications, setNotifications] = useState(() => loadStorage('notifications', INITIAL_NOTIFICATIONS));
   const [auditLogs, setAuditLogs] = useState(() => loadStorage('audit_logs', INITIAL_AUDIT_LOGS));
 
+  // Global Accessory Discount & Promo Sale configured by Super Admin
+  const DEFAULT_ACCESSORY_DISCOUNT = {
+    isActive: true,
+    percentage: 15,
+    title: 'TAWARAN DISKAUN & JUALAN MURAH AKSESORI!',
+    customText: 'Potongan harga istimewa sempena promosi bengkel GIATMARA Kangar. Jimat hebat untuk semua kabel, casing, tempered glass & charger terpilih!',
+    updatedBy: 'Super Admin',
+    updatedAt: new Date().toISOString()
+  };
+  const [accessoryDiscount, setAccessoryDiscount] = useState(() =>
+    loadStorage('accessory_discount', DEFAULT_ACCESSORY_DISCOUNT)
+  );
+
   // UI state
   const [currentTab, setCurrentTabState] = useState('main');
   const [activeSystemMode, setActiveSystemMode] = useState('MAIN'); // 'MAIN', 'PORTAL', 'MASAKAN', 'REPAIR', 'MANAGEMENT'
@@ -137,7 +150,7 @@ export const AppProvider = ({ children }) => {
       setActiveSystemMode('PORTAL');
     } else if (['cafe-dashboard', 'menu', 'tables', 'qr-tables', 'food-ordering', 'kitchen', 'food-orders', 'customer-order', 'customer-phone-app', 'waiter-tablet-app'].includes(tab)) {
       setActiveSystemMode('MASAKAN');
-    } else if (['repair-dashboard', 'customers', 'repair-jobs', 'repair-tools', 'accessories-pos', 'customer-repair-tracker'].includes(tab)) {
+    } else if (['repair-dashboard', 'customers', 'repair-jobs', 'repair-tools', 'accessories-pos', 'customer-repair-tracker', 'customer-repair-phone-app'].includes(tab)) {
       setActiveSystemMode('REPAIR');
     } else {
       setActiveSystemMode('MANAGEMENT');
@@ -265,6 +278,63 @@ export const AppProvider = ({ children }) => {
   useEffect(() => { localStorage.setItem('trig_notifications', JSON.stringify(notifications)); }, [notifications]);
   useEffect(() => { localStorage.setItem('trig_audit_logs', JSON.stringify(auditLogs)); }, [auditLogs]);
   useEffect(() => { localStorage.setItem('trig_is_staff_logged_in', String(isStaffLoggedIn)); }, [isStaffLoggedIn]);
+  useEffect(() => { localStorage.setItem('trig_accessory_discount', JSON.stringify(accessoryDiscount)); }, [accessoryDiscount]);
+
+  // Helper: Synchronize & Calculate Customer CRM stats strictly from valid, diagnosed repair jobs
+  const calculateCustomerStats = (customer, currentRepairJobs) => {
+    const cleanCustPhone = (customer.phone || '').replace(/[^0-9]/g, '');
+    const linkedJobs = (currentRepairJobs || []).filter(j => {
+      if (j.customerId && j.customerId === customer.id) return true;
+      const jPhone = (j.customerPhone || '').replace(/[^0-9]/g, '');
+      return (cleanCustPhone && jPhone && cleanCustPhone === jPhone) ||
+             (j.customerName && customer.name && j.customerName.trim().toLowerCase() === customer.name.trim().toLowerCase());
+    });
+
+    const totalRepairs = linkedJobs.length;
+
+    // IMPORTANT: Customer spending is ONLY counted for jobs that have been diagnosed by the technician (hasDiagnosis === true OR repairStatus !== 'RECEIVED')
+    const diagnosedJobs = linkedJobs.filter(j => 
+      j.hasDiagnosis === true || 
+      (j.repairStatus && j.repairStatus !== 'RECEIVED' && Number(j.sellingPrice) > 0)
+    );
+    const totalSpending = diagnosedJobs.reduce((acc, j) => acc + (Number(j.sellingPrice) || 0), 0);
+
+    const sortedJobs = [...linkedJobs].sort((a, b) => new Date(b.dateReceived || 0) - new Date(a.dateReceived || 0));
+    const latestJob = sortedJobs[0];
+
+    return {
+      totalRepairs,
+      totalSpending,
+      lastRepair: latestJob ? new Date(latestJob.dateReceived).toISOString().split('T')[0] : (customer.lastRepair && customer.lastRepair !== '-' ? customer.lastRepair : '-'),
+      lastJobId: latestJob ? latestJob.id : (customer.lastJobId && customer.lastJobId !== '-' ? customer.lastJobId : null),
+      lastJobStatus: latestJob ? latestJob.repairStatus : (customer.lastJobStatus || '-')
+    };
+  };
+
+  // Synchronize CRM Customers with Repair Jobs in real time whenever repairJobs changes or on initial mount
+  useEffect(() => {
+    setCustomers(prevCustomers => {
+      let hasChanges = false;
+      const updated = prevCustomers.map(cust => {
+        const stats = calculateCustomerStats(cust, repairJobs);
+        if (
+          cust.totalRepairs !== stats.totalRepairs ||
+          cust.totalSpending !== stats.totalSpending ||
+          cust.lastRepair !== stats.lastRepair ||
+          cust.lastJobId !== stats.lastJobId ||
+          cust.lastJobStatus !== stats.lastJobStatus
+        ) {
+          hasChanges = true;
+          return {
+            ...cust,
+            ...stats
+          };
+        }
+        return cust;
+      });
+      return hasChanges ? updated : prevCustomers;
+    });
+  }, [repairJobs]);
 
   // Toast helper
   const showToast = (message, type = 'success') => {
@@ -312,10 +382,13 @@ export const AppProvider = ({ children }) => {
     );
     if (found) {
       setCurrentUser(found);
+      setIsStaffLoggedIn(found.role !== 'CUSTOMER');
       showToast(`Log masuk sebagai: ${found.name} (${found.role})`, 'info');
       logAudit(`Log masuk pengguna sebagai ${found.role}`, 'AUTH');
       if (found.role === 'CUSTOMER') {
         setCurrentTab('customer-order');
+      } else if (found.role === 'CUSTOMER SERVICE') {
+        setCurrentTab('waiter-tablet-app');
       } else if (found.role === 'CAFE STAFF') {
         setCurrentTab('kitchen');
       } else if (found.role === 'REPAIR STAFF') {
@@ -547,7 +620,12 @@ export const AppProvider = ({ children }) => {
 
   // ================= SMARTPHONE REPAIR MODULE ACTIONS ================= //
   const addCustomer = (cust) => {
-    const newId = `CUST-${String(customers.length + 1).padStart(3, '0')}`;
+    const existingCustNums = (customers || []).map(c => {
+      const match = c.id && c.id.match(/CUST-(\d+)/);
+      return match ? parseInt(match[1], 10) : 0;
+    });
+    const maxCustNum = existingCustNums.length > 0 ? Math.max(...existingCustNums, 0) : 0;
+    const newId = `CUST-${String(maxCustNum + 1).padStart(3, '0')}`;
     const newCust = {
       ...cust,
       id: newId,
@@ -555,6 +633,7 @@ export const AppProvider = ({ children }) => {
       totalRepairs: 0,
       totalSpending: 0,
       lastRepair: '-',
+      lastJobId: '-',
       outstandingPayment: 0
     };
     setCustomers(prev => [newCust, ...prev]);
@@ -568,29 +647,131 @@ export const AppProvider = ({ children }) => {
     showToast('Maklumat pelanggan dikemaskini.');
   };
 
+  const deleteCustomer = (customerId) => {
+    setCustomers(prev => prev.filter(c => c.id !== customerId));
+    logAudit(`Memadam profil pelanggan CRM: ${customerId}`, 'CUSTOMER');
+    showToast(`Profil pelanggan ${customerId} telah dipadam.`);
+  };
+
+  const deleteRepairJob = (jobId) => {
+    // Kawalan Keselamatan & RBAC: Hanya SUPER ADMIN & MANAGER dibenarkan memadam job baiki
+    if (currentUser?.role !== 'SUPER ADMIN' && currentUser?.role !== 'MANAGER') {
+      showToast('Akses Ditolak: Hanya Super Admin dan Pengurus (Manager) dibenarkan memadam rekod pembaikan!', 'error');
+      return false;
+    }
+
+    const jobToDelete = (repairJobs || []).find(j => j.id === jobId);
+    if (!jobToDelete) {
+      showToast('Rekod pembaikan tidak dijumpai.', 'error');
+      return false;
+    }
+
+    const remainingJobs = (repairJobs || []).filter(j => j.id !== jobId);
+    setRepairJobs(remainingJobs);
+
+    // Update customer stats if linked
+    setCustomers(prev => prev.map(c => {
+      const isMatched = (jobToDelete.customerId && c.id === jobToDelete.customerId) ||
+        ((jobToDelete.customerPhone || '').replace(/[^0-9]/g, '') === (c.phone || '').replace(/[^0-9]/g, '')) ||
+        (jobToDelete.customerName && c.name && jobToDelete.customerName.trim().toLowerCase() === c.name.trim().toLowerCase());
+      if (isMatched) {
+        const stats = calculateCustomerStats(c, remainingJobs);
+        return {
+          ...c,
+          ...stats
+        };
+      }
+      return c;
+    }));
+
+    logAudit(`Memadam rekod job pembaikan ${jobId} (${jobToDelete.deviceBrand} ${jobToDelete.deviceModel} - ${jobToDelete.customerName})`, 'REPAIR');
+    showToast(`Rekod pembaikan ${jobId} telah dipadam.`);
+    return true;
+  };
+
   const createRepairJob = (jobData) => {
-    const jobNum = repairJobs.length + 1;
-    const jobId = `REP-2026-${String(jobNum).padStart(5, '0')}`;
+    // Generate strictly unique, non-repeating Job ID (e.g. REP-2026-00001)
+    const existingNums = (repairJobs || []).map(j => {
+      const match = j.id && j.id.match(/REP-\d+-(\d+)/);
+      return match ? parseInt(match[1], 10) : 0;
+    });
+    const maxNum = existingNums.length > 0 ? Math.max(...existingNums, 0) : 0;
+    const nextNum = maxNum + 1;
+    const jobId = `REP-2026-${String(nextNum).padStart(5, '0')}`;
     const receiptNo = jobId;
 
-    // Calculate costs
+    // Check if diagnosis has been explicitly completed by admin/technician
+    const hasDiagnosis = Boolean(jobData.hasDiagnosis);
+
+    // Calculate costs (only calculate active selling price if diagnosis is done)
     const partsCost = (jobData.partsUsed || []).reduce((acc, p) => acc + ((p.costPrice || 0) * (p.quantity || 1)), 0);
     const partsSelling = (jobData.partsUsed || []).reduce((acc, p) => acc + ((p.sellingPrice || 0) * (p.quantity || 1)), 0);
-    const labourCost = Number(jobData.labourCost || 0);
+    const labourCost = hasDiagnosis ? Number(jobData.labourCost || 0) : 0;
     const totalCost = partsCost + labourCost;
-    const sellingPrice = Number(jobData.sellingPrice || (partsSelling + labourCost));
-    const grossProfit = sellingPrice - partsCost;
+    const sellingPrice = hasDiagnosis ? Number(jobData.sellingPrice || (partsSelling + labourCost)) : 0;
+    const grossProfit = hasDiagnosis ? (sellingPrice - partsCost) : 0;
+
+    // Auto-link or auto-register into CRM Customers database
+    const cleanPhone = (jobData.customerPhone || '').replace(/[^0-9]/g, '');
+    let matchedCust = (customers || []).find(c => {
+      if (jobData.customerId && c.id === jobData.customerId) return true;
+      const cPhone = (c.phone || '').replace(/[^0-9]/g, '');
+      return (cleanPhone && cPhone && cleanPhone === cPhone) ||
+             (jobData.customerName && c.name && c.name.trim().toLowerCase() === jobData.customerName.trim().toLowerCase());
+    });
+
+    let assignedCustomerId = matchedCust ? matchedCust.id : jobData.customerId;
+
+    if (matchedCust) {
+      // Update existing customer in CRM (Do not add price to totalSpending if pending diagnosis)
+      setCustomers(prev => prev.map(c => c.id === matchedCust.id ? {
+        ...c,
+        totalRepairs: (c.totalRepairs || 0) + 1,
+        totalSpending: hasDiagnosis ? (c.totalSpending || 0) + sellingPrice : (c.totalSpending || 0),
+        lastRepair: new Date().toISOString().split('T')[0],
+        lastJobId: jobId,
+        lastJobStatus: jobData.repairStatus || 'RECEIVED'
+      } : c));
+    } else if (jobData.customerName && jobData.customerPhone) {
+      // Auto-register new customer in CRM with 0 spending until technician completes diagnosis
+      const existingCustNums = (customers || []).map(c => {
+        const match = c.id && c.id.match(/CUST-(\d+)/);
+        return match ? parseInt(match[1], 10) : 0;
+      });
+      const maxCustNum = existingCustNums.length > 0 ? Math.max(...existingCustNums, 0) : 0;
+      const newCustId = `CUST-${String(maxCustNum + 1).padStart(3, '0')}`;
+      assignedCustomerId = newCustId;
+
+      const newCustomer = {
+        id: newCustId,
+        name: jobData.customerName.trim(),
+        phone: jobData.customerPhone.trim(),
+        email: jobData.customerEmail || '',
+        address: jobData.customerAddress || '-',
+        dateRegistered: new Date().toISOString().split('T')[0],
+        totalRepairs: 1,
+        totalSpending: hasDiagnosis ? sellingPrice : 0,
+        lastRepair: new Date().toISOString().split('T')[0],
+        lastJobId: jobId,
+        lastJobStatus: jobData.repairStatus || 'RECEIVED',
+        outstandingPayment: 0
+      };
+      setCustomers(prev => [newCustomer, ...prev]);
+      logAudit(`Mendaftar pelanggan baiki baru secara automatik dari pendaftaran job: ${newCustomer.name} (${jobId})`, 'CUSTOMER');
+    }
 
     const newJob = {
       ...jobData,
       id: jobId,
       receiptNo,
+      customerId: assignedCustomerId,
       dateReceived: jobData.dateReceived || new Date().toISOString(),
       partsCost,
       labourCost,
       totalCost,
       sellingPrice,
       grossProfit,
+      hasDiagnosis,
       quotationStatus: jobData.quotationStatus || 'PENDING',
       repairStatus: jobData.repairStatus || 'RECEIVED',
       paymentStatus: 'PENDING',
@@ -600,15 +781,6 @@ export const AppProvider = ({ children }) => {
     };
 
     setRepairJobs(prev => [newJob, ...prev]);
-
-    // Update customer history
-    if (jobData.customerId) {
-      setCustomers(prev => prev.map(c => c.id === jobData.customerId ? {
-        ...c,
-        totalRepairs: c.totalRepairs + 1,
-        lastRepair: new Date().toISOString().split('T')[0]
-      } : c));
-    }
 
     // Add Notification
     addNotification({
@@ -624,25 +796,57 @@ export const AppProvider = ({ children }) => {
   };
 
   const updateRepairJob = (id, updated) => {
-    setRepairJobs(prev => prev.map(j => {
-      if (j.id === id) {
-        const merged = { ...j, ...updated };
-        const partsCost = (merged.partsUsed || []).reduce((acc, p) => acc + ((p.costPrice || 0) * (p.quantity || 1)), 0);
-        const labourCost = Number(merged.labourCost || 0);
-        const totalCost = partsCost + labourCost;
-        const sellingPrice = Number(merged.sellingPrice || 0);
-        const grossProfit = sellingPrice - partsCost;
+    let nextJobsSnapshot = null;
+
+    setRepairJobs(prev => {
+      const nextJobs = prev.map(j => {
+        if (j.id === id) {
+          const merged = { ...j, ...updated };
+          const hasDiag = merged.hasDiagnosis !== undefined ? Boolean(merged.hasDiagnosis) : Boolean(j.hasDiagnosis);
+          const partsCost = (merged.partsUsed || []).reduce((acc, p) => acc + ((p.costPrice || 0) * (p.quantity || 1)), 0);
+          const labourCost = Number(merged.labourCost || 0);
+          const totalCost = partsCost + labourCost;
+          const sellingPrice = Number(merged.sellingPrice || 0);
+          const grossProfit = sellingPrice - partsCost;
+          return {
+            ...merged,
+            partsCost,
+            totalCost,
+            sellingPrice,
+            grossProfit,
+            hasDiagnosis: hasDiag
+          };
+        }
+        return j;
+      });
+      nextJobsSnapshot = nextJobs;
+      return nextJobs;
+    });
+
+    // Real-time synchronization with CRM customers
+    setCustomers(prev => prev.map(c => {
+      const targetJob = (repairJobs || []).find(j => j.id === id);
+      const isMatched = targetJob && (
+        (targetJob.customerId && c.id === targetJob.customerId) ||
+        ((targetJob.customerPhone || '').replace(/[^0-9]/g, '') === (c.phone || '').replace(/[^0-9]/g, '')) ||
+        (targetJob.customerName && c.name && targetJob.customerName.trim().toLowerCase() === c.name.trim().toLowerCase())
+      );
+      if (isMatched) {
+        const stats = calculateCustomerStats(c, nextJobsSnapshot || repairJobs);
         return {
-          ...merged,
-          partsCost,
-          totalCost,
-          grossProfit
+          ...c,
+          ...stats,
+          ...(updated.customerName ? { name: updated.customerName.trim() } : {}),
+          ...(updated.customerPhone ? { phone: updated.customerPhone.trim() } : {}),
+          ...(updated.customerEmail ? { email: updated.customerEmail.trim() } : {}),
+          ...(updated.customerAddress ? { address: updated.customerAddress.trim() } : {})
         };
       }
-      return j;
+      return c;
     }));
-    logAudit(`Mengemas kini diagnosis/job baiki ${id}`, 'REPAIR');
-    showToast(`Job ${id} dikemaskini.`);
+
+    logAudit(`Mengemas kini butiran/diagnosis job baiki ${id}`, 'REPAIR');
+    showToast(`Job ${id} berjaya dikemaskini.`);
   };
 
   const approveRepairQuotation = (jobId) => {
@@ -652,7 +856,7 @@ export const AppProvider = ({ children }) => {
     // Deduct spare parts from central inventory
     if (job.partsUsed && job.partsUsed.length > 0) {
       job.partsUsed.forEach(part => {
-        if (part.partId) {
+        if (part.partId && part.source !== 'ONLINE' && !part.isManual) {
           adjustStock(part.partId, part.quantity || 1, 'USED_FOR_REPAIR', `${jobId} (${job.customerName})`);
         }
       });
@@ -679,12 +883,37 @@ export const AppProvider = ({ children }) => {
   };
 
   const updateRepairStatus = (jobId, newStatus) => {
+    const job = (repairJobs || []).find(j => j.id === jobId);
+    if (job && job.repairStatus === 'RECEIVED' && newStatus !== 'RECEIVED' && newStatus !== 'CANCELLED' && (!job.hasDiagnosis || Number(job.sellingPrice || 0) <= 0)) {
+      showToast('Status tidak boleh diubah! Sila lengkapkan ruangan "Diagnosis & Alat Ganti" dan simpan sebut harga terlebih dahulu.', 'warning');
+      return;
+    }
+
     const now = new Date().toISOString();
     setRepairJobs(prev => prev.map(j => j.id === jobId ? {
       ...j,
       repairStatus: newStatus,
       completedAt: (newStatus === 'READY FOR COLLECTION' || newStatus === 'COMPLETED') && !j.completedAt ? now : j.completedAt
     } : j));
+
+    // Real-time synchronization of customer status in CRM
+    const targetJob = (repairJobs || []).find(j => j.id === jobId);
+    if (targetJob) {
+      setCustomers(prev => prev.map(c => {
+        const isMatched = (targetJob.customerId && c.id === targetJob.customerId) ||
+          ((targetJob.customerPhone || '').replace(/[^0-9]/g, '') === (c.phone || '').replace(/[^0-9]/g, '')) ||
+          (targetJob.customerName && c.name && targetJob.customerName.trim().toLowerCase() === c.name.trim().toLowerCase());
+        if (isMatched) {
+          return {
+            ...c,
+            lastJobStatus: newStatus,
+            lastRepair: new Date().toISOString().split('T')[0],
+            lastJobId: jobId
+          };
+        }
+        return c;
+      }));
+    }
 
     if (newStatus === 'READY FOR COLLECTION') {
       const job = repairJobs.find(j => j.id === jobId);
@@ -714,13 +943,19 @@ export const AppProvider = ({ children }) => {
       completedAt: j.completedAt || now
     } : j));
 
-    // Update Customer spending
-    if (job.customerId) {
-      setCustomers(prev => prev.map(c => c.id === job.customerId ? {
-        ...c,
-        totalSpending: c.totalSpending + job.sellingPrice
-      } : c));
-    }
+    // Update Customer payment record in CRM
+    setCustomers(prev => prev.map(c => {
+      const isMatched = (job.customerId && c.id === job.customerId) ||
+        ((job.customerPhone || '').replace(/[^0-9]/g, '') === (c.phone || '').replace(/[^0-9]/g, ''));
+      if (isMatched) {
+        return {
+          ...c,
+          outstandingPayment: 0,
+          lastJobStatus: 'COMPLETED'
+        };
+      }
+      return c;
+    }));
 
     // Record Unified Sale
     const newSale = {
@@ -861,19 +1096,47 @@ export const AppProvider = ({ children }) => {
   };
 
   const addInventoryItem = (item) => {
-    const newId = `INV-${item.category.includes('Café') ? 'CF' : item.category.includes('Packaging') ? 'PKG' : item.category.includes('Spare') ? 'SP' : 'ACC'}-${String(inventory.length + 1).padStart(3, '0')}`;
+    const defaultPrefix = item.category?.includes('Café') ? 'CF' : item.category?.includes('Packaging') ? 'PKG' : item.category?.includes('Spare') ? 'SP' : 'ACC';
+    const newId = item.id || `INV-${defaultPrefix}-${String(Date.now()).slice(-4)}`;
+    const currentStock = Number(item.currentStock || 0);
+    const minStock = Number(item.minStock || 5);
     const newItem = {
       ...item,
       id: newId,
-      currentStock: Number(item.currentStock || 0),
-      minStock: Number(item.minStock || 5),
+      sku: item.sku || `${defaultPrefix}-${Date.now().toString().slice(-6)}`,
+      category: item.category || 'Smartphone Accessories',
+      brand: item.brand || 'Umum',
+      model: item.model || 'Universal',
+      unit: item.unit || 'Unit',
+      location: item.location || 'Etalase Aksesori Hadapan',
+      currentStock,
+      minStock,
       costPrice: Number(item.costPrice || 0),
       sellingPrice: Number(item.sellingPrice || 0),
-      status: Number(item.currentStock) <= Number(item.minStock) ? 'LOW_STOCK' : 'IN_STOCK'
+      status: currentStock <= minStock ? (currentStock <= 0 ? 'OUT_OF_STOCK' : 'LOW_STOCK') : 'IN_STOCK'
     };
     setInventory(prev => [newItem, ...prev]);
-    logAudit(`Menambah item inventori baru: ${newItem.name}`, 'INVENTORY');
-    showToast('Item inventori berjaya ditambah!');
+
+    // Record initial stock transaction to keep stock system in sync
+    if (currentStock > 0) {
+      const newTx = {
+        id: `TX-${Date.now().toString().slice(-5)}`,
+        date: new Date().toISOString(),
+        itemId: newId,
+        itemName: newItem.name,
+        type: 'IN',
+        quantity: currentStock,
+        beforeQty: 0,
+        afterQty: currentStock,
+        reference: 'Pendaftaran Aksesori & Stok Awal',
+        user: currentUser ? `${currentUser.name} (${currentUser.role})` : 'Staf Sistem'
+      };
+      setStockTransactions(prev => [newTx, ...prev]);
+    }
+
+    logAudit(`Menambah item aksesori/inventori baru: ${newItem.name} (${newItem.sku}) dengan stok ${currentStock} ${newItem.unit}`, 'INVENTORY');
+    showToast(`Aksesori "${newItem.name}" berjaya didaftarkan dan stok ${currentStock} unit telah ditambah ke sistem!`, 'success');
+    return newItem;
   };
 
   const updateInventoryItem = (id, updated) => {
@@ -888,6 +1151,83 @@ export const AppProvider = ({ children }) => {
     }));
     logAudit(`Mengemas kini item inventori: ${id}`, 'INVENTORY');
     showToast('Inventori dikemaskini.');
+  };
+
+  // Super Admin completely removes an accessory / inventory item
+  const deleteInventoryItem = (id, reason = '') => {
+    const item = inventory.find(it => it.id === id);
+    if (!item) return;
+
+    if (currentUser?.role !== 'SUPER ADMIN') {
+      showToast('Akses Ditolak: Hanya Super Admin yang dibenarkan memadam item aksesori ini sepenuhnya.', 'error');
+      return;
+    }
+
+    setInventory(prev => prev.filter(it => it.id !== id));
+    logAudit(`Super Admin (${currentUser.name}) memadam item aksesori: "${item.name}" (${item.sku || id}) sepenuhnya. Ulasan/Sebab: ${reason || 'Tiada'}`, 'INVENTORY');
+    showToast(`Aksesori "${item.name}" telah berjaya dipadam sepenuhnya oleh Super Admin.`, 'success');
+  };
+
+  // Manager or Super Admin requests removal with required reason/comment
+  const requestRemoveInventoryItem = (id, reason) => {
+    const item = inventory.find(it => it.id === id);
+    if (!item) return;
+
+    setInventory(prev => prev.map(it => {
+      if (it.id === id) {
+        return {
+          ...it,
+          removalRequested: true,
+          removalReason: reason,
+          removalRequestedBy: currentUser ? `${currentUser.name} (${currentUser.role})` : 'Manager Smartphone Repair',
+          removalRequestedAt: new Date().toISOString(),
+          removalStatus: 'PENDING_APPROVAL'
+        };
+      }
+      return it;
+    }));
+
+    logAudit(`Permohonan padam aksesori: "${item.name}" (${id}) dihantar oleh ${currentUser?.name || 'Manager'}. Ulasan: ${reason}`, 'INVENTORY');
+    showToast(`Permohonan membuang aksesori "${item.name}" telah direkodkan. Menunggu kelulusan Super Admin.`, 'info');
+  };
+
+  // Cancel / reject removal request
+  const cancelRemoveInventoryItem = (id) => {
+    setInventory(prev => prev.map(it => {
+      if (it.id === id) {
+        const copy = { ...it };
+        delete copy.removalRequested;
+        delete copy.removalReason;
+        delete copy.removalRequestedBy;
+        delete copy.removalRequestedAt;
+        delete copy.removalStatus;
+        return copy;
+      }
+      return it;
+    }));
+
+    logAudit(`Permohonan buang aksesori (${id}) dibatalkan oleh ${currentUser?.name || 'Admin'}`, 'INVENTORY');
+    showToast('Permohonan membuang aksesori telah dibatalkan.');
+  };
+
+  // Super Admin: Configure store-wide accessory discount & cheap sale promo
+  const updateAccessoryDiscount = (newDiscount) => {
+    if (currentUser && currentUser.role !== 'SUPER ADMIN') {
+      showToast('Akses Ditolak: Hanya Super Admin dibenarkan menetapkan tawaran diskaun aksesori.', 'error');
+      return;
+    }
+
+    const updated = {
+      ...accessoryDiscount,
+      ...newDiscount,
+      percentage: Math.max(0, Math.min(100, Number(newDiscount.percentage) || 0)),
+      updatedBy: currentUser ? `${currentUser.name} (${currentUser.role})` : 'Super Admin',
+      updatedAt: new Date().toISOString()
+    };
+
+    setAccessoryDiscount(updated);
+    logAudit(`Super Admin (${currentUser?.name || 'Super Admin'}) mengemaskini tawaran diskaun aksesori: ${updated.isActive ? `Aktif (${updated.percentage}%)` : 'Dinyahaktifkan'} - "${updated.title}"`, 'PROMOTION');
+    showToast(updated.isActive ? `Tawaran diskaun ${updated.percentage}% berjaya diaktifkan!` : 'Tawaran diskaun aksesori telah dinyahaktifkan.', 'success');
   };
 
   // Procurement: Purchase Request -> Manager Approval -> PO -> Stock Received
@@ -1174,8 +1514,10 @@ export const AppProvider = ({ children }) => {
     cancelFoodOrder,
     addCustomer,
     updateCustomer,
+    deleteCustomer,
     createRepairJob,
     updateRepairJob,
+    deleteRepairJob,
     approveRepairQuotation,
     rejectRepairQuotation,
     updateRepairStatus,
@@ -1184,6 +1526,11 @@ export const AppProvider = ({ children }) => {
     adjustStock,
     addInventoryItem,
     updateInventoryItem,
+    deleteInventoryItem,
+    requestRemoveInventoryItem,
+    cancelRemoveInventoryItem,
+    accessoryDiscount,
+    updateAccessoryDiscount,
     createPurchaseRequest,
     approvePurchaseRequest,
     rejectPurchaseRequest,

@@ -12,48 +12,86 @@
     color: #0f172a;
   }
 
-  /* Force solid black, high-contrast text on all form controls */
+  /* Force solid black, high-contrast text on all standard form controls */
   input:not([type="checkbox"]):not([type="radio"]),
   select,
   textarea {
-    color: #0f172a !important;
-    -webkit-text-fill-color: #0f172a !important;
-    color-scheme: light !important;
+    color: #0f172a;
+    -webkit-text-fill-color: #0f172a;
+    color-scheme: light;
   }
 
   /* Crisp, dark, readable placeholder text */
   input::placeholder,
   textarea::placeholder {
-    color: #475569 !important;
-    -webkit-text-fill-color: #475569 !important;
-    opacity: 1 !important;
+    color: #475569;
+    -webkit-text-fill-color: #475569;
+    opacity: 1;
   }
 
   input::-webkit-input-placeholder,
   textarea::-webkit-input-placeholder {
-    color: #475569 !important;
-    -webkit-text-fill-color: #475569 !important;
-    opacity: 1 !important;
+    color: #475569;
+    -webkit-text-fill-color: #475569;
+    opacity: 1;
   }
 
-  /* Ensure select options are black on white */
+  /* Ensure select options are black on white by default */
   select option {
-    color: #0f172a !important;
-    background-color: #ffffff !important;
-    -webkit-text-fill-color: #0f172a !important;
+    color: #0f172a;
+    background-color: #ffffff;
+    -webkit-text-fill-color: #0f172a;
   }
 
-  /* Exemption for inputs in dark themes */
+  /* Exemption for inputs, selects and textareas in dark themes or with text-white */
   .bg-slate-950 input:not([type="checkbox"]):not([type="radio"]),
   .bg-slate-900 input:not([type="checkbox"]):not([type="radio"]),
+  .bg-slate-800 input:not([type="checkbox"]):not([type="radio"]),
+  .bg-slate-950 select,
+  .bg-slate-900 select,
+  .bg-slate-800 select,
+  .bg-slate-950 textarea,
+  .bg-slate-900 textarea,
+  .bg-slate-800 textarea,
+  .bg-black select,
   input.text-white,
-  textarea.text-white {
+  textarea.text-white,
+  select.text-white {
     color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    color-scheme: dark !important;
+  }
+
+  /* Specific color variants for dark mode selects */
+  select.text-amber-400,
+  .bg-slate-800 select.text-amber-400 {
+    color: #fbbf24 !important;
+    -webkit-text-fill-color: #fbbf24 !important;
+  }
+
+  select.text-cyan-400,
+  .bg-slate-950 select.text-cyan-400 {
+    color: #22d3ee !important;
+    -webkit-text-fill-color: #22d3ee !important;
+  }
+
+  /* Exemption for select options in dark themes */
+  .bg-slate-950 select option,
+  .bg-slate-900 select option,
+  .bg-slate-800 select option,
+  .bg-black select option,
+  select.text-white option,
+  select.text-amber-400 option,
+  select.text-cyan-400 option {
+    color: #ffffff !important;
+    background-color: #0f172a !important;
     -webkit-text-fill-color: #ffffff !important;
   }
 
   .bg-slate-950 input::placeholder,
   .bg-slate-900 input::placeholder,
+  .bg-slate-950 textarea::placeholder,
+  .bg-slate-900 textarea::placeholder,
   input.text-white::placeholder,
   textarea.text-white::placeholder {
     color: #94a3b8 !important;

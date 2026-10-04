@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import {
   FileText,
@@ -14,6 +15,15 @@ import {
 export const QuotationModal = ({ job, onClose, onApprove, onReject }) => {
   const { settings, showToast } = useApp();
 
+  // Lock body scroll while modal is open to prevent page drift/jumping
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+
   if (!job) return null;
 
   const handleApprove = () => {
@@ -26,9 +36,9 @@ export const QuotationModal = ({ job, onClose, onApprove, onReject }) => {
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-slate-200 animate-fade-in my-8 max-h-[90vh] overflow-y-auto text-xs">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-sm overflow-hidden">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-slate-200 animate-fade-in max-h-[90vh] overflow-y-auto text-xs">
         
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
@@ -159,6 +169,7 @@ export const QuotationModal = ({ job, onClose, onApprove, onReject }) => {
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

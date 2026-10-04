@@ -117,6 +117,18 @@ export const INITIAL_USERS = [
     department: "Pelanggan Café & Baiki Telefon",
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
     status: "ACTIVE"
+  },
+  {
+    id: "USR-009",
+    username: "pelayan",
+    password: "pelayan123",
+    name: "Pelatih Masakan (Pelayan)",
+    role: "CUSTOMER SERVICE",
+    email: "pelayan.cafe@giatmara.edu.my",
+    phone: "017-6655443",
+    department: "Layanan Meja & Khidmat Pelanggan Café",
+    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80",
+    status: "ACTIVE"
   }
 ];
 

@@ -41,6 +41,7 @@ export const UserManagement = () => {
     'REPAIR STAFF',
     'SMARTPHONE CASHIER',
     'CASHIER',
+    'CUSTOMER SERVICE',
     'CUSTOMER'
   ];
 

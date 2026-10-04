@@ -34,6 +34,7 @@ import { ReportsCenter } from './views/Reports/ReportsCenter';
 import { CustomerTableOrder } from './views/CustomerPortal/CustomerTableOrder';
 import { CustomerRepairTracker } from './views/CustomerPortal/CustomerRepairTracker';
 import { CustomerPhoneApp } from './views/CustomerPortal/CustomerPhoneApp';
+import { CustomerRepairPhoneApp } from './views/CustomerPortal/CustomerRepairPhoneApp';
 import { WaiterTabletApp } from './views/StaffPortal/WaiterTabletApp';
 import { UserManagement } from './views/System/UserManagement';
 import { AuditTrail } from './views/System/AuditTrail';
@@ -56,8 +57,10 @@ const MainLayout = () => {
         setSelectedTableForCustomer(tableParam);
       }
 
-      if (appMode === 'customer' || appMode === 'phone') {
+      if (appMode === 'customer' || appMode === 'phone' || appMode === 'cafe') {
         setCurrentTab('customer-phone-app');
+      } else if (appMode === 'repair' || appMode === 'phone-repair' || appMode === 'repair-phone' || appMode === 'baiki') {
+        setCurrentTab('customer-repair-phone-app');
       } else if (appMode === 'waiter' || appMode === 'tablet') {
         setCurrentTab('waiter-tablet-app');
       } else if (appMode === 'kitchen') {
@@ -83,7 +86,18 @@ const MainLayout = () => {
     );
   }
 
-  if (currentTab === 'waiter-tablet-app') {
+  if (currentTab === 'customer-repair-phone-app') {
+    return (
+      <div className="min-h-screen bg-slate-950 font-sans">
+        <CustomerRepairPhoneApp />
+        <Toast />
+        <ReceiptModal />
+      </div>
+    );
+  }
+
+  // Jika tab waiter dipilih ATAU pengguna log masuk sebagai Pelatih Masakan (Pelayan) - CUSTOMER SERVICE (eksklusif Apps Tab Pelayan sahaja)
+  if (currentTab === 'waiter-tablet-app' || (isStaffLoggedIn && currentUser?.role === 'CUSTOMER SERVICE')) {
     return (
       <div className="min-h-screen bg-slate-950 font-sans">
         <WaiterTabletApp />
@@ -190,7 +204,7 @@ const MainLayout = () => {
     }
   };
 
-  const isFullWidthMode = activeSystemMode === 'PORTAL' || activeSystemMode === 'MAIN' || currentTab === 'customer-order' || currentTab === 'customer-repair-tracker';
+  const isFullWidthMode = activeSystemMode === 'PORTAL' || activeSystemMode === 'MAIN' || currentTab === 'customer-order' || currentTab === 'customer-repair-tracker' || currentTab === 'customer-repair-phone-app';
 
   const appBackground = 
     activeSystemMode === 'MAIN'

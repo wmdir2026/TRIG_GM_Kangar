@@ -31,6 +31,7 @@ export const Navbar = ({ onToggleSidebar }) => {
     notifications,
     markNotificationRead,
     markAllNotificationsRead,
+    currentTab,
     setCurrentTab,
     activeSystemMode,
     switchSystemMode,
@@ -185,27 +186,60 @@ export const Navbar = ({ onToggleSidebar }) => {
             </button>
           )}
 
-          {/* Quick Android Apps Buttons */}
-          <button
-            onClick={() => setCurrentTab('customer-phone-app')}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-black transition hover:scale-102 cursor-pointer"
-            title="Buka Aplikasi Pelanggan (Android Phone)"
-          >
-            <span>📱</span>
-            <span className="hidden md:inline">Apps Pelanggan</span>
-          </button>
+          {/* Quick Android Apps Buttons - Menyesuaikan mengikut ruangan (Ruangan Baiki vs Ruangan Masakan) */}
+          {activeSystemMode === 'REPAIR' || currentTab === 'customer-repair-tracker' || currentTab === 'customer-repair-phone-app' ? (
+            <button
+              onClick={() => setCurrentTab('customer-repair-phone-app')}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-black transition hover:scale-102 cursor-pointer shadow-xs"
+              title="Buka Aplikasi Pelanggan Baiki Telefon Bimbit (Android Phone)"
+            >
+              <span>📱</span>
+              <span className="hidden md:inline">Apps Baiki Telefon Bimbit</span>
+            </button>
+          ) : activeSystemMode === 'MASAKAN' || currentTab === 'customer-order' || currentTab === 'customer-phone-app' ? (
+            <button
+              onClick={() => setCurrentTab('customer-phone-app')}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-black transition hover:scale-102 cursor-pointer"
+              title="Buka Aplikasi Pelanggan Makanan Café (Android Phone)"
+            >
+              <span>🍝</span>
+              <span className="hidden md:inline">Apps Pelanggan Café</span>
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => setCurrentTab('customer-phone-app')}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-black transition hover:scale-102 cursor-pointer"
+                title="Buka Aplikasi Pelanggan Makanan Café (Android Phone)"
+              >
+                <span>🍝</span>
+                <span className="hidden md:inline">Apps Pelanggan Café</span>
+              </button>
+              <button
+                onClick={() => setCurrentTab('customer-repair-phone-app')}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-black transition hover:scale-102 cursor-pointer shadow-xs"
+                title="Buka Aplikasi Pelanggan Baiki Telefon Bimbit (Android Phone)"
+              >
+                <span>📱</span>
+                <span className="hidden md:inline">Apps Baiki Telefon</span>
+              </button>
+            </>
+          )}
 
-          <button
-            onClick={() => setCurrentTab('waiter-tablet-app')}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 text-xs font-black transition hover:scale-102 cursor-pointer"
-            title="Buka Aplikasi Pelayan (Android Tab)"
-          >
-            <span>📟</span>
-            <span className="hidden md:inline">Apps Tab Pelayan</span>
-          </button>
+          {/* Ikon Apps Tab Pelayan HANYA KELUAR jika pengguna memilih ADMIN - CUSTOMER SERVICES atau SUPER ADMIN */}
+          {isStaffLoggedIn && (currentUser?.role === 'CUSTOMER SERVICE' || currentUser?.role === 'SUPER ADMIN') && (
+            <button
+              onClick={() => setCurrentTab('waiter-tablet-app')}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 text-xs font-black transition hover:scale-102 cursor-pointer"
+              title="Buka Aplikasi Pelayan (Android Tab)"
+            >
+              <span>📟</span>
+              <span className="hidden md:inline">Apps Tab Pelayan</span>
+            </button>
+          )}
 
-          {/* HANYA PAPARKAN PLATFORM STAF DI RUANGAN TENGAH ATAS JIKA ADMIN / STAF TELAH LOGIN */}
-          {isStaffLoggedIn && activeSystemMode !== 'PORTAL' && (
+          {/* HANYA PAPARKAN PLATFORM STAF DI RUANGAN TENGAH ATAS JIKA ADMIN / STAF TELAH LOGIN (Bukan Customer Service) */}
+          {isStaffLoggedIn && activeSystemMode !== 'PORTAL' && currentUser?.role !== 'CUSTOMER SERVICE' && (
             <button
               onClick={() => switchSystemMode('PORTAL')}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-slate-800 via-slate-900 to-indigo-950 hover:from-slate-700 hover:to-indigo-900 text-white border border-white/20 shadow-md text-xs font-bold transition duration-200 hover:scale-[1.02] cursor-pointer"

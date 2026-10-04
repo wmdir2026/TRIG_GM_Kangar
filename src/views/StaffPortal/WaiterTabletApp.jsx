@@ -29,7 +29,8 @@ import {
   Sparkles,
   ArrowLeft,
   Users,
-  BellRing
+  BellRing,
+  LogOut
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -48,7 +49,8 @@ export const WaiterTabletApp = () => {
     switchSystemMode,
     currentUser,
     syncStatus,
-    realtimeSync
+    realtimeSync,
+    logoutStaff
   } = useApp();
 
   const [activeTableId, setActiveTableId] = useState(selectedTableForCustomer || 'M01');
@@ -174,8 +176,14 @@ export const WaiterTabletApp = () => {
       <header className="bg-slate-900 border-b border-amber-500/30 px-4 py-2.5 flex items-center justify-between shadow-lg shrink-0">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => switchSystemMode('MAIN')}
-            className="p-2 rounded-xl bg-slate-800 text-amber-400 hover:bg-slate-700 transition"
+            onClick={() => {
+              if (currentUser?.role === 'CUSTOMER SERVICE') {
+                logoutStaff();
+              } else {
+                switchSystemMode('MAIN');
+              }
+            }}
+            className="p-2 rounded-xl bg-slate-800 text-amber-400 hover:bg-slate-700 transition cursor-pointer"
             title="Kembali ke Menu Utama"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -201,7 +209,7 @@ export const WaiterTabletApp = () => {
               </span>
             </div>
             <p className="text-[11px] text-slate-400">
-              Pelayan: <strong>{currentUser ? currentUser.name : 'NUR Atiqah'}</strong> • Kompleks GIATMARA Kangar
+              Pelayan: <strong>{currentUser ? currentUser.name : 'Pelatih Masakan (Pelayan)'}</strong> • Kompleks GIATMARA Kangar
             </p>
           </div>
         </div>
@@ -223,6 +231,22 @@ export const WaiterTabletApp = () => {
           >
             <QrCode className="w-4 h-4" />
             <span>Papar QR Meja Pelanggan</span>
+          </button>
+
+          {/* Log Keluar Button */}
+          <button
+            onClick={() => {
+              if (currentUser?.role === 'CUSTOMER SERVICE') {
+                logoutStaff();
+              } else {
+                switchSystemMode('MAIN');
+              }
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-950/70 text-slate-300 hover:text-rose-300 border border-slate-700 hover:border-rose-500/40 text-xs font-bold transition shadow-md cursor-pointer"
+            title="Log Keluar ke Menu Pelanggan Awam"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Log Keluar</span>
           </button>
         </div>
       </header>
