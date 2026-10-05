@@ -77,25 +77,25 @@ export const Navbar = ({ onToggleSidebar }) => {
   const handleConfirmAdminPassword = (e) => {
     e.preventDefault();
     const superAdminUser = (users || []).find(u => u.role === 'SUPER ADMIN' || u.username === 'admin');
-    const activePass = superAdminUser?.password || '095059';
+    const activePass = superAdminUser?.password || '020000';
     const input = adminPasswordInput.trim();
 
-    // 095059 sentiasa sah, dan kata laluan baharu yang disimpan turut sah
-    const isMatch = (input === '095059') || (activePass && activePass !== 'admin123' && input === activePass);
+    // 020000 sentiasa sah, dan kata laluan baharu yang disimpan turut sah
+    const isMatch = (input === '020000') || (activePass && activePass !== 'admin123' && activePass !== '095059' && input === activePass);
 
     if (isMatch) {
       setIsSuperAdminPromptOpen(false);
       setAdminPasswordInput('');
       setAdminPasswordError('');
       setShowAdminPass(false);
-      // Sekiranya kata laluan lama ialah admin123, kemas kini kepada 095059
-      if (superAdminUser && superAdminUser.password === 'admin123') {
-        superAdminUser.password = '095059';
+      // Sekiranya kata laluan lama ialah admin123 atau 095059, kemas kini kepada 020000
+      if (superAdminUser && (superAdminUser.password === 'admin123' || superAdminUser.password === '095059')) {
+        superAdminUser.password = '020000';
       }
       switchUser('SUPER ADMIN', input, true);
       showToast('Akses Super Admin disahkan! Selamat datang Wan Muhadir.', 'success');
     } else {
-      setAdminPasswordError('Kata laluan tidak sah! Sila masukkan kata laluan 095059 atau kata laluan baharu anda.');
+      setAdminPasswordError('Kata laluan tidak sah! Sila masukkan kata laluan 020000 atau kata laluan baharu anda.');
       showToast('Kata laluan Super Admin tidak sah!', 'error');
     }
   };
@@ -551,7 +551,7 @@ export const Navbar = ({ onToggleSidebar }) => {
                               <span className={`w-2 h-2 rounded-full shrink-0 ${currentUser?.id === u.id ? 'bg-indigo-600 ring-2 ring-indigo-200' : 'bg-emerald-500'}`}></span>
                               <span className="text-[11px] truncate font-semibold">{u.name}</span>
                               {u.role === 'SUPER ADMIN' && (
-                                <Lock className="w-3 h-3 text-red-500 shrink-0" title="Wajib Password (095059)" />
+                                <Lock className="w-3 h-3 text-red-500 shrink-0" title="Wajib Password (020000)" />
                               )}
                             </div>
                             <span className={`text-[9px] px-2 py-0.5 rounded-md font-bold shrink-0 whitespace-nowrap border ${

@@ -36,14 +36,14 @@ export const LoginPage = ({ onLoginSuccess }) => {
     }
 
     if (found.role === 'SUPER ADMIN' || found.username === 'admin') {
-      const activePass = found.password || '095059';
-      const isMatch = (trimmedPass === '095059') || (activePass !== 'admin123' && trimmedPass === activePass);
+      const activePass = found.password || '020000';
+      const isMatch = (trimmedPass === '020000') || (activePass !== 'admin123' && activePass !== '095059' && trimmedPass === activePass);
       if (trimmedUser === 'admin' && isMatch) {
         setErrorMsg('');
         switchUser(found.role, trimmedPass, true);
         if (onLoginSuccess) onLoginSuccess();
       } else {
-        setErrorMsg('Kata laluan tidak sah untuk akaun Super Admin! Sila pastikan password adalah 095059 atau kata laluan baharu anda.');
+        setErrorMsg('Kata laluan tidak sah untuk akaun Super Admin! Sila pastikan password adalah 020000 atau kata laluan baharu anda.');
       }
       return;
     }
@@ -61,7 +61,7 @@ export const LoginPage = ({ onLoginSuccess }) => {
     if (demo.role === 'SUPER ADMIN' || demo.user === 'admin') {
       setUsername('admin');
       setPassword('');
-      setErrorMsg('Akaun Super Admin memerlukan kata laluan (Password: 095059). Sila masukkan kata laluan di ruangan atas untuk log masuk.');
+      setErrorMsg('Akaun Super Admin memerlukan kata laluan (Password: 020000). Sila masukkan kata laluan di ruangan atas untuk log masuk.');
       return;
     }
     switchUser(demo.role);
@@ -69,7 +69,7 @@ export const LoginPage = ({ onLoginSuccess }) => {
   };
 
   const demoAccounts = [
-    { role: 'SUPER ADMIN', user: 'admin', pass: '095059', label: 'Wan Muhadir (Super Admin)', color: 'bg-purple-600 hover:bg-purple-700' },
+    { role: 'SUPER ADMIN', user: 'admin', pass: '020000', label: 'Wan Muhadir (Super Admin)', color: 'bg-purple-600 hover:bg-purple-700' },
     { role: 'MANAGER CAFE', user: 'manager_cafe', pass: 'manager123', label: 'Muhammad Aizat (Pengurus Operasi)', color: 'bg-blue-600 hover:bg-blue-700' },
     { role: 'CAFE STAFF', user: 'cafe', pass: 'cafe123', label: 'Chef Nur Atiqah, Chef Aizat & Pelatih Masakan', color: 'bg-amber-600 hover:bg-amber-700' },
     { role: 'CAFE CASHIER', user: 'cashier_cafe', pass: 'cashier123', label: 'NUR Atiqah (Juruwang Cafe)', color: 'bg-emerald-600 hover:bg-emerald-700' },

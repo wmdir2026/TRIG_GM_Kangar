@@ -130,7 +130,7 @@ export const TechByteLandingView = () => {
       return;
     }
 
-    const activePass = (user.role === 'SUPER ADMIN' || user.username === 'admin') ? (user.password || '095059') : null;
+    const activePass = (user.role === 'SUPER ADMIN' || user.username === 'admin') ? (user.password || '020000') : null;
     const success = switchUser(user.id, activePass, true);
     if (!success) {
       showToast('Akses ditolak atau gagal menukar pengguna!', 'error');
@@ -152,31 +152,31 @@ export const TechByteLandingView = () => {
     showToast(`Log masuk berjaya! Selamat datang ${user.name} (${user.role}).`, 'success');
   };
 
-  // Pengesahan Kata Laluan Khas untuk Super Admin (Menggunakan password aktif dari profil atau 095059)
+  // Pengesahan Kata Laluan Khas untuk Super Admin (Menggunakan password aktif dari profil atau 020000)
   const handleConfirmSuperAdminPassword = (e) => {
     e.preventDefault();
     const input = adminPasswordInput.trim();
     const superAdminUser = (users || []).find(u => u.role === 'SUPER ADMIN' || u.username === 'admin') || {
       id: "USR-001",
       username: "admin",
-      password: "095059",
+      password: "020000",
       name: "Wan Muhadir (Super Admin)",
       role: "SUPER ADMIN"
     };
-    const activePass = superAdminUser?.password || '095059';
+    const activePass = superAdminUser?.password || '020000';
 
-    // 095059 sentiasa diterima, dan kata laluan baharu yang disimpan turut diterima
-    const isMatch = (input === '095059') || (activePass !== 'admin123' && input === activePass);
+    // 020000 sentiasa diterima, dan kata laluan baharu yang disimpan turut diterima
+    const isMatch = (input === '020000') || (activePass !== 'admin123' && activePass !== '095059' && input === activePass);
 
     if (isMatch) {
       setAdminPasswordError('');
-      // Jika kata laluan lama tersimpan sebagai admin123, kemas kini secara automatik
-      if (superAdminUser.password === 'admin123') {
-        superAdminUser.password = '095059';
+      // Jika kata laluan lama tersimpan sebagai admin123 atau 095059, kemas kini secara automatik
+      if (superAdminUser.password === 'admin123' || superAdminUser.password === '095059') {
+        superAdminUser.password = '020000';
       }
       handleSelectUser(superAdminUser, true);
     } else {
-      setAdminPasswordError('Kata laluan tidak sah! Sila masukkan kata laluan 095059 atau kata laluan baharu anda.');
+      setAdminPasswordError('Kata laluan tidak sah! Sila masukkan kata laluan 020000 atau kata laluan baharu anda.');
       showToast('Kata laluan tidak sah untuk Super Admin!', 'error');
     }
   };
@@ -201,14 +201,14 @@ export const TechByteLandingView = () => {
       return;
     }
 
-    // Kawalan khas bagi Super Admin: Semak dengan kata laluan 095059 atau kata laluan aktif pengguna
+    // Kawalan khas bagi Super Admin: Semak dengan kata laluan 020000 atau kata laluan aktif pengguna
     if (found.role === 'SUPER ADMIN' || found.username === 'admin') {
-      const activePass = found.password || '095059';
-      const isMatch = (trimmedPass === '095059') || (activePass !== 'admin123' && trimmedPass === activePass);
+      const activePass = found.password || '020000';
+      const isMatch = (trimmedPass === '020000') || (activePass !== 'admin123' && activePass !== '095059' && trimmedPass === activePass);
 
       if (trimmedUser === found.username.toLowerCase() && isMatch) {
-        if (found.password === 'admin123') {
-          found.password = '095059';
+        if (found.password === 'admin123' || found.password === '095059') {
+          found.password = '020000';
         }
         handleSelectUser(found, true);
       } else {
@@ -772,7 +772,7 @@ export const TechByteLandingView = () => {
                       setAdminPasswordInput(e.target.value);
                       setAdminPasswordError('');
                     }}
-                    placeholder="Masukkan Kata Laluan (cth: 095059)"
+                    placeholder="Masukkan Kata Laluan (cth: 020000)"
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white font-mono outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400"
                   />
                 </div>

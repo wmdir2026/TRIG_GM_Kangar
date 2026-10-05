@@ -24,7 +24,7 @@ const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
   // Helper to load or fallback to initial
-  const USERS_STORAGE_VERSION = 'v2.7_super_admin_pass_095059_verified';
+  const USERS_STORAGE_VERSION = 'v2.8_super_admin_pass_020000_verified';
 
   const loadStorage = (key, fallback) => {
     try {
@@ -49,9 +49,9 @@ export const AppProvider = ({ children }) => {
             const parsed = JSON.parse(saved);
             const upgraded = parsed.map(u => {
               if (u.username === 'admin' || u.role === 'SUPER ADMIN') {
-                // Naik taraf admin123 atau kata laluan kosong kepada 095059
-                if (!u.password || u.password === 'admin123') {
-                  return { ...u, password: '095059' };
+                // Naik taraf admin123, 095059 atau kata laluan kosong kepada 020000
+                if (!u.password || u.password === 'admin123' || u.password === '095059') {
+                  return { ...u, password: '020000' };
                 }
               }
               return u;
@@ -71,8 +71,8 @@ export const AppProvider = ({ children }) => {
         const parsed = JSON.parse(saved);
         return parsed.map(u => {
           if (u.username === 'admin' || u.role === 'SUPER ADMIN') {
-            if (!u.password || u.password === 'admin123') {
-              return { ...u, password: '095059' };
+            if (!u.password || u.password === 'admin123' || u.password === '095059') {
+              return { ...u, password: '020000' };
             }
           }
           return u;
@@ -419,10 +419,10 @@ export const AppProvider = ({ children }) => {
       u.name?.toLowerCase() === target
     );
     if (found) {
-      // Kawalan Keselamatan: Hanya login betul (095059 atau Kata laluan aktif Super Admin) sahaja boleh masuk ke Super Admin
+      // Kawalan Keselamatan: Hanya login betul (020000 atau Kata laluan aktif Super Admin) sahaja boleh masuk ke Super Admin
       if (found.role === 'SUPER ADMIN' && !force) {
-        const activePass = found.password || '095059';
-        const isMatch = (password === '095059') || (activePass !== 'admin123' && password === activePass);
+        const activePass = found.password || '020000';
+        const isMatch = (password === '020000') || (activePass !== 'admin123' && activePass !== '095059' && password === activePass);
         if (!isMatch) {
           showToast('Akses Ditolak: Kata laluan Super Admin tidak sah!', 'error');
           return false;
