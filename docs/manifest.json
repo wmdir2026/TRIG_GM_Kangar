@@ -1,13 +1,16 @@
 {
   "name": "TECHBYTE & FELÌCE CAFFÉ • TRIG GIATMARA KANGAR",
-  "short_name": "TRIG POS Cafe",
-  "description": "Sistem Pengurusan Makanan & Aplikasi Pelanggan / Pelayan TRIG GIATMARA Kangar",
+  "short_name": "FELÌCE & TECHBYTE",
+  "description": "Aplikasi Pesanan Makanan Felìce Caffé & Baiki Telefon TechByte TRIG GIATMARA Kangar",
+  "id": "/trig-giatmara-app",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0f172a",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#090d16",
   "theme_color": "#f59e0b",
   "orientation": "any",
+  "categories": ["food", "shopping", "utilities", "business"],
   "icons": [
     {
       "src": "./logo.png",
@@ -24,10 +27,17 @@
   ],
   "shortcuts": [
     {
-      "name": "Aplikasi Pelanggan (Phone)",
-      "short_name": "Apps Pelanggan",
-      "description": "Buka Aplikasi Pesanan Makanan Pelanggan",
+      "name": "Felìce Caffé • Pesanan Makanan (Phone)",
+      "short_name": "Apps Café",
+      "description": "Buka Aplikasi Pesanan Makanan & QR Meja Café",
       "url": "./?app=customer",
+      "icons": [{ "src": "./logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "TechByte • Baiki Smartphone (Phone)",
+      "short_name": "Apps Baiki",
+      "description": "Buka Aplikasi Semakan Status Baiki Telefon & Aksesori",
+      "url": "./?app=repair",
       "icons": [{ "src": "./logo.png", "sizes": "192x192" }]
     },
     {
