@@ -208,7 +208,7 @@ export const CustomerPhoneApp = () => {
               TECHBYTE & FELÌCE CAFFÉ
             </span>
             <span className="text-[10px] font-bold text-slate-400 block leading-none">
-              Aplikasi Pelanggan (Android Phone)
+              Pautan Pelanggan (Format Telefon)
             </span>
           </div>
         </div>

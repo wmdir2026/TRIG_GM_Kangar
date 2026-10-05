@@ -243,7 +243,7 @@ export const Navbar = ({ onToggleSidebar }) => {
             </button>
           )}
 
-          {/* Quick Android Apps Buttons - Menyesuaikan mengikut ruangan (Ruangan Baiki vs Ruangan Masakan) */}
+          {/* Quick Pautan Pelanggan Buttons - Menyesuaikan mengikut ruangan (Ruangan Baiki vs Ruangan Masakan) */}
           {activeSystemMode === 'REPAIR' || currentTab === 'customer-repair-tracker' || currentTab === 'customer-repair-phone-app' ? (
             <button
               onClick={() => setCurrentTab('customer-repair-phone-app')}
@@ -252,10 +252,10 @@ export const Navbar = ({ onToggleSidebar }) => {
                   ? 'bg-cyan-100 hover:bg-cyan-200 text-slate-950 border-2 border-cyan-400'
                   : 'bg-cyan-400 hover:bg-cyan-300 text-slate-950 border border-cyan-300'
               }`}
-              title="Buka Aplikasi Pelanggan Baiki Telefon Bimbit (Android Phone)"
+              title="Buka Pautan Pelanggan Baiki Telefon Bimbit"
             >
               <span className="text-sm">📱</span>
-              <span className="hidden md:inline text-slate-950 font-black">Apps Baiki Telefon Bimbit</span>
+              <span className="hidden md:inline text-slate-950 font-black">Pautan Baiki Telefon Bimbit</span>
             </button>
           ) : activeSystemMode === 'MASAKAN' || currentTab === 'customer-order' || currentTab === 'customer-phone-app' ? (
             <button
@@ -265,10 +265,10 @@ export const Navbar = ({ onToggleSidebar }) => {
                   ? 'bg-orange-100 hover:bg-orange-200 text-stone-950 border-2 border-amber-400'
                   : 'bg-amber-400 hover:bg-amber-300 text-stone-950 border border-amber-300'
               }`}
-              title="Buka Aplikasi Pelanggan Makanan Café (Android Phone)"
+              title="Buka Pautan Pelanggan Makanan Café"
             >
               <span className="text-sm">🍝</span>
-              <span className="hidden md:inline text-stone-950 font-black">Apps Pelanggan Café</span>
+              <span className="hidden md:inline text-stone-950 font-black">Pautan Pelanggan Café</span>
             </button>
           ) : (
             <>
@@ -279,10 +279,10 @@ export const Navbar = ({ onToggleSidebar }) => {
                     ? 'bg-orange-100 hover:bg-orange-200 text-stone-950 border-2 border-amber-400'
                     : 'bg-amber-400 hover:bg-amber-300 text-stone-950 border border-amber-300'
                 }`}
-                title="Buka Aplikasi Pelanggan Makanan Café (Android Phone)"
+                title="Buka Pautan Pelanggan Makanan Café"
               >
                 <span className="text-sm">🍝</span>
-                <span className="hidden md:inline text-stone-950 font-black">Apps Pelanggan Café</span>
+                <span className="hidden md:inline text-stone-950 font-black">Pautan Pelanggan Café</span>
               </button>
               <button
                 onClick={() => setCurrentTab('customer-repair-phone-app')}
@@ -291,15 +291,15 @@ export const Navbar = ({ onToggleSidebar }) => {
                     ? 'bg-cyan-100 hover:bg-cyan-200 text-slate-950 border-2 border-cyan-400'
                     : 'bg-cyan-400 hover:bg-cyan-300 text-slate-950 border border-cyan-300'
                 }`}
-                title="Buka Aplikasi Pelanggan Baiki Telefon Bimbit (Android Phone)"
+                title="Buka Pautan Pelanggan Baiki Telefon Bimbit"
               >
                 <span className="text-sm">📱</span>
-                <span className="hidden md:inline text-slate-950 font-black">Apps Baiki Telefon</span>
+                <span className="hidden md:inline text-slate-950 font-black">Pautan Baiki Telefon</span>
               </button>
             </>
           )}
 
-          {/* Ikon Apps Tab Pelayan HANYA KELUAR jika pengguna memilih ADMIN - CUSTOMER SERVICES atau SUPER ADMIN */}
+          {/* Ikon Pautan Tab Pelayan HANYA KELUAR jika pengguna memilih ADMIN - CUSTOMER SERVICES atau SUPER ADMIN */}
           {isStaffLoggedIn && (currentUser?.role === 'CUSTOMER SERVICE' || currentUser?.role === 'SUPER ADMIN') && (
             <button
               onClick={() => setCurrentTab('waiter-tablet-app')}
@@ -308,10 +308,10 @@ export const Navbar = ({ onToggleSidebar }) => {
                   ? 'bg-indigo-100 hover:bg-indigo-200 text-slate-950 border-2 border-indigo-400'
                   : 'bg-indigo-400 hover:bg-indigo-300 text-slate-950 border border-indigo-300'
               }`}
-              title="Buka Aplikasi Pelayan (Android Tab)"
+              title="Buka Pautan Pelayan (Tab)"
             >
               <span className="text-sm">📟</span>
-              <span className="hidden md:inline text-slate-950 font-black">Apps Tab Pelayan</span>
+              <span className="hidden md:inline text-slate-950 font-black">Pautan Tab Pelayan</span>
             </button>
           )}
 

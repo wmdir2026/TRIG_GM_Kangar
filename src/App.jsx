@@ -75,7 +75,7 @@ const MainLayout = () => {
     return <LoginPage onLoginSuccess={() => setIsLoggedOut(false)} />;
   }
 
-  // Full-screen native immersion for Android Phone & Tablet Apps
+  // Paparan skrin penuh untuk Pautan Telefon & Tab
   if (currentTab === 'customer-phone-app') {
     return (
       <div className="min-h-screen bg-slate-950 font-sans">
@@ -96,7 +96,7 @@ const MainLayout = () => {
     );
   }
 
-  // Jika tab waiter dipilih ATAU pengguna log masuk sebagai Pelatih Masakan (Pelayan) - CUSTOMER SERVICE (eksklusif Apps Tab Pelayan sahaja)
+  // Jika tab waiter dipilih ATAU pengguna log masuk sebagai Pelatih Masakan (Pelayan) - CUSTOMER SERVICE (eksklusif Pautan Tab Pelayan sahaja)
   if (currentTab === 'waiter-tablet-app' || (isStaffLoggedIn && currentUser?.role === 'CUSTOMER SERVICE')) {
     return (
       <div className="min-h-screen bg-slate-950 font-sans">

@@ -774,7 +774,7 @@ export const WaiterTabletApp = () => {
             <div>
               <span className="text-xs font-black text-amber-400 block">IMBAS DENGAN TELEFON PELANGGAN</span>
               <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                Pelanggan akan terus membuka Aplikasi Pelanggan dengan Meja {activeTableId} pre-selected dan bersambung secara live ke tablet ini!
+                Pelanggan akan terus membuka Pautan Pelanggan dengan Meja {activeTableId} pre-selected dan bersambung secara live ke tablet ini!
               </p>
             </div>
 

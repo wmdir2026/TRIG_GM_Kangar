@@ -25,7 +25,13 @@ import {
   LogOut,
   ExternalLink,
   Eye,
-  EyeOff
+  EyeOff,
+  Download,
+  CheckCircle2,
+  AlertCircle,
+  RefreshCw,
+  HelpCircle,
+  Play
 } from 'lucide-react';
 
 export const TechByteLandingView = () => {
@@ -49,6 +55,38 @@ export const TechByteLandingView = () => {
   const [adminPasswordInput, setAdminPasswordInput] = useState('');
   const [adminPasswordError, setAdminPasswordError] = useState('');
   const [showAdminPassModal, setShowAdminPassModal] = useState(false);
+
+  // Handle direct navigation to Customer Cafe Food Ordering (Format Paparan Telefon)
+  const handleOpenCustomerCafe = () => {
+    setIsStaffLoggedIn(false);
+    const customerUser = (users || []).find(u => u.role === 'CUSTOMER') || {
+      id: "USR-008",
+      name: "ROSYITA (Pelanggan Umum)",
+      role: "CUSTOMER",
+      email: "rosyita.customer@gmail.com"
+    };
+    if (typeof setCurrentUser === 'function') {
+      setCurrentUser(customerUser);
+    }
+    setCurrentTab('customer-phone-app');
+    showToast('Paparan pelanggan Menu Pesanan Makanan Cafe dibuka.', 'info');
+  };
+
+  // Handle direct navigation to Customer Repair (Format Paparan Telefon)
+  const handleOpenCustomerRepair = () => {
+    setIsStaffLoggedIn(false);
+    const customerUser = (users || []).find(u => u.role === 'CUSTOMER') || {
+      id: "USR-008",
+      name: "ROSYITA (Pelanggan Umum)",
+      role: "CUSTOMER",
+      email: "rosyita.customer@gmail.com"
+    };
+    if (typeof setCurrentUser === 'function') {
+      setCurrentUser(customerUser);
+    }
+    setCurrentTab('customer-repair-phone-app');
+    showToast('Paparan pelanggan Menu Baiki telefon Bimbit dibuka.', 'info');
+  };
 
   // Handle direct navigation to Customer Cafe Food Ordering (PELANGGAN)
   const handleGoToCustomerCafe = () => {
@@ -107,7 +145,7 @@ export const TechByteLandingView = () => {
 
     if (user.role === 'CUSTOMER SERVICE') {
       setCurrentTab('waiter-tablet-app');
-      showToast(`Log masuk berjaya! Selamat datang ${user.name} (Apps Tab Pelayan sahaja).`, 'success');
+      showToast(`Log masuk berjaya! Selamat datang ${user.name} (Pautan Tab Pelayan sahaja).`, 'success');
       return;
     }
     switchSystemMode('PORTAL');
@@ -426,7 +464,7 @@ export const TechByteLandingView = () => {
         </div>
 
         {/* ========================================================================= */}
-        {/* ANDROID APPS SHOWCASE: APPS PELANGGAN (CAFE & BAIKI TELEFON) */}
+        {/* PAUTAN MUDAH ALIH PELANGGAN (CAFE & BAIKI TELEFON) */}
         {/* ========================================================================= */}
         <div className="bg-stone-950/85 backdrop-blur-md rounded-3xl border border-amber-500/30 p-5 sm:p-6 shadow-2xl space-y-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-b border-stone-800 pb-3">
@@ -436,10 +474,10 @@ export const TechByteLandingView = () => {
               </div>
               <div>
                 <h3 className="text-base sm:text-lg font-black text-white uppercase tracking-wide">
-                  Aplikasi Mudah Alih Pelanggan (Android Phone Apps)
+                  Pautan Mudah Alih Pelanggan
                 </h3>
                 <p className="text-xs text-slate-400">
-                  Dua aplikasi awam diselaraskan secara langsung melalui rangkaian cloud MQTT GitHub Pages
+                  Dua pautan awam diselaraskan secara langsung melalui rangkaian cloud MQTT GitHub Pages
                 </p>
               </div>
             </div>
@@ -454,20 +492,20 @@ export const TechByteLandingView = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             
-            {/* APP 1: ANDROID PHONE PESANAN MAKANAN CAFE */}
+            {/* PAUTAN 1: MENU PESANAN MAKANAN CAFE */}
             <div
-              onClick={() => setCurrentTab('customer-phone-app')}
+              onClick={handleOpenCustomerCafe}
               className="bg-slate-900/90 rounded-2xl p-4 border border-amber-500/40 hover:border-amber-400 transition-all hover:scale-[1.01] cursor-pointer group shadow-lg flex flex-col justify-between"
             >
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[10px] font-black uppercase tracking-wider">
-                    ANDROID PHONE • CAFÉ
+                    PAUTAN MENU CAFÉ
                   </span>
                   <span className="text-xs text-amber-400 font-mono font-bold">?app=customer</span>
                 </div>
                 <h4 className="text-base font-black text-white group-hover:text-amber-400 transition">
-                  Aplikasi Pesanan Makanan Café
+                  Menu Pesanan Makanan Cafe
                 </h4>
                 <p className="text-xs text-slate-300 leading-relaxed">
                   Pelanggan boleh imbas QR meja, memesan makanan & minuman Itali, bayaran DuitNow QR, serta pantau status masakan dapur secara langsung.
@@ -475,28 +513,28 @@ export const TechByteLandingView = () => {
               </div>
 
               <div className="pt-4 flex items-center justify-between">
-                <span className="text-xs font-black text-amber-400 flex items-center gap-1">
-                  <span>Buka Apps Café</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <span className="text-xs font-black text-amber-400 flex items-center gap-1.5 group-hover:text-amber-300 transition">
+                  <span>Klik di sini</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
                 </span>
                 <span className="text-[10px] text-slate-500 font-bold">Format Skrin Telefon</span>
               </div>
             </div>
 
-            {/* APP 2: ANDROID PHONE BAIKI SMARTPHONE */}
+            {/* PAUTAN 2: MENU BAIKI TELEFON BIMBIT */}
             <div
-              onClick={() => setCurrentTab('customer-repair-phone-app')}
+              onClick={handleOpenCustomerRepair}
               className="bg-slate-900/90 rounded-2xl p-4 border border-cyan-500/40 hover:border-cyan-400 transition-all hover:scale-[1.01] cursor-pointer group shadow-lg flex flex-col justify-between"
             >
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="px-2.5 py-0.5 rounded-full bg-cyan-400 text-slate-950 text-[10px] font-black uppercase tracking-wider">
-                    ANDROID PHONE • BAIKI
+                    PAUTAN MENU BAIKI
                   </span>
                   <span className="text-xs text-cyan-300 font-mono font-bold">?app=repair</span>
                 </div>
                 <h4 className="text-base font-black text-white group-hover:text-cyan-300 transition">
-                  Apps Baiki Telefon Bimbit
+                  Menu Baiki telefon Bimbit
                 </h4>
                 <p className="text-xs text-slate-300 leading-relaxed">
                   Semak status live kerja baikpulih telefon pintar (timeline 7-peringkat), pendaftaran permohonan servis baru & katalog aksesori.
@@ -504,9 +542,9 @@ export const TechByteLandingView = () => {
               </div>
 
               <div className="pt-4 flex items-center justify-between">
-                <span className="text-xs font-black text-cyan-300 flex items-center gap-1">
-                  <span>Buka Apps Baiki Telefon</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <span className="text-xs font-black text-cyan-300 flex items-center gap-1.5 group-hover:text-cyan-200 transition">
+                  <span>Klik di sini</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
                 </span>
                 <span className="text-[10px] text-slate-500 font-bold">Format Skrin Telefon</span>
               </div>
@@ -514,9 +552,7 @@ export const TechByteLandingView = () => {
 
           </div>
         </div>
-
       </div>
-
 
       {/* ========================================================================= */}
       {/* STAFF / ADMIN LOGIN MODAL */}
@@ -607,7 +643,7 @@ export const TechByteLandingView = () => {
                             {isSuperAdmin
                               ? 'ID: admin • Wajib Masukkan Kata Laluan'
                               : isCustomerService
-                              ? 'Akses Apps Tab Pelayan Sahaja'
+                              ? 'Akses Pautan Tab Pelayan Sahaja'
                               : isCafe
                               ? 'Akses Modul Pengurusan Café'
                               : 'Akses Modul Baiki Smartphone'}

@@ -220,7 +220,7 @@ export const CustomerRepairPhoneApp = () => {
       deviceModel: bookModel.trim(),
       damageType: bookDamage,
       problemReported: `${bookDamage}${bookNotes.trim() ? ` - ${bookNotes.trim()}` : ''}`,
-      diagnosis: `Pendaftaran Dalam Talian (Apps Pelanggan): ${bookNotes.trim() || 'Pemeriksaan teknikal penuh diperlukan.'}`,
+      diagnosis: `Pendaftaran Dalam Talian (Pautan Pelanggan): ${bookNotes.trim() || 'Pemeriksaan teknikal penuh diperlukan.'}`,
       labourCost: 0,
       partsCost: 0,
       totalCost: 0,
@@ -251,7 +251,7 @@ export const CustomerRepairPhoneApp = () => {
   return (
     <div className="max-w-md mx-auto min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans pb-24 shadow-2xl border-x border-cyan-500/20">
       
-      {/* ================= ANDROID TOP APP BAR ================= */}
+      {/* ================= TOP BAR ================= */}
       <div className="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md px-4 py-3 border-b border-cyan-500/30 flex items-center justify-between shadow-md">
         <div className="flex items-center gap-2.5">
           <button
@@ -277,7 +277,7 @@ export const CustomerRepairPhoneApp = () => {
                 TECHBYTE REPAIR
               </span>
               <span className="px-1.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[9px] font-black">
-                ANDROID PHONE APP
+                PAUTAN PELANGGAN
               </span>
             </div>
             <p className="text-[10px] text-slate-400 font-semibold leading-tight">

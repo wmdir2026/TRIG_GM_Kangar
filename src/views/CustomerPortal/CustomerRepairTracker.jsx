@@ -291,10 +291,10 @@ export const CustomerRepairTracker = () => {
             <button
               onClick={() => setCurrentTab('customer-repair-phone-app')}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-black transition cursor-pointer shadow-md"
-              title="Buka Aplikasi Telefon Pintar (Format Android Phone)"
+              title="Buka Pautan Telefon Pintar (Format Telefon Bimbit)"
             >
               <Smartphone className="w-3.5 h-3.5" />
-              <span>Apps Baiki Telefon</span>
+              <span>Pautan Baiki Telefon</span>
             </button>
 
             <button

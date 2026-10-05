@@ -552,7 +552,7 @@ export const FoodOrderingPOS = () => {
                   />
                 </div>
                 <div className="text-[11px] text-slate-500">
-                  Imbas menggunakan mana-mana Aplikasi Perbankan / E-Wallet.
+                  Imbas menggunakan mana-mana Perbankan Dalam Talian / E-Wallet.
                   <br />
                   <span className="font-bold text-emerald-700">Jumlah: RM {grandTotal.toFixed(2)}</span>
                 </div>
