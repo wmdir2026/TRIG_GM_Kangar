@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pusat Ujian Pengimbas Barcode & QR - TECHBYTE & FELÌCE CAFFÉ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes pulseScan {
+      0%, 100% { transform: translateY(0); opacity: 0.8; }
+      50% { transform: translateY(180px); opacity: 1; }
+    }
+    .scanner-laser {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #ef4444, #f87171, #ef4444, transparent);
+      box-shadow: 0 0 12px #ef4444;
+      animation: pulseScan 2s ease-in-out infinite;
+    }
+    @media print {
+      .no-print { display: none !important; }
+      .print-page { padding: 0 !important; background: white !important; }
+      body { background: white !important; color: black !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-cyan-500 selection:text-black">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-500 flex items-center justify-center font-black text-xl shadow-lg shadow-cyan-500/20 text-white">
+          ⚡
+        </div>
+        <div>
+          <h1 class="text-lg font-black tracking-wide text-white flex items-center gap-2">
+            Pusat Ujian Pengimbas Barcode & QR USB
+            <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold">Aktif</span>
+          </h1>
+          <p class="text-xs text-slate-400">TECHBYTE & FELÌCE CAFFÉ • TRIG GIATMARA KANGAR</p>
+        </div>
+      </div>
+
+      <!-- Quick Nav Buttons -->
+      <div class="flex items-center gap-2 no-print">
+        <a href="/" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700 transition">
+          ← Kembali ke Sistem POS
+        </a>
+        <button onclick="window.print()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-lg transition flex items-center gap-1.5">
+          🖨️ Cetak Lembaran Ujian
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-8 space-y-8 print-page">
+
+    <!-- USB Device Status Card -->
+    <div class="p-5 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-850 border border-cyan-500/30 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div class="space-y-1">
+        <div class="flex items-center gap-2 text-cyan-400 text-xs font-bold tracking-wider uppercase">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+          Peranti USB Dikesan di Mac OS:
+        </div>
+        <div class="text-base font-bold text-white flex items-center gap-2">
+          <span>USBScn Module (USBScn Chip)</span>
+          <span class="text-xs px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 font-mono">Vendor ID: 0x0218 • Product ID: 0x0210</span>
+        </div>
+        <p class="text-xs text-slate-400">
+          Mod: <strong>USB HID Keyboard Wedge</strong>. Halakan scanner ke mana-mana kod di bawah dan tekan butang pengimbas. Data akan masuk secara serta-merta!
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <span class="px-3 py-1.5 rounded-xl bg-emerald-950/80 text-emerald-300 border border-emerald-600/40 text-xs font-black flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          Scanner Sedia Digunakan
+        </span>
+      </div>
+    </div>
+
+    <!-- Live Scanner Testing Console -->
+    <div class="p-6 rounded-3xl bg-slate-900 border-2 border-indigo-500/40 shadow-2xl relative overflow-hidden no-print">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-slate-800 gap-2">
+        <div>
+          <h2 class="text-base font-black text-white flex items-center gap-2">
+            <span>🎯 Konsol Ujian Imbasan Langsung (Live Scanner Console)</span>
+          </h2>
+          <p class="text-xs text-slate-400">Klik di kotak bawah (atau mulakan imbasan). Kotak ini akan sentiasa bersedia menerima kod bar anda.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="soundToggle" onclick="toggleSound()" class="px-3 py-1 rounded-lg bg-slate-800 text-xs font-bold text-slate-300 border border-slate-700">
+            🔊 Bunyi Beep: HIDUP
+          </button>
+          <button onclick="clearConsole()" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 border border-slate-700">
+            Bersihkan
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Input Box -->
+      <div class="mt-4 space-y-3">
+        <div class="relative">
+          <input
+            id="scanInput"
+            type="text"
+            autofocus
+            placeholder="Halakan Barcode Scanner dan imbas di sini..."
+            class="w-full px-5 py-4 bg-slate-950 border-2 border-cyan-500/60 rounded-2xl text-lg font-mono text-cyan-300 placeholder-slate-600 outline-none shadow-inner focus:border-cyan-400 focus:ring-4 focus:ring-cyan-500/20"
+          />
+          <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-500 pointer-events-none">
+            [Tekan Picu Scanner]
+          </span>
+        </div>
+
+        <!-- Result Card -->
+        <div id="resultBox" class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 min-h-[90px] flex items-center justify-center text-center text-slate-500 text-sm">
+          Menunggu imbasan pertama anda... Halakan pengimbas ke salah satu kod QR atau Barcode di bawah!
+        </div>
+      </div>
+    </div>
+
+    <!-- Title for Cards -->
+    <div class="space-y-1">
+      <h2 class="text-xl font-black text-white flex items-center gap-2">
+        <span>📸 Kod QR & Barcode Contoh (Boleh Diimbas Terus di Skrin)</span>
+      </h2>
+      <p class="text-xs text-slate-400">
+        Anda boleh halakan pengimbas USB anda terus ke skrin komputer / laptop ini untuk menguji bacaan, atau cetak lembaran ini.
+      </p>
+    </div>
+
+    <!-- Grid of Scannable Codes -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <!-- Card 1: USB Cable -->
+      <div class="p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl flex flex-col items-center text-center space-y-3 relative overflow-hidden group hover:border-cyan-500/50 transition">
+        <span class="px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-[10px] font-black uppercase tracking-wider border border-cyan-500/20">
+          Aksesori Telefon • RM 15.00
+        </span>
+        <h3 class="font-bold text-sm text-white">Braided Type-C 60W Cable</h3>
+        
+        <!-- QR Code SVG -->
+        <div class="p-3 bg-white rounded-2xl shadow-inner my-2 flex items-center justify-center">
+          <svg height="240" width="240" viewBox="0 0 29 29" role="img"><path fill="#FFFFFF" d="M0,0 h29v29H0z" shape-rendering="crispEdges"></path><path fill="#000000" d="M4 4h7v1H4zM12 4h2v1H12zM16 4h1v1H16zM18,4 h7v1H18zM4 5h1v1H4zM10 5h1v1H10zM12 5h2v1H12zM16 5h1v1H16zM18 5h1v1H18zM24,5 h1v1H24zM4 6h1v1H4zM6 6h3v1H6zM10 6h1v1H10zM12 6h3v1H12zM18 6h1v1H18zM20 6h3v1H20zM24,6 h1v1H24zM4 7h1v1H4zM6 7h3v1H6zM10 7h1v1H10zM13 7h2v1H13zM18 7h1v1H18zM20 7h3v1H20zM24,7 h1v1H24zM4 8h1v1H4zM6 8h3v1H6zM10 8h1v1H10zM12 8h1v1H12zM14 8h1v1H14zM16 8h1v1H16zM18 8h1v1H18zM20 8h3v1H20zM24,8 h1v1H24zM4 9h1v1H4zM10 9h1v1H10zM13 9h1v1H13zM15 9h2v1H15zM18 9h1v1H18zM24,9 h1v1H24zM4 10h7v1H4zM12 10h1v1H12zM14 10h1v1H14zM16 10h1v1H16zM18,10 h7v1H18zM13 11h4v1H13zM4 12h1v1H4zM7 12h6v1H7zM14 12h1v1H14zM16 12h2v1H16zM20 12h1v1H20zM22,12 h3v1H22zM6 13h1v1H6zM11 13h1v1H11zM16 13h2v1H16zM20 13h3v1H20zM6 14h3v1H6zM10 14h1v1H10zM12 14h1v1H12zM19 14h5v1H19zM4 15h2v1H4zM7 15h1v1H7zM11 15h3v1H11zM15 15h1v1H15zM17 15h1v1H17zM19 15h1v1H19zM21 15h1v1H21zM4 16h3v1H4zM8 16h1v1H8zM10 16h1v1H10zM12 16h3v1H12zM17 16h1v1H17zM19 16h1v1H19zM21 16h2v1H21zM12 17h1v1H12zM16 17h2v1H16zM19 17h2v1H19zM24,17 h1v1H24zM4 18h7v1H4zM12 18h2v1H12zM16 18h1v1H16zM19 18h2v1H19zM23,18 h2v1H23zM4 19h1v1H4zM10 19h1v1H10zM12 19h1v1H12zM16 19h1v1H16zM18 19h3v1H18zM24,19 h1v1H24zM4 20h1v1H4zM6 20h3v1H6zM10 20h1v1H10zM12 20h1v1H12zM14 20h5v1H14zM21 20h2v1H21zM4 21h1v1H4zM6 21h3v1H6zM10 21h1v1H10zM12 21h1v1H12zM14 21h4v1H14zM19 21h3v1H19zM4 22h1v1H4zM6 22h3v1H6zM10 22h1v1H10zM13 22h1v1H13zM16 22h3v1H16zM22,22 h3v1H22zM4 23h1v1H4zM10 23h1v1H10zM13 23h1v1H13zM15 23h1v1H15zM17 23h1v1H17zM20 23h2v1H20zM23 23h1v1H23zM4 24h7v1H4zM12 24h1v1H12zM14 24h4v1H14zM21 24h3v1H21z" shape-rendering="crispEdges"></path></svg>
+        </div>
+
+        <div class="w-full bg-slate-950 p-2 rounded-xl border border-slate-800 text-xs font-mono text-cyan-400">
+          SKU: ACC-CBL-TYPEC-60W
+        </div>
+
+        <!-- 1D Barcode -->
+        <div class="w-full pt-1">
+          <p class="text-[10px] text-slate-400 mb-1">Versi Barcode 1D (Garis):</p>
+          <div class="p-1.5 bg-white rounded-xl">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 464 80" width="100%" height="75" preserveAspectRatio="xMidYMid meet">
+    <rect width="464" height="80" fill="#ffffff"/>
+    <rect x="10" y="0" width="4" height="60" fill="#000000" /><rect x="16" y="0" width="2" height="60" fill="#000000" /><rect x="22" y="0" width="2" height="60" fill="#000000" /><rect x="32" y="0" width="2" height="60" fill="#000000" /><rect x="36" y="0" width="2" height="60" fill="#000000" /><rect x="44" y="0" width="4" height="60" fill="#000000" /><rect x="54" y="0" width="2" height="60" fill="#000000" /><rect x="62" y="0" width="2" height="60" fill="#000000" /><rect x="70" y="0" width="4" height="60" fill="#000000" /><rect x="76" y="0" width="2" height="60" fill="#000000" /><rect x="84" y="0" width="2" height="60" fill="#000000" /><rect x="92" y="0" width="4" height="60" fill="#000000" /><rect x="98" y="0" width="2" height="60" fill="#000000" /><rect x="104" y="0" width="4" height="60" fill="#000000" /><rect x="110" y="0" width="6" height="60" fill="#000000" /><rect x="120" y="0" width="2" height="60" fill="#000000" /><rect x="128" y="0" width="2" height="60" fill="#000000" /><rect x="136" y="0" width="4" height="60" fill="#000000" /><rect x="142" y="0" width="2" height="60" fill="#000000" /><rect x="150" y="0" width="2" height="60" fill="#000000" /><rect x="154" y="0" width="4" height="60" fill="#000000" /><rect x="164" y="0" width="2" height="60" fill="#000000" /><rect x="172" y="0" width="4" height="60" fill="#000000" /><rect x="178" y="0" width="6" height="60" fill="#000000" /><rect x="186" y="0" width="2" height="60" fill="#000000" /><rect x="192" y="0" width="4" height="60" fill="#000000" /><rect x="198" y="0" width="6" height="60" fill="#000000" /><rect x="208" y="0" width="4" height="60" fill="#000000" /><rect x="214" y="0" width="6" height="60" fill="#000000" /><rect x="226" y="0" width="2" height="60" fill="#000000" /><rect x="230" y="0" width="6" height="60" fill="#000000" /><rect x="238" y="0" width="4" height="60" fill="#000000" /><rect x="244" y="0" width="2" height="60" fill="#000000" /><rect x="252" y="0" width="6" height="60" fill="#000000" /><rect x="260" y="0" width="6" height="60" fill="#000000" /><rect x="268" y="0" width="4" height="60" fill="#000000" /><rect x="274" y="0" width="2" height="60" fill="#000000" /><rect x="282" y="0" width="4" height="60" fill="#000000" /><rect x="288" y="0" width="2" height="60" fill="#000000" /><rect x="296" y="0" width="2" height="60" fill="#000000" /><rect x="304" y="0" width="2" height="60" fill="#000000" /><rect x="312" y="0" width="4" height="60" fill="#000000" /><rect x="318" y="0" width="2" height="60" fill="#000000" /><rect x="324" y="0" width="4" height="60" fill="#000000" /><rect x="330" y="0" width="6" height="60" fill="#000000" /><rect x="340" y="0" width="4" height="60" fill="#000000" /><rect x="348" y="0" width="6" height="60" fill="#000000" /><rect x="356" y="0" width="2" height="60" fill="#000000" /><rect x="362" y="0" width="2" height="60" fill="#000000" /><rect x="368" y="0" width="6" height="60" fill="#000000" /><rect x="376" y="0" width="4" height="60" fill="#000000" /><rect x="384" y="0" width="6" height="60" fill="#000000" /><rect x="392" y="0" width="2" height="60" fill="#000000" /><rect x="400" y="0" width="4" height="60" fill="#000000" /><rect x="406" y="0" width="2" height="60" fill="#000000" /><rect x="410" y="0" width="4" height="60" fill="#000000" /><rect x="422" y="0" width="2" height="60" fill="#000000" /><rect x="428" y="0" width="4" height="60" fill="#000000" /><rect x="438" y="0" width="6" height="60" fill="#000000" /><rect x="446" y="0" width="2" height="60" fill="#000000" /><rect x="450" y="0" width="4" height="60" fill="#000000" />
+    <text x="232" y="75" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle" fill="#000000">ACC-CBL-TYPEC-60W</text>
+  </svg>
+          </div>
+        </div>
+
+        <button onclick="simulateScan('ACC-CBL-TYPEC-60W')" class="w-full py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 no-print transition">
+          Simulasi Imbas Klik
+        </button>
+      </div>
+
+      <!-- Card 2: Phone Case -->
+      <div class="p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl flex flex-col items-center text-center space-y-3 relative overflow-hidden group hover:border-cyan-500/50 transition">
+        <span class="px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-[10px] font-black uppercase tracking-wider border border-cyan-500/20">
+          Aksesori Telefon • RM 20.00
+        </span>
+        <h3 class="font-bold text-sm text-white">Magnetic Clear Case Armor</h3>
+        
+        <div class="p-3 bg-white rounded-2xl shadow-inner my-2 flex items-center justify-center">
+          <svg height="240" width="240" viewBox="0 0 29 29" role="img"><path fill="#FFFFFF" d="M0,0 h29v29H0z" shape-rendering="crispEdges"></path><path fill="#000000" d="M4 4h7v1H4zM12 4h2v1H12zM18,4 h7v1H18zM4 5h1v1H4zM10 5h1v1H10zM12 5h1v1H12zM14 5h1v1H14zM18 5h1v1H18zM24,5 h1v1H24zM4 6h1v1H4zM6 6h3v1H6zM10 6h1v1H10zM14 6h3v1H14zM18 6h1v1H18zM20 6h3v1H20zM24,6 h1v1H24zM4 7h1v1H4zM6 7h3v1H6zM10 7h1v1H10zM12 7h1v1H12zM14 7h2v1H14zM18 7h1v1H18zM20 7h3v1H20zM24,7 h1v1H24zM4 8h1v1H4zM6 8h3v1H6zM10 8h1v1H10zM13 8h3v1H13zM18 8h1v1H18zM20 8h3v1H20zM24,8 h1v1H24zM4 9h1v1H4zM10 9h1v1H10zM14 9h3v1H14zM18 9h1v1H18zM24,9 h1v1H24zM4 10h7v1H4zM12 10h1v1H12zM14 10h1v1H14zM16 10h1v1H16zM18,10 h7v1H18zM12 11h5v1H12zM4 12h1v1H4zM6 12h2v1H6zM9 12h3v1H9zM15 12h2v1H15zM18 12h1v1H18zM21 12h1v1H21zM23,12 h2v1H23zM6 13h1v1H6zM9 13h1v1H9zM11 13h1v1H11zM16 13h2v1H16zM20 13h3v1H20zM24,13 h1v1H24zM5 14h2v1H5zM8 14h6v1H8zM15 14h1v1H15zM17 14h1v1H17zM19 14h1v1H19zM21 14h1v1H21zM23 14h1v1H23zM4 15h1v1H4zM7 15h3v1H7zM11 15h1v1H11zM13 15h2v1H13zM18 15h3v1H18zM22 15h2v1H22zM4 16h2v1H4zM7 16h6v1H7zM16 16h1v1H16zM18 16h2v1H18zM22,16 h3v1H22zM12 17h7v1H12zM21,17 h4v1H21zM4 18h7v1H4zM12 18h1v1H12zM18 18h3v1H18zM22 18h2v1H22zM4 19h1v1H4zM10 19h1v1H10zM12 19h1v1H12zM15 19h3v1H15zM20 19h1v1H20zM23 19h1v1H23zM4 20h1v1H4zM6 20h3v1H6zM10 20h1v1H10zM16 20h2v1H16zM19 20h1v1H19zM21 20h1v1H21zM4 21h1v1H4zM6 21h3v1H6zM10 21h1v1H10zM12 21h1v1H12zM15 21h1v1H15zM19 21h2v1H19zM22 21h2v1H22zM4 22h1v1H4zM6 22h3v1H6zM10 22h1v1H10zM12 22h1v1H12zM14 22h1v1H14zM17 22h2v1H17zM20 22h3v1H20zM4 23h1v1H4zM10 23h1v1H10zM13 23h1v1H13zM19 23h4v1H19zM4 24h7v1H4zM12 24h1v1H12zM15 24h1v1H15zM17 24h4v1H17zM22 24h2v1H22z" shape-rendering="crispEdges"></path></svg>
+        </div>
+
+        <div class="w-full bg-slate-950 p-2 rounded-xl border border-slate-800 text-xs font-mono text-cyan-400">
+          SKU: ACC-CASE-CLEAR-MAG
+        </div>
+
+        <div class="w-full pt-1">
+          <p class="text-[10px] text-slate-400 mb-1">Versi Barcode 1D (Garis):</p>
+          <div class="p-1.5 bg-white rounded-xl">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 486 80" width="100%" height="75" preserveAspectRatio="xMidYMid meet">
+    <rect width="486" height="80" fill="#ffffff"/>
+    <rect x="10" y="0" width="4" height="60" fill="#000000" /><rect x="16" y="0" width="2" height="60" fill="#000000" /><rect x="22" y="0" width="2" height="60" fill="#000000" /><rect x="32" y="0" width="2" height="60" fill="#000000" /><rect x="36" y="0" width="2" height="60" fill="#000000" /><rect x="44" y="0" width="4" height="60" fill="#000000" /><rect x="54" y="0" width="2" height="60" fill="#000000" /><rect x="62" y="0" width="2" height="60" fill="#000000" /><rect x="70" y="0" width="4" height="60" fill="#000000" /><rect x="76" y="0" width="2" height="60" fill="#000000" /><rect x="84" y="0" width="2" height="60" fill="#000000" /><rect x="92" y="0" width="4" height="60" fill="#000000" /><rect x="98" y="0" width="2" height="60" fill="#000000" /><rect x="104" y="0" width="4" height="60" fill="#000000" /><rect x="110" y="0" width="6" height="60" fill="#000000" /><rect x="120" y="0" width="2" height="60" fill="#000000" /><rect x="128" y="0" width="2" height="60" fill="#000000" /><rect x="136" y="0" width="4" height="60" fill="#000000" /><rect x="142" y="0" width="2" height="60" fill="#000000" /><rect x="146" y="0" width="2" height="60" fill="#000000" /><rect x="154" y="0" width="4" height="60" fill="#000000" /><rect x="164" y="0" width="4" height="60" fill="#000000" /><rect x="170" y="0" width="6" height="60" fill="#000000" /><rect x="178" y="0" width="2" height="60" fill="#000000" /><rect x="186" y="0" width="2" height="60" fill="#000000" /><rect x="194" y="0" width="4" height="60" fill="#000000" /><rect x="200" y="0" width="2" height="60" fill="#000000" /><rect x="208" y="0" width="2" height="60" fill="#000000" /><rect x="214" y="0" width="4" height="60" fill="#000000" /><rect x="220" y="0" width="6" height="60" fill="#000000" /><rect x="230" y="0" width="2" height="60" fill="#000000" /><rect x="238" y="0" width="2" height="60" fill="#000000" /><rect x="246" y="0" width="4" height="60" fill="#000000" /><rect x="252" y="0" width="2" height="60" fill="#000000" /><rect x="260" y="0" width="4" height="60" fill="#000000" /><rect x="266" y="0" width="6" height="60" fill="#000000" /><rect x="274" y="0" width="2" height="60" fill="#000000" /><rect x="282" y="0" width="4" height="60" fill="#000000" /><rect x="288" y="0" width="2" height="60" fill="#000000" /><rect x="296" y="0" width="2" height="60" fill="#000000" /><rect x="300" y="0" width="2" height="60" fill="#000000" /><rect x="308" y="0" width="4" height="60" fill="#000000" /><rect x="318" y="0" width="4" height="60" fill="#000000" /><rect x="328" y="0" width="2" height="60" fill="#000000" /><rect x="332" y="0" width="6" height="60" fill="#000000" /><rect x="340" y="0" width="2" height="60" fill="#000000" /><rect x="346" y="0" width="4" height="60" fill="#000000" /><rect x="352" y="0" width="6" height="60" fill="#000000" /><rect x="362" y="0" width="2" height="60" fill="#000000" /><rect x="366" y="0" width="6" height="60" fill="#000000" /><rect x="374" y="0" width="4" height="60" fill="#000000" /><rect x="384" y="0" width="2" height="60" fill="#000000" /><rect x="388" y="0" width="2" height="60" fill="#000000" /><rect x="396" y="0" width="4" height="60" fill="#000000" /><rect x="406" y="0" width="4" height="60" fill="#000000" /><rect x="412" y="0" width="2" height="60" fill="#000000" /><rect x="420" y="0" width="2" height="60" fill="#000000" /><rect x="428" y="0" width="2" height="60" fill="#000000" /><rect x="432" y="0" width="6" height="60" fill="#000000" /><rect x="442" y="0" width="4" height="60" fill="#000000" /><rect x="450" y="0" width="4" height="60" fill="#000000" /><rect x="460" y="0" width="6" height="60" fill="#000000" /><rect x="468" y="0" width="2" height="60" fill="#000000" /><rect x="472" y="0" width="4" height="60" fill="#000000" />
+    <text x="243" y="75" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle" fill="#000000">ACC-CASE-CLEAR-MAG</text>
+  </svg>
+          </div>
+        </div>
+
+        <button onclick="simulateScan('ACC-CASE-CLEAR-MAG')" class="w-full py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 no-print transition">
+          Simulasi Imbas Klik
+        </button>
+      </div>
+
+      <!-- Card 3: Tempered Glass -->
+      <div class="p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl flex flex-col items-center text-center space-y-3 relative overflow-hidden group hover:border-cyan-500/50 transition">
+        <span class="px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-[10px] font-black uppercase tracking-wider border border-cyan-500/20">
+          Aksesori Telefon • RM 12.00
+        </span>
+        <h3 class="font-bold text-sm text-white">9H Privacy Tempered Glass</h3>
+        
+        <div class="p-3 bg-white rounded-2xl shadow-inner my-2 flex items-center justify-center">
+          <svg height="240" width="240" viewBox="0 0 29 29" role="img"><path fill="#FFFFFF" d="M0,0 h29v29H0z" shape-rendering="crispEdges"></path><path fill="#000000" d="M4 4h7v1H4zM12 4h1v1H12zM15 4h2v1H15zM18,4 h7v1H18zM4 5h1v1H4zM10 5h1v1H10zM13 5h1v1H13zM16 5h1v1H16zM18 5h1v1H18zM24,5 h1v1H24zM4 6h1v1H4zM6 6h3v1H6zM10 6h1v1H10zM12 6h1v1H12zM15 6h2v1H15zM18 6h1v1H18zM20 6h3v1H20zM24,6 h1v1H24zM4 7h1v1H4zM6 7h3v1H6zM10 7h1v1H10zM14 7h1v1H14zM18 7h1v1H18zM20 7h3v1H20zM24,7 h1v1H24zM4 8h1v1H4zM6 8h3v1H6zM10 8h1v1H10zM13 8h2v1H13zM16 8h1v1H16zM18 8h1v1H18zM20 8h3v1H20zM24,8 h1v1H24zM4 9h1v1H4zM10 9h1v1H10zM12 9h1v1H12zM18 9h1v1H18zM24,9 h1v1H24zM4 10h7v1H4zM12 10h1v1H12zM14 10h1v1H14zM16 10h1v1H16zM18,10 h7v1H18zM13 11h3v1H13zM4 12h1v1H4zM6 12h1v1H6zM10 12h2v1H10zM14 12h3v1H14zM19 12h1v1H19zM22 12h1v1H22zM24,12 h1v1H24zM7 13h1v1H7zM11 13h1v1H11zM13 13h2v1H13zM19 13h1v1H19zM21 13h1v1H21zM24,13 h1v1H24zM5 14h2v1H5zM8 14h1v1H8zM10 14h4v1H10zM17 14h3v1H17zM21 14h2v1H21zM5 15h1v1H5zM7 15h1v1H7zM9 15h1v1H9zM12 15h1v1H12zM16 15h1v1H16zM20 15h1v1H20zM22 15h1v1H22zM6 16h1v1H6zM9 16h2v1H9zM12 16h1v1H12zM14 16h1v1H14zM17 16h2v1H17zM20 16h3v1H20zM12 17h3v1H12zM17 17h2v1H17zM20 17h1v1H20zM22 17h2v1H22zM4 18h7v1H4zM12 18h1v1H12zM14 18h3v1H14zM18 18h3v1H18zM23 18h1v1H23zM4 19h1v1H4zM10 19h1v1H10zM14 19h1v1H14zM19 19h3v1H19zM4 20h1v1H4zM6 20h3v1H6zM10 20h1v1H10zM14 20h1v1H14zM16 20h2v1H16zM19 20h5v1H19zM4 21h1v1H4zM6 21h3v1H6zM10 21h1v1H10zM14 21h1v1H14zM17 21h1v1H17zM19 21h2v1H19zM22 21h1v1H22zM4 22h1v1H4zM6 22h3v1H6zM10 22h1v1H10zM12 22h1v1H12zM16 22h3v1H16zM21 22h1v1H21zM23,22 h2v1H23zM4 23h1v1H4zM10 23h1v1H10zM13 23h1v1H13zM15 23h5v1H15zM21 23h1v1H21zM24,23 h1v1H24zM4 24h7v1H4zM12 24h1v1H12zM16 24h2v1H16zM19 24h1v1H19zM23,24 h2v1H23z" shape-rendering="crispEdges"></path></svg>
+        </div>
+
+        <div class="w-full bg-slate-950 p-2 rounded-xl border border-slate-800 text-xs font-mono text-cyan-400">
+          SKU: ACC-TG-9H-PRIVACY
+        </div>
+
+        <div class="w-full pt-1">
+          <p class="text-[10px] text-slate-400 mb-1">Versi Barcode 1D (Garis):</p>
+          <div class="p-1.5 bg-white rounded-xl">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 464 80" width="100%" height="75" preserveAspectRatio="xMidYMid meet">
+    <rect width="464" height="80" fill="#ffffff"/>
+    <rect x="10" y="0" width="4" height="60" fill="#000000" /><rect x="16" y="0" width="2" height="60" fill="#000000" /><rect x="22" y="0" width="2" height="60" fill="#000000" /><rect x="32" y="0" width="2" height="60" fill="#000000" /><rect x="36" y="0" width="2" height="60" fill="#000000" /><rect x="44" y="0" width="4" height="60" fill="#000000" /><rect x="54" y="0" width="2" height="60" fill="#000000" /><rect x="62" y="0" width="2" height="60" fill="#000000" /><rect x="70" y="0" width="4" height="60" fill="#000000" /><rect x="76" y="0" width="2" height="60" fill="#000000" /><rect x="84" y="0" width="2" height="60" fill="#000000" /><rect x="92" y="0" width="4" height="60" fill="#000000" /><rect x="98" y="0" width="2" height="60" fill="#000000" /><rect x="104" y="0" width="4" height="60" fill="#000000" /><rect x="110" y="0" width="6" height="60" fill="#000000" /><rect x="120" y="0" width="4" height="60" fill="#000000" /><rect x="126" y="0" width="6" height="60" fill="#000000" /><rect x="138" y="0" width="2" height="60" fill="#000000" /><rect x="142" y="0" width="4" height="60" fill="#000000" /><rect x="148" y="0" width="2" height="60" fill="#000000" /><rect x="156" y="0" width="2" height="60" fill="#000000" /><rect x="164" y="0" width="2" height="60" fill="#000000" /><rect x="170" y="0" width="4" height="60" fill="#000000" /><rect x="176" y="0" width="6" height="60" fill="#000000" /><rect x="186" y="0" width="6" height="60" fill="#000000" /><rect x="196" y="0" width="2" height="60" fill="#000000" /><rect x="200" y="0" width="4" height="60" fill="#000000" /><rect x="208" y="0" width="4" height="60" fill="#000000" /><rect x="218" y="0" width="2" height="60" fill="#000000" /><rect x="222" y="0" width="2" height="60" fill="#000000" /><rect x="230" y="0" width="2" height="60" fill="#000000" /><rect x="236" y="0" width="4" height="60" fill="#000000" /><rect x="242" y="0" width="6" height="60" fill="#000000" /><rect x="252" y="0" width="6" height="60" fill="#000000" /><rect x="260" y="0" width="6" height="60" fill="#000000" /><rect x="268" y="0" width="4" height="60" fill="#000000" /><rect x="274" y="0" width="4" height="60" fill="#000000" /><rect x="284" y="0" width="2" height="60" fill="#000000" /><rect x="288" y="0" width="6" height="60" fill="#000000" /><rect x="296" y="0" width="4" height="60" fill="#000000" /><rect x="306" y="0" width="2" height="60" fill="#000000" /><rect x="314" y="0" width="2" height="60" fill="#000000" /><rect x="318" y="0" width="6" height="60" fill="#000000" /><rect x="326" y="0" width="2" height="60" fill="#000000" /><rect x="330" y="0" width="4" height="60" fill="#000000" /><rect x="340" y="0" width="2" height="60" fill="#000000" /><rect x="344" y="0" width="2" height="60" fill="#000000" /><rect x="352" y="0" width="4" height="60" fill="#000000" /><rect x="362" y="0" width="2" height="60" fill="#000000" /><rect x="370" y="0" width="2" height="60" fill="#000000" /><rect x="378" y="0" width="4" height="60" fill="#000000" /><rect x="384" y="0" width="6" height="60" fill="#000000" /><rect x="392" y="0" width="4" height="60" fill="#000000" /><rect x="398" y="0" width="2" height="60" fill="#000000" /><rect x="406" y="0" width="2" height="60" fill="#000000" /><rect x="412" y="0" width="2" height="60" fill="#000000" /><rect x="418" y="0" width="4" height="60" fill="#000000" /><rect x="428" y="0" width="4" height="60" fill="#000000" /><rect x="438" y="0" width="6" height="60" fill="#000000" /><rect x="446" y="0" width="2" height="60" fill="#000000" /><rect x="450" y="0" width="4" height="60" fill="#000000" />
+    <text x="232" y="75" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle" fill="#000000">ACC-TG-9H-PRIVACY</text>
+  </svg>
+          </div>
+        </div>
+
+        <button onclick="simulateScan('ACC-TG-9H-PRIVACY')" class="w-full py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 no-print transition">
+          Simulasi Imbas Klik
+        </button>
+      </div>
+
+      <!-- Card 4: 65W GaN Charger -->
+      <div class="p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl flex flex-col items-center text-center space-y-3 relative overflow-hidden group hover:border-cyan-500/50 transition">
+        <span class="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 text-[10px] font-black uppercase tracking-wider border border-amber-500/20">
+          Aksesori Premium • RM 69.00
+        </span>
+        <h3 class="font-bold text-sm text-white">GaN 65W Fast Charger</h3>
+        
+        <div class="p-3 bg-white rounded-2xl shadow-inner my-2 flex items-center justify-center">
+          <svg height="240" width="240" viewBox="0 0 29 29" role="img"><path fill="#FFFFFF" d="M0,0 h29v29H0z" shape-rendering="crispEdges"></path><path fill="#000000" d="M4 4h7v1H4zM12 4h1v1H12zM14 4h2v1H14zM18,4 h7v1H18zM4 5h1v1H4zM10 5h1v1H10zM16 5h1v1H16zM18 5h1v1H18zM24,5 h1v1H24zM4 6h1v1H4zM6 6h3v1H6zM10 6h1v1H10zM12 6h2v1H12zM15 6h1v1H15zM18 6h1v1H18zM20 6h3v1H20zM24,6 h1v1H24zM4 7h1v1H4zM6 7h3v1H6zM10 7h1v1H10zM12 7h1v1H12zM14 7h3v1H14zM18 7h1v1H18zM20 7h3v1H20zM24,7 h1v1H24zM4 8h1v1H4zM6 8h3v1H6zM10 8h1v1H10zM13 8h1v1H13zM15 8h2v1H15zM18 8h1v1H18zM20 8h3v1H20zM24,8 h1v1H24zM4 9h1v1H4zM10 9h1v1H10zM12 9h1v1H12zM14 9h1v1H14zM16 9h1v1H16zM18 9h1v1H18zM24,9 h1v1H24zM4 10h7v1H4zM12 10h1v1H12zM14 10h1v1H14zM16 10h1v1H16zM18,10 h7v1H18zM12 11h3v1H12zM16 11h1v1H16zM5 12h1v1H5zM7 12h1v1H7zM9 12h5v1H9zM15 12h5v1H15zM21 12h2v1H21zM24,12 h1v1H24zM6 13h1v1H6zM8 13h2v1H8zM11 13h1v1H11zM13 13h3v1H13zM19 13h1v1H19zM23,13 h2v1H23zM8 14h3v1H8zM12 14h2v1H12zM15 14h1v1H15zM17 14h1v1H17zM20 14h1v1H20zM22 14h1v1H22zM9 15h1v1H9zM14 15h1v1H14zM17 15h1v1H17zM19 15h2v1H19zM22,15 h3v1H22zM7 16h1v1H7zM9 16h2v1H9zM13 16h1v1H13zM15 16h1v1H15zM18 16h1v1H18zM22 16h2v1H22zM12 17h3v1H12zM16 17h2v1H16zM20 17h4v1H20zM4 18h7v1H4zM12 18h3v1H12zM19 18h1v1H19zM21 18h1v1H21zM24,18 h1v1H24zM4 19h1v1H4zM10 19h1v1H10zM12 19h2v1H12zM15 19h2v1H15zM19 19h4v1H19zM24,19 h1v1H24zM4 20h1v1H4zM6 20h3v1H6zM10 20h1v1H10zM13 20h1v1H13zM15 20h4v1H15zM20 20h1v1H20zM22 20h1v1H22zM24,20 h1v1H24zM4 21h1v1H4zM6 21h3v1H6zM10 21h1v1H10zM12 21h2v1H12zM19 21h1v1H19zM22,21 h3v1H22zM4 22h1v1H4zM6 22h3v1H6zM10 22h1v1H10zM14 22h1v1H14zM16 22h1v1H16zM19 22h1v1H19zM21 22h1v1H21zM24,22 h1v1H24zM4 23h1v1H4zM10 23h1v1H10zM12 23h4v1H12zM24,23 h1v1H24zM4 24h7v1H4zM13 24h4v1H13zM19 24h2v1H19zM22 24h1v1H22z" shape-rendering="crispEdges"></path></svg>
+        </div>
+
+        <div class="w-full bg-slate-950 p-2 rounded-xl border border-slate-800 text-xs font-mono text-amber-400">
+          SKU: ACC-CHG-GAN-65W
+        </div>
+
+        <div class="w-full pt-1">
+          <p class="text-[10px] text-slate-400 mb-1">Versi Barcode 1D (Garis):</p>
+          <div class="p-1.5 bg-white rounded-xl">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 80" width="100%" height="75" preserveAspectRatio="xMidYMid meet">
+    <rect width="420" height="80" fill="#ffffff"/>
+    <rect x="10" y="0" width="4" height="60" fill="#000000" /><rect x="16" y="0" width="2" height="60" fill="#000000" /><rect x="22" y="0" width="2" height="60" fill="#000000" /><rect x="32" y="0" width="2" height="60" fill="#000000" /><rect x="36" y="0" width="2" height="60" fill="#000000" /><rect x="44" y="0" width="4" height="60" fill="#000000" /><rect x="54" y="0" width="2" height="60" fill="#000000" /><rect x="62" y="0" width="2" height="60" fill="#000000" /><rect x="70" y="0" width="4" height="60" fill="#000000" /><rect x="76" y="0" width="2" height="60" fill="#000000" /><rect x="84" y="0" width="2" height="60" fill="#000000" /><rect x="92" y="0" width="4" height="60" fill="#000000" /><rect x="98" y="0" width="2" height="60" fill="#000000" /><rect x="104" y="0" width="4" height="60" fill="#000000" /><rect x="110" y="0" width="6" height="60" fill="#000000" /><rect x="120" y="0" width="2" height="60" fill="#000000" /><rect x="128" y="0" width="2" height="60" fill="#000000" /><rect x="136" y="0" width="4" height="60" fill="#000000" /><rect x="142" y="0" width="4" height="60" fill="#000000" /><rect x="152" y="0" width="2" height="60" fill="#000000" /><rect x="156" y="0" width="2" height="60" fill="#000000" /><rect x="164" y="0" width="4" height="60" fill="#000000" /><rect x="170" y="0" width="2" height="60" fill="#000000" /><rect x="178" y="0" width="2" height="60" fill="#000000" /><rect x="186" y="0" width="2" height="60" fill="#000000" /><rect x="192" y="0" width="4" height="60" fill="#000000" /><rect x="198" y="0" width="6" height="60" fill="#000000" /><rect x="208" y="0" width="4" height="60" fill="#000000" /><rect x="214" y="0" width="2" height="60" fill="#000000" /><rect x="222" y="0" width="2" height="60" fill="#000000" /><rect x="230" y="0" width="2" height="60" fill="#000000" /><rect x="234" y="0" width="2" height="60" fill="#000000" /><rect x="242" y="0" width="4" height="60" fill="#000000" /><rect x="252" y="0" width="2" height="60" fill="#000000" /><rect x="256" y="0" width="6" height="60" fill="#000000" /><rect x="268" y="0" width="4" height="60" fill="#000000" /><rect x="274" y="0" width="2" height="60" fill="#000000" /><rect x="280" y="0" width="4" height="60" fill="#000000" /><rect x="286" y="0" width="6" height="60" fill="#000000" /><rect x="296" y="0" width="4" height="60" fill="#000000" /><rect x="304" y="0" width="6" height="60" fill="#000000" /><rect x="312" y="0" width="2" height="60" fill="#000000" /><rect x="318" y="0" width="4" height="60" fill="#000000" /><rect x="324" y="0" width="6" height="60" fill="#000000" /><rect x="334" y="0" width="2" height="60" fill="#000000" /><rect x="340" y="0" width="6" height="60" fill="#000000" /><rect x="348" y="0" width="2" height="60" fill="#000000" /><rect x="356" y="0" width="4" height="60" fill="#000000" /><rect x="362" y="0" width="2" height="60" fill="#000000" /><rect x="366" y="0" width="2" height="60" fill="#000000" /><rect x="374" y="0" width="8" height="60" fill="#000000" /><rect x="384" y="0" width="4" height="60" fill="#000000" /><rect x="394" y="0" width="6" height="60" fill="#000000" /><rect x="402" y="0" width="2" height="60" fill="#000000" /><rect x="406" y="0" width="4" height="60" fill="#000000" />
+    <text x="210" y="75" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle" fill="#000000">ACC-CHG-GAN-65W</text>
+  </svg>
+          </div>
+        </div>
+
+        <button onclick="simulateScan('ACC-CHG-GAN-65W')" class="w-full py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 no-print transition">
+          Simulasi Imbas Klik
+        </button>
+      </div>
+
+      <!-- Card 5: Repair Job Status -->
+      <div class="p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl flex flex-col items-center text-center space-y-3 relative overflow-hidden group hover:border-blue-500/50 transition">
+        <span class="px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 text-[10px] font-black uppercase tracking-wider border border-blue-500/20">
+          Servis Baiki Smartphone
+        </span>
+        <h3 class="font-bold text-sm text-white">No. Job Baiki LCD iPhone 11</h3>
+        
+        <div class="p-3 bg-white rounded-2xl shadow-inner my-2 flex items-center justify-center">
+          <svg height="240" width="240" viewBox="0 0 29 29" role="img"><path fill="#FFFFFF" d="M0,0 h29v29H0z" shape-rendering="crispEdges"></path><path fill="#000000" d="M4 4h7v1H4zM18,4 h7v1H18zM4 5h1v1H4zM10 5h1v1H10zM12 5h1v1H12zM14 5h1v1H14zM18 5h1v1H18zM24,5 h1v1H24zM4 6h1v1H4zM6 6h3v1H6zM10 6h1v1H10zM13 6h1v1H13zM15 6h2v1H15zM18 6h1v1H18zM20 6h3v1H20zM24,6 h1v1H24zM4 7h1v1H4zM6 7h3v1H6zM10 7h1v1H10zM12 7h1v1H12zM14 7h3v1H14zM18 7h1v1H18zM20 7h3v1H20zM24,7 h1v1H24zM4 8h1v1H4zM6 8h3v1H6zM10 8h1v1H10zM12 8h3v1H12zM16 8h1v1H16zM18 8h1v1H18zM20 8h3v1H20zM24,8 h1v1H24zM4 9h1v1H4zM10 9h1v1H10zM13 9h2v1H13zM16 9h1v1H16zM18 9h1v1H18zM24,9 h1v1H24zM4 10h7v1H4zM12 10h1v1H12zM14 10h1v1H14zM16 10h1v1H16zM18,10 h7v1H18zM12 11h1v1H12zM14 11h3v1H14zM5 12h1v1H5zM7 12h4v1H7zM12 12h3v1H12zM16 12h3v1H16zM20 12h2v1H20zM23 12h1v1H23zM5 13h5v1H5zM11 13h1v1H11zM13 13h2v1H13zM16 13h1v1H16zM18 13h1v1H18zM20 13h1v1H20zM23,13 h2v1H23zM5 14h1v1H5zM7 14h4v1H7zM12 14h5v1H12zM18 14h2v1H18zM22 14h2v1H22zM4 15h1v1H4zM8 15h2v1H8zM11 15h1v1H11zM13 15h2v1H13zM16 15h1v1H16zM19 15h4v1H19zM5 16h2v1H5zM8 16h1v1H8zM10 16h3v1H10zM17 16h2v1H17zM20 16h1v1H20zM22 16h1v1H22zM12 17h3v1H12zM16 17h6v1H16zM23,17 h2v1H23zM4 18h7v1H4zM13 18h1v1H13zM17 18h1v1H17zM19 18h2v1H19zM22 18h1v1H22zM24,18 h1v1H24zM4 19h1v1H4zM10 19h1v1H10zM12 19h1v1H12zM14 19h2v1H14zM19 19h1v1H19zM22 19h1v1H22zM4 20h1v1H4zM6 20h3v1H6zM10 20h1v1H10zM12 20h1v1H12zM18 20h1v1H18zM22,20 h3v1H22zM4 21h1v1H4zM6 21h3v1H6zM10 21h1v1H10zM12 21h1v1H12zM14 21h3v1H14zM20 21h1v1H20zM22 21h1v1H22zM4 22h1v1H4zM6 22h3v1H6zM10 22h1v1H10zM13 22h1v1H13zM17 22h5v1H17zM23,22 h2v1H23zM4 23h1v1H4zM10 23h1v1H10zM12 23h1v1H12zM14 23h1v1H14zM17 23h4v1H17zM23 23h1v1H23zM4 24h7v1H4zM13 24h3v1H13zM17 24h1v1H17zM19 24h2v1H19zM22 24h2v1H22z" shape-rendering="crispEdges"></path></svg>
+        </div>
+
+        <div class="w-full bg-slate-950 p-2 rounded-xl border border-slate-800 text-xs font-mono text-blue-400">
+          JOB: REP-2026-0001
+        </div>
+
+        <div class="w-full pt-1">
+          <p class="text-[10px] text-slate-400 mb-1">Versi Barcode 1D (Garis):</p>
+          <div class="p-1.5 bg-white rounded-xl">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 376 80" width="100%" height="75" preserveAspectRatio="xMidYMid meet">
+    <rect width="376" height="80" fill="#ffffff"/>
+    <rect x="10" y="0" width="4" height="60" fill="#000000" /><rect x="16" y="0" width="2" height="60" fill="#000000" /><rect x="22" y="0" width="2" height="60" fill="#000000" /><rect x="32" y="0" width="4" height="60" fill="#000000" /><rect x="42" y="0" width="2" height="60" fill="#000000" /><rect x="46" y="0" width="6" height="60" fill="#000000" /><rect x="54" y="0" width="2" height="60" fill="#000000" /><rect x="62" y="0" width="4" height="60" fill="#000000" /><rect x="68" y="0" width="2" height="60" fill="#000000" /><rect x="76" y="0" width="6" height="60" fill="#000000" /><rect x="84" y="0" width="6" height="60" fill="#000000" /><rect x="92" y="0" width="4" height="60" fill="#000000" /><rect x="98" y="0" width="2" height="60" fill="#000000" /><rect x="104" y="0" width="4" height="60" fill="#000000" /><rect x="110" y="0" width="6" height="60" fill="#000000" /><rect x="120" y="0" width="4" height="60" fill="#000000" /><rect x="128" y="0" width="6" height="60" fill="#000000" /><rect x="138" y="0" width="2" height="60" fill="#000000" /><rect x="142" y="0" width="2" height="60" fill="#000000" /><rect x="148" y="0" width="6" height="60" fill="#000000" /><rect x="156" y="0" width="4" height="60" fill="#000000" /><rect x="164" y="0" width="4" height="60" fill="#000000" /><rect x="172" y="0" width="6" height="60" fill="#000000" /><rect x="182" y="0" width="2" height="60" fill="#000000" /><rect x="186" y="0" width="4" height="60" fill="#000000" /><rect x="194" y="0" width="6" height="60" fill="#000000" /><rect x="202" y="0" width="2" height="60" fill="#000000" /><rect x="208" y="0" width="2" height="60" fill="#000000" /><rect x="214" y="0" width="4" height="60" fill="#000000" /><rect x="220" y="0" width="6" height="60" fill="#000000" /><rect x="230" y="0" width="2" height="60" fill="#000000" /><rect x="236" y="0" width="6" height="60" fill="#000000" /><rect x="244" y="0" width="4" height="60" fill="#000000" /><rect x="252" y="0" width="2" height="60" fill="#000000" /><rect x="258" y="0" width="6" height="60" fill="#000000" /><rect x="266" y="0" width="4" height="60" fill="#000000" /><rect x="274" y="0" width="2" height="60" fill="#000000" /><rect x="280" y="0" width="6" height="60" fill="#000000" /><rect x="288" y="0" width="4" height="60" fill="#000000" /><rect x="296" y="0" width="2" height="60" fill="#000000" /><rect x="302" y="0" width="6" height="60" fill="#000000" /><rect x="312" y="0" width="4" height="60" fill="#000000" /><rect x="318" y="0" width="6" height="60" fill="#000000" /><rect x="326" y="0" width="4" height="60" fill="#000000" /><rect x="334" y="0" width="2" height="60" fill="#000000" /><rect x="340" y="0" width="4" height="60" fill="#000000" /><rect x="350" y="0" width="6" height="60" fill="#000000" /><rect x="358" y="0" width="2" height="60" fill="#000000" /><rect x="362" y="0" width="4" height="60" fill="#000000" />
+    <text x="188" y="75" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle" fill="#000000">REP-2026-0001</text>
+  </svg>
+          </div>
+        </div>
+
+        <button onclick="simulateScan('REP-2026-0001')" class="w-full py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 no-print transition">
+          Simulasi Imbas Klik
+        </button>
+      </div>
+
+      <!-- Card 6: Cafe Menu -->
+      <div class="p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl flex flex-col items-center text-center space-y-3 relative overflow-hidden group hover:border-emerald-500/50 transition">
+        <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-wider border border-emerald-500/20">
+          Menu FELÌCE CAFFÉ • RM 16.00
+        </span>
+        <h3 class="font-bold text-sm text-white">Spaghetti Bolognese</h3>
+        
+        <div class="p-3 bg-white rounded-2xl shadow-inner my-2 flex items-center justify-center">
+          <svg height="240" width="240" viewBox="0 0 33 33" role="img"><path fill="#FFFFFF" d="M0,0 h33v33H0z" shape-rendering="crispEdges"></path><path fill="#000000" d="M4 4h7v1H4zM12 4h1v1H12zM14 4h2v1H14zM19 4h1v1H19zM22,4 h7v1H22zM4 5h1v1H4zM10 5h1v1H10zM14 5h2v1H14zM17 5h1v1H17zM19 5h1v1H19zM22 5h1v1H22zM28,5 h1v1H28zM4 6h1v1H4zM6 6h3v1H6zM10 6h1v1H10zM12 6h1v1H12zM14 6h1v1H14zM16 6h1v1H16zM18 6h1v1H18zM22 6h1v1H22zM24 6h3v1H24zM28,6 h1v1H28zM4 7h1v1H4zM6 7h3v1H6zM10 7h1v1H10zM12 7h1v1H12zM15 7h2v1H15zM18 7h2v1H18zM22 7h1v1H22zM24 7h3v1H24zM28,7 h1v1H28zM4 8h1v1H4zM6 8h3v1H6zM10 8h1v1H10zM14 8h2v1H14zM17 8h4v1H17zM22 8h1v1H22zM24 8h3v1H24zM28,8 h1v1H28zM4 9h1v1H4zM10 9h1v1H10zM12 9h3v1H12zM17 9h1v1H17zM19 9h1v1H19zM22 9h1v1H22zM28,9 h1v1H28zM4 10h7v1H4zM12 10h1v1H12zM14 10h1v1H14zM16 10h1v1H16zM18 10h1v1H18zM20 10h1v1H20zM22,10 h7v1H22zM12 11h2v1H12zM15 11h2v1H15zM18 11h1v1H18zM5 12h1v1H5zM7 12h1v1H7zM9 12h4v1H9zM14 12h3v1H14zM19 12h5v1H19zM25 12h2v1H25zM28,12 h1v1H28zM7 13h1v1H7zM12 13h1v1H12zM16 13h1v1H16zM20 13h4v1H20zM25 13h1v1H25zM27,13 h2v1H27zM5 14h7v1H5zM15 14h1v1H15zM20 14h1v1H20zM22 14h1v1H22zM24 14h2v1H24zM27,14 h2v1H27zM4 15h1v1H4zM8 15h1v1H8zM12 15h1v1H12zM15 15h2v1H15zM18 15h1v1H18zM20 15h1v1H20zM23 15h1v1H23zM4 16h2v1H4zM10 16h1v1H10zM16 16h1v1H16zM20 16h3v1H20zM28,16 h1v1H28zM11 17h2v1H11zM16 17h1v1H16zM21 17h1v1H21zM23 17h1v1H23zM26 17h1v1H26zM28,17 h1v1H28zM4 18h1v1H4zM10 18h3v1H10zM18 18h1v1H18zM21 18h2v1H21zM25 18h1v1H25zM28,18 h1v1H28zM5 19h1v1H5zM7 19h1v1H7zM9 19h1v1H9zM11 19h2v1H11zM14 19h2v1H14zM17 19h2v1H17zM20 19h3v1H20zM28,19 h1v1H28zM4 20h7v1H4zM12 20h2v1H12zM15 20h1v1H15zM17 20h1v1H17zM19 20h6v1H19zM26 20h1v1H26zM28,20 h1v1H28zM12 21h2v1H12zM17 21h4v1H17zM24 21h4v1H24zM4 22h7v1H4zM12 22h1v1H12zM15 22h2v1H15zM19 22h2v1H19zM22 22h1v1H22zM24 22h1v1H24zM26,22 h3v1H26zM4 23h1v1H4zM10 23h1v1H10zM12 23h2v1H12zM17 23h1v1H17zM20 23h1v1H20zM24 23h1v1H24zM26 23h1v1H26zM28,23 h1v1H28zM4 24h1v1H4zM6 24h3v1H6zM10 24h1v1H10zM14 24h1v1H14zM16 24h1v1H16zM20 24h5v1H20zM27,24 h2v1H27zM4 25h1v1H4zM6 25h3v1H6zM10 25h1v1H10zM12 25h4v1H12zM18 25h2v1H18zM24 25h1v1H24zM4 26h1v1H4zM6 26h3v1H6zM10 26h1v1H10zM13 26h2v1H13zM16 26h1v1H16zM18 26h3v1H18zM24 26h2v1H24zM28,26 h1v1H28zM4 27h1v1H4zM10 27h1v1H10zM12 27h6v1H12zM19 27h6v1H19zM4 28h7v1H4zM13 28h1v1H13zM15 28h1v1H15zM19 28h3v1H19zM23 28h3v1H23zM27,28 h2v1H27z" shape-rendering="crispEdges"></path></svg>
+        </div>
+
+        <div class="w-full bg-slate-950 p-2 rounded-xl border border-slate-800 text-xs font-mono text-emerald-400">
+          MENU: Spaghetti Bolognese
+        </div>
+
+        <div class="w-full pt-1">
+          <p class="text-[10px] text-slate-400 mb-1">Versi Barcode 1D (Garis):</p>
+          <div class="p-1.5 bg-white rounded-xl">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 508 80" width="100%" height="75" preserveAspectRatio="xMidYMid meet">
+    <rect width="508" height="80" fill="#ffffff"/>
+    <rect x="10" y="0" width="4" height="60" fill="#000000" /><rect x="16" y="0" width="2" height="60" fill="#000000" /><rect x="22" y="0" width="2" height="60" fill="#000000" /><rect x="32" y="0" width="4" height="60" fill="#000000" /><rect x="38" y="0" width="6" height="60" fill="#000000" /><rect x="46" y="0" width="2" height="60" fill="#000000" /><rect x="54" y="0" width="2" height="60" fill="#000000" /><rect x="58" y="0" width="2" height="60" fill="#000000" /><rect x="64" y="0" width="8" height="60" fill="#000000" /><rect x="76" y="0" width="2" height="60" fill="#000000" /><rect x="82" y="0" width="2" height="60" fill="#000000" /><rect x="86" y="0" width="4" height="60" fill="#000000" /><rect x="98" y="0" width="2" height="60" fill="#000000" /><rect x="104" y="0" width="4" height="60" fill="#000000" /><rect x="110" y="0" width="2" height="60" fill="#000000" /><rect x="120" y="0" width="2" height="60" fill="#000000" /><rect x="126" y="0" width="4" height="60" fill="#000000" /><rect x="138" y="0" width="2" height="60" fill="#000000" /><rect x="142" y="0" width="2" height="60" fill="#000000" /><rect x="146" y="0" width="4" height="60" fill="#000000" /><rect x="154" y="0" width="2" height="60" fill="#000000" /><rect x="164" y="0" width="2" height="60" fill="#000000" /><rect x="170" y="0" width="8" height="60" fill="#000000" /><rect x="180" y="0" width="2" height="60" fill="#000000" /><rect x="186" y="0" width="2" height="60" fill="#000000" /><rect x="192" y="0" width="8" height="60" fill="#000000" /><rect x="202" y="0" width="2" height="60" fill="#000000" /><rect x="208" y="0" width="2" height="60" fill="#000000" /><rect x="218" y="0" width="4" height="60" fill="#000000" /><rect x="224" y="0" width="2" height="60" fill="#000000" /><rect x="230" y="0" width="4" height="60" fill="#000000" /><rect x="236" y="0" width="4" height="60" fill="#000000" /><rect x="244" y="0" width="4" height="60" fill="#000000" /><rect x="252" y="0" width="2" height="60" fill="#000000" /><rect x="260" y="0" width="2" height="60" fill="#000000" /><rect x="264" y="0" width="4" height="60" fill="#000000" /><rect x="274" y="0" width="2" height="60" fill="#000000" /><rect x="282" y="0" width="8" height="60" fill="#000000" /><rect x="292" y="0" width="2" height="60" fill="#000000" /><rect x="296" y="0" width="4" height="60" fill="#000000" /><rect x="304" y="0" width="2" height="60" fill="#000000" /><rect x="308" y="0" width="2" height="60" fill="#000000" /><rect x="318" y="0" width="2" height="60" fill="#000000" /><rect x="326" y="0" width="8" height="60" fill="#000000" /><rect x="336" y="0" width="2" height="60" fill="#000000" /><rect x="340" y="0" width="2" height="60" fill="#000000" /><rect x="346" y="0" width="4" height="60" fill="#000000" /><rect x="352" y="0" width="2" height="60" fill="#000000" /><rect x="362" y="0" width="4" height="60" fill="#000000" /><rect x="374" y="0" width="2" height="60" fill="#000000" /><rect x="378" y="0" width="2" height="60" fill="#000000" /><rect x="384" y="0" width="2" height="60" fill="#000000" /><rect x="388" y="0" width="4" height="60" fill="#000000" /><rect x="396" y="0" width="2" height="60" fill="#000000" /><rect x="406" y="0" width="2" height="60" fill="#000000" /><rect x="410" y="0" width="8" height="60" fill="#000000" /><rect x="422" y="0" width="2" height="60" fill="#000000" /><rect x="428" y="0" width="2" height="60" fill="#000000" /><rect x="432" y="0" width="4" height="60" fill="#000000" /><rect x="440" y="0" width="2" height="60" fill="#000000" /><rect x="450" y="0" width="2" height="60" fill="#000000" /><rect x="458" y="0" width="4" height="60" fill="#000000" /><rect x="466" y="0" width="2" height="60" fill="#000000" /><rect x="472" y="0" width="4" height="60" fill="#000000" /><rect x="482" y="0" width="6" height="60" fill="#000000" /><rect x="490" y="0" width="2" height="60" fill="#000000" /><rect x="494" y="0" width="4" height="60" fill="#000000" />
+    <text x="254" y="75" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle" fill="#000000">Spaghetti Bolognese</text>
+  </svg>
+          </div>
+        </div>
+
+        <button onclick="simulateScan('Spaghetti Bolognese')" class="w-full py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 no-print transition">
+          Simulasi Imbas Klik
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Guide: Where to scan in POS -->
+    <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
+      <h3 class="text-base font-black text-white flex items-center gap-2">
+        <span>📖 Di Mana Anda Boleh Mengimbas Dalam Sistem POS Sebenar?</span>
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+        <div class="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-1.5">
+          <span class="text-cyan-400 font-bold block text-sm">1. POS Jualan Aksesori Telefon</span>
+          <p class="text-slate-400">
+            Di menu <strong>"Jualan Aksesori"</strong>, klik pada kotak carian <em>"Cari aksesori, imbas Barcode/SKU..."</em>. Apabila diimbas, item akan terus dimasukkan ke dalam troli secara automatik!
+          </p>
+        </div>
+
+        <div class="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-1.5">
+          <span class="text-emerald-400 font-bold block text-sm">2. POS Pesanan Café</span>
+          <p class="text-slate-400">
+            Di menu <strong>"POS Café"</strong>, klik pada kotak carian <em>"Cari menu, imbas Barcode/QR..."</em>. Apabila diimbas, makanan akan terus ditambah ke pesanan!
+          </p>
+        </div>
+
+        <div class="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-1.5">
+          <span class="text-blue-400 font-bold block text-sm">3. Status Baiki Smartphone</span>
+          <p class="text-slate-400">
+            Di menu <strong>"Status Baiki"</strong>, imbas Kod QR No. Job (cth: <code>REP-2026-0001</code>) untuk mencari rekod pelanggan serta-merta tanpa perlu menaip.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    function playBeep() {
+      if (!soundEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1800, audioCtx.currentTime); // 1800Hz POS beep
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.12);
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundToggle').innerText = soundEnabled ? '🔊 Bunyi Beep: HIDUP' : '🔇 Bunyi Beep: BISU';
+    }
+
+    const inventoryDatabase = {
+      'ACC-CBL-TYPEC-60W': {
+        name: 'Braided Fast Charge USB Type-C to Type-C 60W Cable (1.2m)',
+        category: 'Smartphone Accessories',
+        price: 'RM 15.00',
+        stock: '20 Unit',
+        status: 'Dalam Stok'
+      },
+      'ACC-CASE-CLEAR-MAG': {
+        name: 'Shockproof Magnetic Clear Case Armor (All Models)',
+        category: 'Smartphone Accessories',
+        price: 'RM 20.00',
+        stock: '15 Unit',
+        status: 'Dalam Stok'
+      },
+      'ACC-TG-9H-PRIVACY': {
+        name: '9H Privacy Tempered Glass Screen Protector',
+        category: 'Smartphone Accessories',
+        price: 'RM 12.00',
+        stock: '25 Unit',
+        status: 'Dalam Stok'
+      },
+      'ACC-CHG-GAN-65W': {
+        name: 'GaN 65W 3-Port Fast Wall Charger (2x USB-C + 1x USB-A)',
+        category: 'Smartphone Accessories',
+        price: 'RM 69.00',
+        stock: '12 Unit',
+        status: 'Dalam Stok'
+      },
+      'REP-2026-0001': {
+        name: 'Job Pembaikan: Tukar LCD iPhone 11 (Puan Siti Aminah)',
+        category: 'Servis Smartphone',
+        price: 'RM 220.00',
+        stock: 'Siap & Menunggu Pelanggan',
+        status: 'SELESAI (COMPLETED)'
+      },
+      'Spaghetti Bolognese': {
+        name: 'Spaghetti Bolognese Daging Cincang (Resepi Khas Chef TRIG)',
+        category: 'FELÌCE CAFFÉ',
+        price: 'RM 16.00',
+        stock: 'Tersedia Hari Ini',
+        status: 'TERSEDIA'
+      }
+    };
+
+    const input = document.getElementById('scanInput');
+    const resultBox = document.getElementById('resultBox');
+
+    function processScan(val) {
+      const code = val.trim();
+      if (!code) return;
+      playBeep();
+
+      const item = inventoryDatabase[code];
+      const timeStr = new Date().toLocaleTimeString();
+
+      if (item) {
+        resultBox.innerHTML = `
+          <div class="w-full text-left bg-emerald-950/60 border border-emerald-500/50 rounded-xl p-4 animate-fade-in">
+            <div class="flex items-center justify-between text-xs text-emerald-400 font-bold mb-1">
+              <span>✅ IMBASAN BERJAYA DISAHKAN PADA ${timeStr}</span>
+              <span class="bg-emerald-500/20 px-2 py-0.5 rounded text-emerald-300 font-mono">${code.length} AKSARA</span>
+            </div>
+            <div class="text-lg font-black text-white">${item.name}</div>
+            <div class="flex flex-wrap items-center gap-3 mt-2 text-xs">
+              <span class="text-cyan-300 font-bold font-mono">Kod: ${code}</span>
+              <span class="text-slate-400">•</span>
+              <span class="text-amber-300 font-black">${item.price}</span>
+              <span class="text-slate-400">•</span>
+              <span class="text-emerald-300 font-semibold">${item.stock}</span>
+              <span class="text-slate-400">•</span>
+              <span class="text-slate-300 font-medium">${item.category}</span>
+            </div>
+          </div>
+        `;
+      } else {
+        resultBox.innerHTML = `
+          <div class="w-full text-left bg-blue-950/60 border border-blue-500/50 rounded-xl p-4 animate-fade-in">
+            <div class="flex items-center justify-between text-xs text-blue-400 font-bold mb-1">
+              <span>📡 KOD DIIMBAS PADA ${timeStr}</span>
+              <span class="bg-blue-500/20 px-2 py-0.5 rounded text-blue-300 font-mono">${code.length} AKSARA</span>
+            </div>
+            <div class="text-base font-bold font-mono text-cyan-200">${code}</div>
+            <p class="text-xs text-slate-400 mt-1">
+              Pengimbas berfungsi dengan sempurna! Kod ini tidak berada dalam senarai demo pantas di atas tetapi dibaca dengan tepat oleh perkakasan pengimbas anda.
+            </p>
+          </div>
+        `;
+      }
+
+      input.value = '';
+      input.focus();
+    }
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        processScan(input.value);
+      }
+    });
+
+    function simulateScan(code) {
+      input.value = code;
+      processScan(code);
+    }
+
+    function clearConsole() {
+      resultBox.innerHTML = '<span class="text-slate-500">Menunggu imbasan... Halakan pengimbas ke salah satu kod di bawah!</span>';
+      input.value = '';
+      input.focus();
+    }
+
+    // Auto keep focus on input unless user clicked another button
+    document.addEventListener('click', (e) => {
+      if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'A') {
+        input.focus();
+      }
+    });
+  </script>
+</body>
+</html>
