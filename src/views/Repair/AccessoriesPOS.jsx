@@ -50,6 +50,30 @@ export const AccessoriesPOS = () => {
     (currentUser?.role && currentUser.role.includes('MANAGER'));
   const canManageAccessories = isSuperAdmin || isManager;
 
+  // Smartphone Admin & Cashier Check (Hanya Admin Smartphone Cashier boleh scan)
+  const isSmartphoneAdminCashier = !currentUser ||
+    ['SUPER ADMIN', 'SMARTPHONE CASHIER', 'MANAGER SMARTPHONE REPAIR', 'REPAIR STAFF', 'ADMIN'].includes(currentUser?.role) ||
+    (currentUser?.role && (currentUser.role.includes('ADMIN') || currentUser.role.includes('SMARTPHONE') || currentUser.role.includes('REPAIR')));
+
+  // Audio Synthesizer Beep for POS Barcode Scanner
+  const playPosBeep = () => {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1750, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.12);
+    } catch (e) {
+      // Audio fallback
+    }
+  };
+
   const [searchQuery, setSearchQuery] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [cart, setCart] = useState([]);
@@ -179,6 +203,64 @@ export const AccessoriesPOS = () => {
   const handleRemove = (accId) => {
     setCart(prev => prev.filter(i => i.id !== accId));
   };
+
+  // Global Barcode & QR Scanner Listener (Khusus untuk Admin Smartphone Cashier)
+  useEffect(() => {
+    if (!isSmartphoneAdminCashier) return;
+
+    let scanBuffer = '';
+    let lastKeyTime = Date.now();
+
+    const handleGlobalKeyDown = (e) => {
+      // Abaikan jika mana-mana modal sedang aktif
+      if (isPaymentModalOpen || isAddModalOpen || selectedAccForRemoval || isDiscountModalOpen) return;
+
+      const currentTime = Date.now();
+      const timeDiff = currentTime - lastKeyTime;
+      lastKeyTime = currentTime;
+
+      // Jika jeda menaip melebihi 250ms dan bukan kekunci Enter, reset buffer
+      if (timeDiff > 250 && e.key !== 'Enter') {
+        scanBuffer = '';
+      }
+
+      if (e.key === 'Enter') {
+        const rawCode = scanBuffer.trim();
+        if (rawCode) {
+          const cleanCode = rawCode.replace(/^(TRIG-ACC:|TRIG-MENU:|ACC:|SKU:)/i, '').trim().toLowerCase();
+          const matchedAcc = accessories.find(a => 
+            (a.sku && a.sku.toLowerCase() === cleanCode) ||
+            (a.sku && a.sku.toLowerCase() === rawCode.toLowerCase()) ||
+            (a.id && a.id.toLowerCase() === cleanCode) ||
+            (a.id && a.id.toLowerCase() === rawCode.toLowerCase()) ||
+            (a.name && a.name.toLowerCase() === cleanCode) ||
+            (a.name && a.name.toLowerCase() === rawCode.toLowerCase())
+          );
+
+          if (matchedAcc) {
+            e.preventDefault();
+            if (matchedAcc.currentStock <= 0) {
+              showToast(`Stok aksesori "${matchedAcc.name}" telah habis.`, 'warning');
+            } else {
+              handleAddToCart(matchedAcc);
+              playPosBeep();
+              showToast(`⚡ Imbasan Berjaya: Ditambah "${matchedAcc.name}" ke troli!`, 'success');
+            }
+            scanBuffer = '';
+            return;
+          }
+        }
+        scanBuffer = '';
+      } else if (e.key && e.key.length === 1) {
+        scanBuffer += e.key;
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleGlobalKeyDown);
+    };
+  }, [accessories, isPaymentModalOpen, isAddModalOpen, selectedAccForRemoval, isDiscountModalOpen, isSmartphoneAdminCashier]);
 
   const subtotal = cart.reduce((acc, it) => acc + (it.sellingPrice * it.quantity), 0);
   const grandTotal = subtotal;
@@ -325,17 +407,60 @@ export const AccessoriesPOS = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-            {/* Search Input */}
-            <div className="relative w-full sm:w-56">
+            {/* Search Input with Barcode/QR Scanner Auto-Add */}
+            <div className="relative w-full sm:w-64">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Cari aksesori, SKU..."
+                placeholder="Cari aksesori, imbas Barcode/SKU..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const query = searchQuery.trim().toLowerCase();
+                    if (!query) return;
+                    const cleanCode = query.replace(/^(TRIG-ACC:|TRIG-MENU:|ACC:|SKU:)/i, '').trim();
+                    const matchedAcc = accessories.find(a => 
+                      (a.sku && a.sku.toLowerCase() === cleanCode.toLowerCase()) ||
+                      (a.sku && a.sku.toLowerCase() === query) ||
+                      (a.id && a.id.toLowerCase() === cleanCode.toLowerCase()) ||
+                      (a.id && a.id.toLowerCase() === query) ||
+                      (a.name && a.name.toLowerCase() === cleanCode.toLowerCase()) ||
+                      (a.name && a.name.toLowerCase() === query)
+                    ) || (filteredAccessories.length === 1 ? filteredAccessories[0] : null);
+
+                    if (matchedAcc) {
+                      if (matchedAcc.currentStock <= 0) {
+                        showToast(`Stok "${matchedAcc.name}" telah habis.`, 'warning');
+                      } else {
+                        handleAddToCart(matchedAcc);
+                        playPosBeep();
+                        showToast(`⚡ Imbasan Berjaya: Ditambah "${matchedAcc.name}" ke troli!`, 'success');
+                        setSearchQuery('');
+                      }
+                    } else if (filteredAccessories.length > 1) {
+                      showToast(`Ditemui ${filteredAccessories.length} padanan carian. Sila pilih item.`, 'info');
+                    } else {
+                      showToast(`Tiada aksesori dijumpai untuk kod/carian "${searchQuery}".`, 'warning');
+                    }
+                  }
+                }}
                 className="w-full pl-9 pr-3 py-2 text-xs bg-slate-900/80 border border-blue-400/30 rounded-xl outline-none font-medium text-white placeholder-slate-400 focus:border-cyan-400"
               />
             </div>
+
+            {/* Test Barcode / QR Codes Button */}
+            <a
+              href="./barcode-scanner-test.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs rounded-xl border border-cyan-500/30 transition cursor-pointer shrink-0"
+              title="Buka Pusat Ujian Barcode & QR Code untuk melihat kod contoh boleh diimbas"
+            >
+              <QrCode className="w-3.5 h-3.5" />
+              <span>Contoh Kod QR/Barcode</span>
+            </a>
 
             {/* Manage Discount Button (Super Admin Only) */}
             {isSuperAdmin && (
@@ -538,20 +663,56 @@ export const AccessoriesPOS = () => {
                         </span>
                       )}
                     </div>
-                    <button
-                      type="button"
-                      disabled={acc.currentStock <= 0}
-                      className={`p-1.5 rounded-lg transition ${
-                        acc.currentStock <= 0
-                          ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                          : hasItemDiscount
-                          ? 'bg-rose-50 text-rose-700 group-hover:bg-rose-600 group-hover:text-white cursor-pointer'
-                          : 'bg-blue-50 text-blue-700 group-hover:bg-blue-600 group-hover:text-white cursor-pointer'
-                      }`}
-                      title="Tambah ke troli jualan"
-                    >
-                      <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-                    </button>
+                    {/* Bahagian Kanan Bawah: Barcode / QR Code (Hanya Admin Smartphone Cashier) + Butang Tambah */}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {isSmartphoneAdminCashier && (
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (acc.currentStock > 0) {
+                              handleAddToCart(acc);
+                              playPosBeep();
+                              showToast(`⚡ Imbasan Berjaya: Ditambah "${acc.name}" ke troli!`, 'success');
+                            }
+                          }}
+                          className="p-1 bg-white hover:bg-cyan-50 border border-slate-200 hover:border-cyan-400 rounded-xl flex items-center gap-1.5 transition cursor-pointer shadow-2xs group/barcode"
+                          title={`Imbas Kod Bar / QR SKU (${acc.sku}) menggunakan Barcode Scanner untuk terus masuk ke troli`}
+                        >
+                          <div className="bg-white p-0.5 rounded-md flex items-center justify-center shrink-0">
+                            <QRCodeSVG
+                              value={acc.sku || acc.id}
+                              size={38}
+                              level="M"
+                              includeMargin={false}
+                            />
+                          </div>
+                          <div className="hidden sm:flex flex-col text-left pr-1">
+                            <span className="text-[8px] font-black text-cyan-600 uppercase tracking-wider flex items-center gap-0.5">
+                              <QrCode className="w-2.5 h-2.5 text-cyan-600 shrink-0" />
+                              <span>Imbas QR</span>
+                            </span>
+                            <span className="font-mono text-[8px] text-slate-600 font-bold truncate max-w-[65px]" title={acc.sku}>
+                              {acc.sku}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        disabled={acc.currentStock <= 0}
+                        className={`p-2 rounded-xl transition ${
+                          acc.currentStock <= 0
+                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                            : hasItemDiscount
+                            ? 'bg-rose-50 text-rose-700 group-hover:bg-rose-600 group-hover:text-white cursor-pointer'
+                            : 'bg-blue-50 text-blue-700 group-hover:bg-blue-600 group-hover:text-white cursor-pointer'
+                        }`}
+                        title="Tambah ke troli jualan"
+                      >
+                        <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                      </button>
+                    </div>
                   </div>
 
                 </div>
@@ -748,6 +909,33 @@ export const AccessoriesPOS = () => {
                     placeholder="Cth: Baseus / ProTech / Anker"
                     className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:border-blue-600"
                   />
+                </div>
+              </div>
+
+              {/* Pratonton Kod QR Automatik Dijana (Super Admin & Admin Manager Smartphone Repair) */}
+              <div className="p-3.5 bg-gradient-to-r from-blue-50 via-cyan-50 to-indigo-50 border border-blue-200/80 rounded-2xl flex items-center gap-3.5 shadow-2xs">
+                <div className="bg-white p-2 rounded-xl border border-blue-200 shadow-xs shrink-0 flex flex-col items-center justify-center">
+                  <QRCodeSVG
+                    value={addForm.sku.trim() || 'ACC-BARCODE'}
+                    size={64}
+                    level="M"
+                    includeMargin={false}
+                  />
+                  <span className="text-[7.5px] font-mono font-bold text-slate-600 mt-1 uppercase truncate max-w-[70px]">
+                    {addForm.sku.trim() || 'ACC-PREVIEW'}
+                  </span>
+                </div>
+                <div className="space-y-1 text-left">
+                  <div className="flex items-center gap-1.5 text-xs font-black text-blue-950">
+                    <QrCode className="w-4 h-4 text-blue-600" />
+                    <span>Kod QR Aksesori Dijana Bersamanya</span>
+                  </div>
+                  <p className="text-[11px] text-slate-700 leading-snug">
+                    Setiap penambahan aksesori oleh <strong>Super Admin & Admin Manager</strong> akan menghasilkan QR Code ini secara automatik berdasarkan Kod SKU: <span className="font-mono font-bold text-blue-700 bg-blue-100/60 px-1.5 py-0.5 rounded">{addForm.sku.trim() || 'ACC-BARCODE'}</span>.
+                  </p>
+                  <p className="text-[10px] text-slate-500">
+                    QR Code ini akan dipaparkan di sebelah kanan bawah kad aksesori dan boleh diimbas serta-merta oleh <strong>Smartphone Cashier</strong>.
+                  </p>
                 </div>
               </div>
 

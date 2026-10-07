@@ -159,6 +159,16 @@ export const PortalLandingView = () => {
             >
               <span>📖 Buku Manual</span>
             </a>
+
+            <a
+              href="./barcode-scanner-test.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-950/80 hover:bg-cyan-900/90 text-cyan-300 border border-cyan-500/40 text-xs font-bold transition shadow-xs"
+              title="Uji alat pengimbas USB Barcode & QR Code"
+            >
+              <span>⚡ Uji Pengimbas USB</span>
+            </a>
           </div>
 
         </div>

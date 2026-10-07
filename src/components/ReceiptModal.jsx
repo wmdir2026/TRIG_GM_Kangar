@@ -17,7 +17,7 @@ import { QRCodeSVG } from 'qrcode.react';
 
 export const ReceiptModal = () => {
   const { receiptData, isReceiptModalOpen, setIsReceiptModalOpen, settings, showToast } = useApp();
-  const [printFormat, setPrintFormat] = useState('80mm'); // '80mm', '58mm', 'a4'
+  const [printFormat, setPrintFormat] = useState('80mm'); // '80mm', '100mm', '58mm', 'a4'
 
   const isRepair = receiptData?.type === 'REPAIR';
   const job = receiptData?.job || {};
@@ -74,7 +74,8 @@ export const ReceiptModal = () => {
       .join('\n');
 
     const widthStyle = printFormat === '58mm' ? '58mm' :
-                       printFormat === '80mm' ? '80mm' : '185mm';
+                       printFormat === '80mm' ? '80mm' :
+                       printFormat === '100mm' ? '100mm' : '185mm';
 
     doc.open();
     doc.write(`
@@ -86,7 +87,7 @@ export const ReceiptModal = () => {
           ${styles}
           <style>
             @page {
-              size: ${printFormat === '58mm' ? '58mm auto' : printFormat === '80mm' ? '80mm auto' : 'A4 portrait'};
+              size: ${printFormat === '58mm' ? '58mm auto' : printFormat === '80mm' ? '80mm auto' : printFormat === '100mm' ? '100mm auto' : 'A4 portrait'};
               margin: ${printFormat === 'a4' ? '12mm' : '2mm 3mm'};
             }
             html, body {
@@ -109,7 +110,7 @@ export const ReceiptModal = () => {
               width: ${widthStyle} !important;
               max-width: 100% !important;
               margin: 0 auto !important;
-              padding: ${printFormat === '58mm' ? '4px' : printFormat === '80mm' ? '8px' : '16px'} !important;
+              padding: ${printFormat === '58mm' ? '4px' : printFormat === '80mm' ? '8px' : printFormat === '100mm' ? '10px' : '16px'} !important;
               background: #ffffff !important;
               color: #000000 !important;
               border: none !important;
@@ -210,7 +211,9 @@ export const ReceiptModal = () => {
 
   return (
     <div className="receipt-modal-wrapper fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh] animate-fade-in">
+      <div className={`bg-white rounded-3xl shadow-2xl transition-all duration-200 w-full overflow-hidden border border-slate-200 flex flex-col max-h-[90vh] animate-fade-in ${
+        printFormat === 'a4' ? 'max-w-2xl' : printFormat === '100mm' ? 'max-w-xl' : 'max-w-lg'
+      }`}>
         
         {/* Modal Header */}
         <div className="p-4 bg-slate-900 text-white flex items-center justify-between no-print">
@@ -235,9 +238,9 @@ export const ReceiptModal = () => {
         </div>
 
         {/* Format Selector Bar */}
-        <div className="px-4 py-2 bg-slate-100 border-b border-slate-200 flex items-center justify-between no-print text-xs">
+        <div className="px-4 py-2 bg-slate-100 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 no-print text-xs">
           <span className="font-semibold text-slate-600">Format Cetakan:</span>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <button
               onClick={() => setPrintFormat('80mm')}
               className={`px-2.5 py-1 rounded-lg font-bold transition ${
@@ -245,6 +248,14 @@ export const ReceiptModal = () => {
               }`}
             >
               Thermal 80mm
+            </button>
+            <button
+              onClick={() => setPrintFormat('100mm')}
+              className={`px-2.5 py-1 rounded-lg font-bold transition ${
+                printFormat === '100mm' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              Thermal 100mm
             </button>
             <button
               onClick={() => setPrintFormat('58mm')}
@@ -272,6 +283,7 @@ export const ReceiptModal = () => {
             className={`bg-white shadow-lg border border-slate-200 p-6 text-slate-900 font-mono transition-all ${
               printFormat === '58mm' ? 'w-[280px] text-[11px]' :
               printFormat === '80mm' ? 'w-[360px] text-xs' :
+              printFormat === '100mm' ? 'w-[440px] text-xs' :
               'w-full text-xs'
             }`}
           >

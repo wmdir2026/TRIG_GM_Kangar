@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import {
   ShoppingBag,
@@ -32,8 +32,13 @@ export const FoodOrderingPOS = () => {
     settings,
     showToast,
     isMenuItemAvailableToday,
-    getCurrentDayMalay
+    getCurrentDayMalay,
+    currentUser
   } = useApp();
+
+  const isCafeAdminCashier = !currentUser || 
+                             ['SUPER ADMIN', 'CAFE CASHIER', 'MANAGER CAFE', 'CAFE STAFF', 'ADMIN'].includes(currentUser?.role) ||
+                             (currentUser?.role && (currentUser.role.includes('ADMIN') || currentUser.role.includes('CAFE')));
 
   const todayMalay = getCurrentDayMalay ? getCurrentDayMalay() : 'Hari Ini';
 
@@ -54,6 +59,25 @@ export const FoodOrderingPOS = () => {
   const [paymentMethod, setPaymentMethod] = useState('QR_PAYMENT');
   const [cashTendered, setCashTendered] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Audio Synthesizer Beep for POS Barcode Scanner
+  const playPosBeep = () => {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1750, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.12);
+    } catch (e) {
+      // Audio fallback
+    }
+  };
 
   // Add to cart
   const handleAddToCart = (item) => {
@@ -98,6 +122,67 @@ export const FoodOrderingPOS = () => {
   const handleClearCart = () => {
     setCart([]);
   };
+
+  // Global Barcode & QR Scanner Listener (Khusus untuk Admin Cafe Cashier)
+  useEffect(() => {
+    if (!isCafeAdminCashier) return;
+
+    let scanBuffer = '';
+    let lastKeyTime = Date.now();
+
+    const handleGlobalKeyDown = (e) => {
+      // Abaikan jika modal pembayaran sedang aktif
+      if (isPaymentModalOpen) return;
+
+      const currentTime = Date.now();
+      const timeDiff = currentTime - lastKeyTime;
+      lastKeyTime = currentTime;
+
+      // Jika jeda menaip melebihi 250ms dan bukan kekunci Enter, reset buffer
+      if (timeDiff > 250 && e.key !== 'Enter') {
+        scanBuffer = '';
+      }
+
+      if (e.key === 'Enter') {
+        const rawCode = scanBuffer.trim();
+        if (rawCode) {
+          // Bersihkan prefix jika ada (contoh: "TRIG-MENU:MENU-001" -> "MENU-001")
+          const cleanCode = rawCode.replace(/^(TRIG-MENU:|MENU:|FOOD:)/i, '').trim().toLowerCase();
+          const found = menu.find(m => 
+            (m.id && m.id.toLowerCase() === cleanCode) ||
+            (m.id && m.id.toLowerCase() === rawCode.toLowerCase()) ||
+            (m.name && m.name.toLowerCase() === cleanCode) ||
+            (m.name && m.name.toLowerCase() === rawCode.toLowerCase())
+          );
+
+          if (found) {
+            e.preventDefault();
+            const availableToday = isMenuItemAvailableToday ? isMenuItemAvailableToday(found) : true;
+            if (!availableToday) {
+              showToast(`Item "${found.name}" tidak dimasak hari ini (${todayMalay}).`, 'warning');
+            } else if (found.status === 'OUT OF STOCK') {
+              showToast(`Item "${found.name}" telah kehabisan stok.`, 'warning');
+            } else {
+              handleAddToCart(found);
+              playPosBeep();
+              showToast(`⚡ Imbasan Berjaya: Ditambah "${found.name}" ke troli!`, 'success');
+            }
+            scanBuffer = '';
+            return;
+          }
+        }
+        scanBuffer = '';
+      } else if (e.key && e.key.length === 1) {
+        // Kumpul setiap aksara daripada pengimbas kod bar
+        scanBuffer += e.key;
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleGlobalKeyDown);
+    };
+  }, [menu, isMenuItemAvailableToday, todayMalay, isPaymentModalOpen, isCafeAdminCashier]);
 
   // Calculations
   const subtotal = cart.reduce((acc, it) => acc + (it.sellingPrice * it.quantity), 0);
@@ -244,9 +329,34 @@ export const FoodOrderingPOS = () => {
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
               <input
                 type="text"
-                placeholder="Cari menu makanan/minuman..."
+                placeholder="Cari menu, imbas Barcode/QR..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const query = searchQuery.trim().toLowerCase();
+                    if (!query) return;
+                    const cleanCode = query.replace(/^(TRIG-MENU:|MENU:|FOOD:)/i, '').trim();
+                    const matchedItem = menu.find(m => 
+                      (m.id && m.id.toLowerCase() === cleanCode) ||
+                      (m.id && m.id.toLowerCase() === query) ||
+                      (m.name && m.name.toLowerCase() === cleanCode) ||
+                      (m.name && m.name.toLowerCase() === query)
+                    ) || (filteredMenu.length === 1 ? filteredMenu[0] : null);
+
+                    if (matchedItem) {
+                      handleAddToCart(matchedItem);
+                      playPosBeep();
+                      showToast(`⚡ Imbasan Berjaya: Ditambah "${matchedItem.name}" ke troli!`, 'success');
+                      setSearchQuery('');
+                    } else if (filteredMenu.length > 1) {
+                      showToast(`Ditemui ${filteredMenu.length} padanan carian. Sila pilih item.`, 'info');
+                    } else {
+                      showToast(`Tiada menu dijumpai untuk carian "${searchQuery}".`, 'warning');
+                    }
+                  }
+                }}
                 className="w-full pl-9 pr-3 py-1.5 text-xs bg-stone-50 border border-stone-200 rounded-xl outline-none font-medium"
               />
             </div>
@@ -254,6 +364,13 @@ export const FoodOrderingPOS = () => {
               <Calendar className="w-3.5 h-3.5" />
               <span>Hari Ini: {todayMalay}</span>
             </div>
+            {isCafeAdminCashier && (
+              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-800 text-xs font-bold shrink-0 shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <QrCode className="w-3.5 h-3.5 text-emerald-600" />
+                <span>QR Scanner Aktif</span>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
@@ -362,6 +479,43 @@ export const FoodOrderingPOS = () => {
                     <Plus className="w-3.5 h-3.5" />
                   </button>
                 </div>
+
+                {/* QR Code Barcode Scanner Zone (Untuk Admin Cafe Cashier Sahaja) */}
+                {isCafeAdminCashier && (
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (canOrder) {
+                        handleAddToCart(item);
+                        playPosBeep();
+                        showToast(`⚡ Imbasan Berjaya: Ditambah "${item.name}" ke troli!`, 'success');
+                      }
+                    }}
+                    className="mx-3 mb-3 p-2 bg-stone-50 hover:bg-amber-50/80 border border-stone-200 hover:border-amber-400 rounded-xl flex items-center gap-2.5 transition cursor-pointer group/qr shadow-2xs"
+                    title={`Imbas QR ini menggunakan Barcode Scanner atau klik untuk terus masukkan ${item.name} ke troli`}
+                  >
+                    <div className="bg-white p-1 rounded-lg border border-stone-200 shadow-2xs shrink-0 flex items-center justify-center">
+                      <QRCodeSVG
+                        value={`TRIG-MENU:${item.id}`}
+                        size={46}
+                        level="M"
+                        includeMargin={false}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0 text-left">
+                      <div className="flex items-center gap-1 text-[9px] font-black text-amber-700 uppercase tracking-wider">
+                        <QrCode className="w-3 h-3 text-amber-600 shrink-0" />
+                        <span>Imbas QR</span>
+                      </div>
+                      <div className="font-mono text-[10px] font-bold text-stone-800 truncate mt-0.5">
+                        {item.id}
+                      </div>
+                      <div className="text-[8px] text-stone-400 font-medium truncate">
+                        Halakan Barcode Scanner
+                      </div>
+                    </div>
+                  </div>
+                )}
 
               </div>
             );
